@@ -4,7 +4,7 @@ xUnit testing framework written in Facebook's language, [Hack](http://docs.hhvm.
 
 Goal
 ----
-Write a testing framework using Hack's stric mode - with the exception of the runner (which currently must be partial due to a limitation of hack).
+Write a testing framework using Hack's strict mode - with the exception of the runner (which currently must be partial due to a limitation of hack).
 
 Running tests
 -------------
