@@ -9,6 +9,19 @@ class TestCaseTest extends TestCase
         $this->test = new WasRun('testMethod');
     }
 
+    public function testResult(): void
+    {
+        $test = $this->test;
+        if ($test) {
+            $result = $test->run();
+            $expected = "1 run, 0 failed";
+            $actual = $result->getSummary();
+            if ($expected != $actual) {
+                throw new Exception("Expected $expected, got $actual");
+            }
+        }
+    }
+
     public function testTemplateMethod(): void
     {
         $test = $this->test;
@@ -19,6 +32,17 @@ class TestCaseTest extends TestCase
             if ($expected != $actual) {
                 throw new Exception("Expected $expected, got $actual");
             }
+        }
+    }
+
+    public function testFailedResult(): void
+    {
+        $test = new WasRun('testBrokenMethod');
+        $result = $test->run();
+        $expected = '1 run, 1 failed';
+        $actual  = $result->getSummary();
+        if ($expected != $actual) {
+            throw new Exception("Expected $expected, got $actual");
         }
     }
 }
