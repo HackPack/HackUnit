@@ -1,7 +1,7 @@
 <?hh //strict
 class TestResult
 {
-    public function __construct(protected int $runCount = 0)
+    public function __construct(protected int $runCount = 0, protected int $errorCount = 0)
     {
     }
 
@@ -10,8 +10,13 @@ class TestResult
         $this->runCount++;
     }
 
+    public function testFailed(): void
+    {
+        $this->errorCount++;
+    }
+
     public function getSummary(): string
     {
-        return sprintf("%d run, 0 failed", $this->runCount);
+        return sprintf("%d run, %d failed", $this->runCount, $this->errorCount);
     }
 }

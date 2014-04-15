@@ -20,7 +20,11 @@ abstract class TestCase
         $result->testStarted();
         $this->setUp();
         $class = get_class($this);
-        hphp_invoke_method($this, $class, $this->name, []);
+        try {
+            hphp_invoke_method($this, $class, $this->name, []);
+        } catch (Exception $e) {
+            $result->testFailed();
+        }
         $this->tearDown();
         return $result;
     }

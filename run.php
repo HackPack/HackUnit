@@ -8,5 +8,7 @@ function main(): void {
     $test3->run();
     $test4 = new TestCaseTest('testFailedResult');
     $test4->run();
+    $test5 = new TestCaseTest('testFailedResultFormatting');
+    $test5->run();
 }
 main();

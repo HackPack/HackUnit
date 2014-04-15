@@ -1,5 +1,6 @@
 <?hh //strict
 require_once 'WasRun.php';
+require_once 'TestResult.php';
 class TestCaseTest extends TestCase
 {
     private ?WasRun $test;
@@ -41,6 +42,18 @@ class TestCaseTest extends TestCase
         $result = $test->run();
         $expected = '1 run, 1 failed';
         $actual  = $result->getSummary();
+        if ($expected != $actual) {
+            throw new Exception("Expected $expected, got $actual");
+        }
+    }
+
+    public function testFailedResultFormatting(): void
+    {
+        $result = new TestResult();
+        $result->testStarted();
+        $result->testFailed();
+        $expected = '1 run, 1 failed';
+        $actual = $result->getSummary();
         if ($expected != $actual) {
             throw new Exception("Expected $expected, got $actual");
         }
