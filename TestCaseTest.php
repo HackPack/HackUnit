@@ -9,25 +9,15 @@ class TestCaseTest extends TestCase
         $this->test = new WasRun('testMethod');
     }
 
-    public function testRunning(): void
-    {
-        $test = $this->test;
-        if ($test != null) {
-            $test->run();
-            if (!$test->wasRun) {
-                throw new Exception("Expected true, got false");
-            }
-
-        }
-    }
-
-    public function testSetUp(): void
+    public function testTemplateMethod(): void
     {
         $test = $this->test;
         if ($test) {
             $test->run();
-            if (!$test->wasSetUp) {
-                throw new Exception("Expected true, got false");
+            $expected = 'setUp testMethod tearDown ';
+            $actual = $test->log;
+            if ($expected != $actual) {
+                throw new Exception("Expected $expected, got $actual");
             }
         }
     }

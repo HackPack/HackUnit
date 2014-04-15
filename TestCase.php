@@ -9,10 +9,15 @@ abstract class TestCase
     {
     }
 
+    public function tearDown(): void
+    {
+    }
+
     public function run(): void
     {
         $this->setUp();
         $class = get_class($this);
         hphp_invoke_method($this, $class, $this->name, []);
+        $this->tearDown();
     }
 }

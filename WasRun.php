@@ -2,16 +2,20 @@
 require_once 'TestCase.php';
 class WasRun extends TestCase
 {
-    public bool $wasRun = false;
-    public bool $wasSetUp = false;
+    public string $log = '';
 
-    public function setUp(): void
+    <<Override>> public function setUp(): void
     {
-        $this->wasSetUp = true;
+        $this->log = 'setUp ';
+    }
+
+    <<Override>> public function tearDown(): void
+    {
+        $this->log .= 'tearDown ';
     }
 
     public function testMethod(): void
     {
-        $this->wasRun = true;
+        $this->log .= 'testMethod ';
     }
 }
