@@ -1,6 +1,6 @@
 HackUnit
 ========
-xUnit testing framework written in Facebook's language [Hack](http://docs.hhvm.com/manual/en/index.php);
+xUnit testing framework written in Facebook's language, [Hack](http://docs.hhvm.com/manual/en/index.php)
 
 Goal
 ----
