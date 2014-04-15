@@ -14,9 +14,8 @@ abstract class TestCase
     {
     }
 
-    public function run(): TestResult
+    public function run(TestResult $result): TestResult
     {
-        $result = new TestResult();
         $result->testStarted();
         $this->setUp();
         $class = get_class($this);
