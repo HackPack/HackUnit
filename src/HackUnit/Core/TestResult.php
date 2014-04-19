@@ -1,4 +1,5 @@
 <?hh //strict
+namespace HackUnit\Core;
 class TestResult
 {
     public function __construct(protected int $runCount = 0, protected int $errorCount = 0)

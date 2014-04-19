@@ -1,7 +1,5 @@
 <?hh //strict
-require_once 'WasRun.php';
-require_once 'TestResult.php';
-require_once 'TestSuite.php';
+namespace HackUnit\Core;
 class TestCaseTest extends TestCase
 {
     private ?WasRun $test;
@@ -19,7 +17,7 @@ class TestCaseTest extends TestCase
             $expected = "1 run, 0 failed";
             $actual = $result->getSummary();
             if ($expected != $actual) {
-                throw new Exception("Expected $expected, got $actual");
+                throw new \Exception("Expected $expected, got $actual");
             }
         }
     }
@@ -32,7 +30,7 @@ class TestCaseTest extends TestCase
             $expected = 'setUp testMethod tearDown ';
             $actual = $test->log;
             if ($expected != $actual) {
-                throw new Exception("Expected $expected, got $actual");
+                throw new \Exception("Expected $expected, got $actual");
             }
         }
     }
@@ -44,7 +42,7 @@ class TestCaseTest extends TestCase
         $expected = '1 run, 1 failed';
         $actual  = $result->getSummary();
         if ($expected != $actual) {
-            throw new Exception("Expected $expected, got $actual");
+            throw new \Exception("Expected $expected, got $actual");
         }
     }
 
@@ -56,7 +54,7 @@ class TestCaseTest extends TestCase
         $expected = '1 run, 1 failed';
         $actual = $result->getSummary();
         if ($expected != $actual) {
-            throw new Exception("Expected $expected, got $actual");
+            throw new \Exception("Expected $expected, got $actual");
         }
     }
 
@@ -70,7 +68,7 @@ class TestCaseTest extends TestCase
         $actual = $result->getSummary();
         $expected = '2 run, 1 failed';
         if ($expected != $actual) {
-            throw new Exception("Expected $expected, got $actual");
+            throw new \Exception("Expected $expected, got $actual");
         }
     }
 }

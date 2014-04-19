@@ -1,5 +1,5 @@
 <?hh //strict
-require_once 'TestResult.php';
+namespace HackUnit\Core;
 abstract class TestCase
 {
     public function __construct(protected string $name)
@@ -21,7 +21,7 @@ abstract class TestCase
         $class = get_class($this);
         try {
             hphp_invoke_method($this, $class, $this->name, []);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $result->testFailed();
         }
         $this->tearDown();

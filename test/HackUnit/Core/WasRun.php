@@ -1,5 +1,5 @@
 <?hh //strict
-require_once 'TestCase.php';
+namespace HackUnit\Core;
 class WasRun extends TestCase
 {
     public string $log = '';
@@ -21,6 +21,6 @@ class WasRun extends TestCase
 
     public function testBrokenMethod(): void
     {
-        throw new Exception("broken");
+        throw new \Exception("broken");
     }
 }

@@ -1,6 +1,5 @@
 <?hh //strict
-require_once 'TestCase.php';
-require_once 'TestResult.php';
+namespace HackUnit\Core;
 class TestSuite
 {
     public function __construct(protected Vector<TestCase> $tests = Vector {})
