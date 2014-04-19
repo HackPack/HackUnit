@@ -1,5 +1,6 @@
 <?hh //strict
 namespace HackUnit\Core;
+
 class TestSuite
 {
     public function __construct(protected Vector<TestCase> $tests = Vector {})

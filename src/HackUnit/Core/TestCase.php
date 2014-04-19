@@ -1,5 +1,6 @@
 <?hh //strict
 namespace HackUnit\Core;
+
 abstract class TestCase
 {
     public function __construct(protected string $name)

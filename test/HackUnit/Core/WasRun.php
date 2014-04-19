@@ -1,5 +1,6 @@
 <?hh //strict
 namespace HackUnit\Core;
+
 class WasRun extends TestCase
 {
     public string $log = '';

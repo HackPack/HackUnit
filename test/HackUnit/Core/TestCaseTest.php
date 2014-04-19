@@ -1,5 +1,6 @@
 <?hh //strict
 namespace HackUnit\Core;
+
 class TestCaseTest extends TestCase
 {
     private ?WasRun $test;
