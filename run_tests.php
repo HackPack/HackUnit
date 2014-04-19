@@ -1,25 +1,10 @@
 <?hh //partial
+require_once 'src/HackUnit/Loader.php';
 
+use HackUnit\Loader;
 use HackUnit\Core\TestSuite;
 use HackUnit\Core\TestCaseTest;
 use HackUnit\Core\TestResult;
-
-function autoload($class): void {
-    $directories = [__DIR__ . '/test', __DIR__ . '/src'];
-    $parts = explode('\\', $class);
-    $path = implode('/', $parts);
-    foreach ($directories as $dir) {
-        $absPath = $dir . '/' . $path . '.php';
-        if (file_exists($absPath)) {
-            require_once($absPath);
-            break;
-        }
-    }
-}
-
-function register(): void {
-    spl_autoload_register('autoload');
-}
 
 function main(): void {
     $suite = new TestSuite();
@@ -32,5 +17,6 @@ function main(): void {
     print "\n" . $result->getSummary() . "\n";
 }
 
-register();
+Loader::add(__DIR__ . '/test');
+Loader::register();
 main();
