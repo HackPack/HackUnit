@@ -10,5 +10,5 @@ Running tests
 -------------
 
 ```
-hhvm run.php
+hhvm run_tests.php
 ```
