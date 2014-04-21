@@ -11,9 +11,11 @@ class ExpectationTest extends TestCase
 
     public function test_toEqual_does_not_throw_exception_when_true(): void
     {
-        $expectation = new Expectation(1 + 1);
-        $expected = true;
-        $expectation->toEqual(2);
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation(1 + 1);
+            $expected = true;
+            $expectation->toEqual(2);
+        })->toNotThrow();
     }
 
     public function test_toEqual_throws_ExpectationException_if_fails(): void

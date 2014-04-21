@@ -20,4 +20,18 @@ class CallableExpectation
             throw new ExpectationException("Expected exception of type $exceptionType to be thrown");
         }
     }
+
+    public function toNotThrow(): void
+    {
+        $thrown = false;
+        try {
+            $fun = $this->context;
+            $fun();
+        } catch (\Exception $e) {
+            $thrown = true;
+        }
+        if ($thrown) {
+            throw new ExpectationException("Expected exception to not be thrown");
+        }
+    }
 }
