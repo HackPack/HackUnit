@@ -15,6 +15,11 @@ abstract class TestCase
     {
     }
 
+    public function expect<T>(T $context): Expectation<T>
+    {
+        return new Expectation($context);
+    }
+
     public function run(TestResult $result): TestResult
     {
         $result->testStarted();
