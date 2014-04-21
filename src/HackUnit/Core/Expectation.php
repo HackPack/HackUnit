@@ -11,4 +11,9 @@ class Expectation<T>
     {
         return $this->context;
     }
+
+    public function toEqual(T $comparison): bool
+    {
+        return $this->getContext() == $comparison;
+    }
 }

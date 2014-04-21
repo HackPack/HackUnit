@@ -19,6 +19,7 @@ function main(): void {
 
     //ExpectationTest
     $suite->add(new ExpectationTest('test_getContext_returns_value_being_tested'));
+    $suite->add(new ExpectationTest('test_toEqual_returns_true_when_true'));
 
     $result = $suite->run(new TestResult());
     print "\n" . $result->getSummary() . "\n";
