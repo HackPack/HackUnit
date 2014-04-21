@@ -26,6 +26,7 @@ function main(): void {
     //CallableExpectationTest
     $suite->add(new CallableExpectationTest('test_toThrow_does_nothing_if_exception_thrown'));
     $suite->add(new CallableExpectationTest('test_toThrow_throws_exception_if_wrong_exception_type'));
+    $suite->add(new CallableExpectationTest('test_toThrow_throws_exception_if_no_exception_thrown'));
 
     $result = $suite->run(new TestResult());
     print "\n" . $result->getSummary() . "\n";

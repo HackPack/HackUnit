@@ -20,6 +20,11 @@ abstract class TestCase
         return new Expectation($context);
     }
 
+    public function expectCallable((function(): void) $callable): CallableExpectation
+    {
+        return new CallableExpectation($callable);
+    }
+
     public function run(TestResult $result): TestResult
     {
         $result->testStarted();
