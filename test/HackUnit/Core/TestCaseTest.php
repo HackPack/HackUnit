@@ -15,11 +15,7 @@ class TestCaseTest extends TestCase
         $test = $this->test;
         if ($test) {
             $result = $test->run(new TestResult());
-            $expected = "1 run, 0 failed";
-            $actual = $result->getSummary();
-            if ($expected != $actual) {
-                throw new \Exception("Expected $expected, got $actual");
-            }
+            $this->expect($result->getSummary())->toEqual('1 run, 0 failed');
         }
     }
 
@@ -28,11 +24,7 @@ class TestCaseTest extends TestCase
         $test = $this->test;
         if ($test) {
             $test->run(new TestResult());
-            $expected = 'setUp testMethod tearDown ';
-            $actual = $test->log;
-            if ($expected != $actual) {
-                throw new \Exception("Expected $expected, got $actual");
-            }
+            $this->expect($test->log)->toEqual('setUp testMethod tearDown ');
         }
     }
 
@@ -40,11 +32,7 @@ class TestCaseTest extends TestCase
     {
         $test = new WasRun('testBrokenMethod');
         $result = $test->run(new TestResult());
-        $expected = '1 run, 1 failed';
-        $actual  = $result->getSummary();
-        if ($expected != $actual) {
-            throw new \Exception("Expected $expected, got $actual");
-        }
+        $this->expect($result->getSummary())->toEqual('1 run, 1 failed');
     }
 
     public function testFailedResultFormatting(): void
@@ -52,11 +40,7 @@ class TestCaseTest extends TestCase
         $result = new TestResult();
         $result->testStarted();
         $result->testFailed();
-        $expected = '1 run, 1 failed';
-        $actual = $result->getSummary();
-        if ($expected != $actual) {
-            throw new \Exception("Expected $expected, got $actual");
-        }
+        $this->expect($result->getSummary())->toEqual('1 run, 1 failed');
     }
 
     public function testSuite(): void
@@ -66,10 +50,6 @@ class TestCaseTest extends TestCase
         $suite->add(new WasRun('testMethod'));
         $suite->add(new WasRun('testBrokenMethod'));
         $result = $suite->run($result);
-        $actual = $result->getSummary();
-        $expected = '2 run, 1 failed';
-        if ($expected != $actual) {
-            throw new \Exception("Expected $expected, got $actual");
-        }
+        $this->expect($result->getSummary())->toEqual('2 run, 1 failed');
     }
 }
