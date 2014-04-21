@@ -8,7 +8,7 @@ class Loader
     public static function register(): void
     {
         static::$searchPaths->add(__DIR__ . '/..');
-        $cb = \class_meth('HackUnit\\Loader', 'autoload');
+        $cb = class_meth('HackUnit\\Loader', 'autoload');
         spl_autoload_register($cb);
     }
 
