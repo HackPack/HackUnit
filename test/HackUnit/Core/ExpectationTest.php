@@ -13,20 +13,15 @@ class ExpectationTest extends TestCase
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation(1 + 1);
-            $expected = true;
             $expectation->toEqual(2);
         })->toNotThrow();
     }
 
     public function test_toEqual_throws_ExpectationException_if_fails(): void
     {
-        $expectation = new Expectation(1 + 1);
-        $exception = new ExpectationException();
-        try {
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation(1 + 1);
             $expectation->toEqual(3);
-        } catch (ExpectationException $e) {
-            $exception = $e;
-        }
-        $this->expect($exception->getMessage())->toEqual('Expected 3, got 2');
+        })->toThrow('\HackUnit\Core\ExpectationException');
     }
 }
