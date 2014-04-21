@@ -12,8 +12,12 @@ class Expectation<T>
         return $this->context;
     }
 
-    public function toEqual(T $comparison): bool
+    public function toEqual(T $comparison): void
     {
-        return $this->getContext() == $comparison;
+        $equals = $this->getContext() == $comparison;
+        if (!$equals) {
+            $message = sprintf('Expected %s, got %s', $comparison, $this->getContext());
+            throw new ExpectationException($message); 
+        }
     }
 }
