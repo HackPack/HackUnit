@@ -19,29 +19,21 @@ class CallableExpectationTest extends TestCase
 
     public function test_toThrow_throws_exception_if_wrong_exception_type(): void
     {
-        $exception = new \Exception();
         if ($this->callable) {
-            $expectation = new CallableExpectation($this->callable);
-            try {
+            $this->expectCallable(() ==> {
+                $expectation = new CallableExpectation($this->callable);
                 $expectation->toThrow('\RuntimeException');
-            } catch (\Exception $e) {
-                $exception = $e;
-            }
+            })->toThrow('\HackUnit\Core\ExpectationException');
         }
-        $this->expect($exception->getMessage())->toEqual('Expected exception of type \RuntimeException to be thrown');
     }
 
     public function test_toThrow_throws_exception_if_no_exception_thrown(): void
     {
-        $exception = new \Exception();
-        $callable = () ==> { $var = 'do nothing';  };
-        $expectation = new CallableExpectation($callable);
-        try {
+        $this->expectCallable(() ==> {
+            $callable = () ==> { $var = 'do nothing';  };
+            $expectation = new CallableExpectation($callable);
             $expectation->toThrow('\RuntimeException');
-        } catch (\Exception $e) {
-            $exception = $e;
-        }
-        $this->expect($exception->getMessage())->toEqual('Expected exception of type \RuntimeException to be thrown');
+        })->toThrow('\HackUnit\Core\ExpectationException');
     }
 
     public function test_toNotThrow_does_nothing_if_exception_not_thrown(): void
