@@ -4,7 +4,7 @@ namespace HackUnit\Loading;
 use HackUnit\Core\TestCase;
 use HackUnit\Core\TestSuite;
 
-class ConventionalLoader
+class ConventionalLoader implements LoaderInterface
 {
     private static string $testPattern = '/Test.php$/';
     private static string $testMethodPattern = '/^test/';
@@ -28,15 +28,16 @@ class ConventionalLoader
 
     public function load(): Vector<TestCase>
     {
-        $paths = $this->getTestCasePaths($this->path);
+        $paths = $this->getTestCasePaths();
         foreach ($paths as $path) {
             $this->addTestCase($path);
         }
         return $this->testCases;
     }
 
-    public function getTestCasePaths(string $searchPath, Vector<string> $accum = Vector {}): Vector<string>
+    public function getTestCasePaths(string $searchPath = '', Vector<string> $accum = Vector {}): Vector<string>
     {
+        $searchPath = $searchPath ? $searchPath : $this->path;
         $files = scandir($searchPath);
         foreach ($files as $file) {
             if ($file == '.' || $file == '..') {
