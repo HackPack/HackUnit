@@ -17,29 +17,33 @@ class ConventionalLoader
 
     public function load(): Vector<TestCase>
     {
-        $this->buildTestCases($this->path);
+        $paths = $this->getTestCasePaths($this->path);
+        foreach ($paths as $path) {
+            $this->addTestCase($path);
+        }
         return $this->testCases;
     }
 
-    protected function buildTestCases(string $path): void
+    public function getTestCasePaths(string $searchPath, Vector<string> $accum = Vector {}): Vector<string>
     {
-        $files = scandir($path);
+        $files = scandir($searchPath);
         foreach ($files as $file) {
             if ($file == '.' || $file == '..') {
                 continue;
             }
-            $newPath = $path . "/" . (string)$file;
+            $newPath = $searchPath . "/" . (string)$file;
             if (is_file($newPath)) {
-                $this->addTestCase($newPath);
+                if (! preg_match(ConventionalLoader::$testPattern, $newPath)) continue;
+                $accum->add($newPath);
                 continue;
             }
-            $this->buildTestCases($newPath);
+            $this->getTestCasePaths($newPath, $accum);
         }
+        return $accum;
     }
 
     protected function addTestCase(string $testPath): void
     {
-        if (! preg_match(ConventionalLoader::$testPattern, $testPath)) return;
         $this->includeClass($testPath);
         $testCase = $this->createTestCaseInstance($testPath, 'noop');
         $methods = get_class_methods($testCase);

@@ -15,6 +15,11 @@ abstract class TestCase
     {
     }
 
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     public function expect<T>(T $context): Expectation<T>
     {
         return new Expectation($context);

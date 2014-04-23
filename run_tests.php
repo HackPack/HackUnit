@@ -33,6 +33,7 @@ function main(): void {
 
     //ConventionalLoaderTest
     $suite->add(new ConventionalLoaderTest('test_load_should_return_classes_ending_in_Test_for_every_method'));
+    $suite->add(new ConventionalLoaderTest('test_getTestCasePaths_should_return_paths_to_test_cases'));
 
     $result = $suite->run(new TestResult());
     print "\n" . $result->getSummary() . "\n";
