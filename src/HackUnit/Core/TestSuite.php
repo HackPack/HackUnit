@@ -12,6 +12,11 @@ class TestSuite
         $this->tests->add($case);
     }
 
+    public function getTests(): Vector<TestCase>
+    {
+        return $this->tests;
+    }
+
     public function run(TestResult $result): TestResult
     {
         foreach ($this->tests as $test) {

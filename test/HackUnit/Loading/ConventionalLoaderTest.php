@@ -38,4 +38,13 @@ class ConventionalLoaderTest extends TestCase
         $this->expect($twoTest->getName())->toEqual('testThree');
         $this->expect($twoTest2->getName())->toEqual('testFour');
     }
+    
+    public function test_loadSuite_should_use_results_of_load_to_create_a_TestSuite(): void
+    {
+        if (! $this->loader) throw new \Exception("loader cannot be null");
+        $suite = $this->loader->loadSuite();
+        $tests = $suite->getTests();
+        $this->expect($tests->count())->toEqual(4);
+    }
+
 }

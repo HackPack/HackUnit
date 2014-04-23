@@ -2,6 +2,7 @@
 namespace HackUnit\Loading;
 
 use HackUnit\Core\TestCase;
+use HackUnit\Core\TestSuite;
 
 class ConventionalLoader
 {
@@ -13,6 +14,16 @@ class ConventionalLoader
     public function __construct(protected string $path)
     {
         $this->testCases = Vector {};
+    }
+
+    public function loadSuite(): TestSuite
+    {
+        $testCases = $this->load();
+        $suite = new TestSuite();
+        foreach ($testCases as $testCase) {
+            $suite->add($testCase);
+        }
+        return $suite;
     }
 
     public function load(): Vector<TestCase>
