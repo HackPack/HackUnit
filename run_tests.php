@@ -35,6 +35,7 @@ function main(): void {
     $suite->add(new ConventionalLoaderTest('test_load_should_return_classes_ending_in_Test_for_every_method'));
     $suite->add(new ConventionalLoaderTest('test_getTestCasePaths_should_return_paths_to_test_cases'));
     $suite->add(new ConventionalLoaderTest('test_loadSuite_should_use_results_of_load_to_create_a_TestSuite'));
+    $suite->add(new ConventionalLoaderTest('test_getTestCasePaths_should_exclude_dirs'));
 
     $result = $suite->run(new TestResult());
     print "\n" . $result->getSummary() . "\n";

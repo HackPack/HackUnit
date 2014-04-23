@@ -11,7 +11,7 @@ class ConventionalLoader implements LoaderInterface
 
     private Vector<TestCase> $testCases;
 
-    public function __construct(protected string $path)
+    public function __construct(protected string $path, protected Vector<string> $exclude = Vector {})
     {
         $this->testCases = Vector {};
     }
@@ -39,19 +39,32 @@ class ConventionalLoader implements LoaderInterface
     {
         $searchPath = $searchPath ? $searchPath : $this->path;
         $files = scandir($searchPath);
+
         foreach ($files as $file) {
             if ($file == '.' || $file == '..') {
                 continue;
             }
+
             $newPath = $searchPath . "/" . (string)$file;
+
+            if ($this->isExcluded($newPath)) {
+                continue;
+            }
+
             if (is_file($newPath)) {
                 if (! preg_match(ConventionalLoader::$testPattern, $newPath)) continue;
                 $accum->add($newPath);
                 continue;
             }
+
             $this->getTestCasePaths($newPath, $accum);
         }
         return $accum;
+    }
+
+    protected function isExcluded(string $path): bool
+    {
+        return $this->exclude->linearSearch($path) != -1;
     }
 
     protected function addTestCase(string $testPath): void
