@@ -1,14 +1,14 @@
 <?hh //strict
 namespace HackUnit;
 
-class Loader
+class ClassLoader
 {
     public static Vector<string> $searchPaths = Vector {};
 
     public static function register(): void
     {
         static::$searchPaths->add(__DIR__ . '/..');
-        $cb = class_meth('\HackUnit\Loader', 'autoload');
+        $cb = class_meth('\HackUnit\ClassLoader', 'autoload');
         spl_autoload_register($cb);
     }
 
@@ -26,7 +26,7 @@ class Loader
         }
     }
 
-    public static function add(string $searchPath): void 
+    public static function addSearchPath(string $searchPath): void 
     {
         static::$searchPaths->add($searchPath);
     }

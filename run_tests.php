@@ -1,7 +1,7 @@
 <?hh //partial
-require_once 'src/HackUnit/Loader.php';
+require_once 'src/HackUnit/ClassLoader.php';
 
-use HackUnit\Loader;
+use HackUnit\ClassLoader;
 use HackUnit\Core\TestResult;
 use HackUnit\Loading\ConventionalLoader;
 
@@ -12,6 +12,6 @@ function main(): void {
     print "\n" . $result->getSummary() . "\n";
 }
 
-Loader::add(__DIR__ . '/test');
-Loader::register();
+ClassLoader::addSearchPath(__DIR__ . '/test');
+ClassLoader::register();
 main();
