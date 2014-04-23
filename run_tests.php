@@ -7,6 +7,7 @@ use HackUnit\Core\TestCaseTest;
 use HackUnit\Core\TestResult;
 use HackUnit\Core\ExpectationTest;
 use HackUnit\Core\CallableExpectationTest;
+use HackUnit\Loading\ConventionalLoaderTest;
 
 function main(): void {
     $suite = new TestSuite();
@@ -29,6 +30,9 @@ function main(): void {
     $suite->add(new CallableExpectationTest('test_toThrow_throws_exception_if_no_exception_thrown'));
     $suite->add(new CallableExpectationTest('test_toNotThrow_does_nothing_if_exception_not_thrown'));
     $suite->add(new CallableExpectationTest('test_toNotThrow_throws_exception_if_exception_thrown'));
+
+    //ConventionalLoaderTest
+    $suite->add(new ConventionalLoaderTest('test_load_should_return_classes_ending_in_Test_for_every_method'));
 
     $result = $suite->run(new TestResult());
     print "\n" . $result->getSummary() . "\n";
