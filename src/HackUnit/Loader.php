@@ -1,4 +1,4 @@
-<?hh //partial 
+<?hh //strict
 namespace HackUnit;
 
 class Loader
@@ -8,7 +8,7 @@ class Loader
     public static function register(): void
     {
         static::$searchPaths->add(__DIR__ . '/..');
-        $cb = class_meth('HackUnit\\Loader', 'autoload');
+        $cb = class_meth('\HackUnit\Loader', 'autoload');
         spl_autoload_register($cb);
     }
 
@@ -19,7 +19,8 @@ class Loader
         foreach (static::$searchPaths as $spath) {
             $absPath = $spath . '/' . $path . '.php';
             if (file_exists($absPath)) {
-                require_once($absPath);
+                // UNSAFE
+                include_once($absPath);
                 break;
             }
         }
