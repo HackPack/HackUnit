@@ -1,11 +1,12 @@
 <?hh //strict
 namespace HackUnit\Core;
 
-type Failure = shape('method' => string, 'message' => string, 'location' => string);
+use HackUnit\Error\TraceParser;
+use HackUnit\Error\Origin;
 
 class TestResult
 {
-    protected Vector<Failure> $failures;
+    protected Vector<Origin> $failures;
 
     public function __construct(protected int $runCount = 0, protected int $errorCount = 0)
     {
@@ -19,25 +20,9 @@ class TestResult
 
     public function testFailed(\Exception $exception): void
     {
-        $trace = $exception->getTrace();
-        $fileInfo = $this->getFileAndLine($trace);
-        $test = $trace[1];
-        $this->failures->add(shape(
-            'method' => sprintf('%s::%s', $test['class'], $test['function']),
-            'message' => $exception->getMessage(),
-            'location' => sprintf('%s:%d', $fileInfo[0], $fileInfo[1])
-        ));
+        $parser = new TraceParser($exception);
+        $this->failures->add($parser->getOrigin());
         $this->errorCount++;
-    }
-
-    protected function getFileAndLine(array<array<string, string>> $trace): Pair<string, string>
-    {
-        foreach ($trace as $item) {
-            if (array_key_exists('line', $item)) {
-                return Pair {$item['file'], $item['line']};
-            }
-        }
-        return Pair {'',''};
     }
 
     public function getSummary(): string
@@ -45,7 +30,7 @@ class TestResult
         return sprintf("%d run, %d failed", $this->runCount, $this->errorCount);
     }
 
-    public function getFailures(): Vector<Failure>
+    public function getFailures(): Vector<Origin>
     {
         return $this->failures;
     }
