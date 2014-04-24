@@ -39,7 +39,11 @@ class TestCaseTest extends TestCase
     {
         $result = new TestResult();
         $result->testStarted();
-        $result->testFailed();
+        try {
+            throw new \Exception("Failure!");
+        } catch (\Exception $e) {
+            $result->testFailed($e);
+        }
         $this->expect($result->getSummary())->toEqual('1 run, 1 failed');
     }
 

@@ -38,7 +38,7 @@ abstract class TestCase
         try {
             hphp_invoke_method($this, $class, $this->name, []);
         } catch (\Exception $e) {
-            $result->testFailed();
+            $result->testFailed($e);
         }
         $this->tearDown();
         return $result;
