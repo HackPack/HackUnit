@@ -16,7 +16,7 @@ class Text
     public function getReport(): string
     {
         return sprintf(
-            "%s%s",
+            "\n%s%s",
             $this->getFailures(),
             $this->getFooter()
         );

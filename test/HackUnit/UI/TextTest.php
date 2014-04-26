@@ -27,7 +27,7 @@ class TextTest extends TestCase
         $result = $this->getResult();
         $ui = new Text($result);
         $expectedFailures = $this->getExpectedFailures(27, "test_getReport_should_return_entire_message");
-        $expected = $expectedFailures . "1 run, 1 failed\n";
+        $expected = "\n" . $expectedFailures . "1 run, 1 failed\n";
         $this->expect($ui->getReport())->toEqual($expected);
     }
 
