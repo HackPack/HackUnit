@@ -1,5 +1,6 @@
 <?hh //partial
-require_once 'src/HackUnit/ClassLoader.php';
+$autoloader = include( __DIR__ . '/vendor/autoload.php');
+$autoloader->add('HackUnit', __DIR__ . '/test');
 
 use HackUnit\ClassLoader;
 use HackUnit\Core\TestResult;
@@ -14,6 +15,4 @@ function main(): void {
     print $text->getReport();
 }
 
-ClassLoader::addSearchPath(__DIR__ . '/test');
-ClassLoader::register();
 main();

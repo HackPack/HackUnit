@@ -1,0 +1,20 @@
+{
+    "name": "brianium/hackunit",
+    "type": "library",
+    "description": "xUnit library for hacklang written in strict mode",
+    "keywords": ["testing", "xunit", "hack", "hhvm"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Brian Scaturro",
+            "email": "scaturrob@gmail.com",
+            "homepage": "http://brianscaturro.com",
+            "role": "lead"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "HackUnit": "src/"
+        }
+    }
+}
