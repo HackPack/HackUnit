@@ -14,6 +14,7 @@ class ConventionalLoader implements LoaderInterface
     public function __construct(protected string $path, protected Vector<string> $exclude = Vector {})
     {
         $this->testCases = Vector {};
+        $this->exclude = $this->exclude->map(fun('realpath'));
     }
 
     public function loadSuite(): TestSuite
@@ -64,7 +65,7 @@ class ConventionalLoader implements LoaderInterface
 
     protected function isExcluded(string $path): bool
     {
-        return $this->exclude->linearSearch($path) != -1;
+        return $this->exclude->linearSearch(realpath($path)) != -1;
     }
 
     protected function addTestCase(string $testPath): void
