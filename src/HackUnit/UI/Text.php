@@ -13,10 +13,31 @@ class Text
         $this->failures = $result->getFailures();
     }
 
+    public function getReport(): string
+    {
+        return sprintf(
+            "%s%s",
+            $this->getFailures(),
+            $this->getFooter()
+        );
+    }
+
+    public function getFailures(): string
+    {
+        $failures = "";
+        for($i = 0; $i < $this->failures->count(); $i++) {
+            $method = sprintf("%d) %s\n", $i + 1, $this->failures[$i]['method']);
+            $message = sprintf("%s\n\n", $this->failures[$i]['message']);
+            $location = sprintf("%s\n\n", $this->failures[$i]['location']);
+            $failures .= $method . $message . $location;
+        }
+        return $failures;
+    }
+
     public function getFooter(): string
     {
         return sprintf(
-            '%d run, %d failed',
+            "%d run, %d failed\n",
             $this->result->getTestCount(),
             count($this->result->getFailures())
         );
