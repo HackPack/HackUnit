@@ -18,6 +18,11 @@ class TestResult
         $this->runCount++;
     }
 
+    public function getTestCount(): int
+    {
+        return $this->runCount;
+    }
+
     public function testFailed(\Exception $exception): void
     {
         $parser = new TraceParser($exception);
