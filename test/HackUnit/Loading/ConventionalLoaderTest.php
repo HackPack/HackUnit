@@ -21,9 +21,9 @@ class ConventionalLoaderTest extends TestCase
         if (! $this->loader) throw new \Exception("loader and path cannot be null");
         $paths = $this->loader->getTestCasePaths();
         $this->expect($paths->count())->toEqual(3);
-        $this->expect($paths->at(0))->toEqual($this->path . '/OneTest.php');
-        $this->expect($paths->at(1))->toEqual($this->path . '/TwoTest.php');
-        $this->expect($paths->at(2))->toEqual($this->path . '/excluded/ThreeTest.php');
+        $this->expect($paths->contains($this->path . '/OneTest.php'))->toEqual(true);
+        $this->expect($paths->contains($this->path . '/TwoTest.php'))->toEqual(true);
+        $this->expect($paths->contains($this->path . '/excluded/ThreeTest.php'))->toEqual(true);
     }
 
     public function test_load_should_return_classes_ending_in_Test_for_every_method(): void

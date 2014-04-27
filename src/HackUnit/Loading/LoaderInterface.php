@@ -10,5 +10,5 @@ interface LoaderInterface
 
     public function load(): Vector<TestCase>;
 
-    public function getTestCasePaths(): Vector<string>;
+    public function getTestCasePaths(): Set<string>;
 }

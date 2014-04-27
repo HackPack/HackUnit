@@ -38,7 +38,7 @@ class ConventionalLoader implements LoaderInterface
         return $this->testCases;
     }
 
-    public function getTestCasePaths(string $searchPath = '', Vector<string> $accum = Vector {}): Vector<string>
+    public function getTestCasePaths(string $searchPath = '', Set<string> $accum = Set {}): Set<string>
     {
         $searchPath = $searchPath ? $searchPath : $this->path;
         $files = scandir($searchPath);
