@@ -83,8 +83,38 @@ class ConventionalLoader implements LoaderInterface
 
     protected function createTestCaseInstance(string $testPath, string $testMethod): TestCase
     {
-        $classFile = substr($testPath, strlen($this->path) + 1, strlen($testPath));
-        $className = str_replace('/', '\\', str_replace('.php', '', $classFile));
+        $fp = fopen($testPath, 'r');
+        $namespace = $class = $buffer = '';
+        $i = 0;
+        while (!$class) {
+            if (feof($fp)) break;
+            $buffer .= (string) fread($fp, 512);
+            $tokens = token_get_all($buffer);
+
+            if (strpos($buffer, '{') === false) continue;
+
+            for (; $i < count($tokens); $i++) {
+
+                if ($tokens[$i][0] === 377) {
+                    for ($j = $i + 1; $j < count($tokens); $j++) {
+                        if ($tokens[$j][0] === 307) {
+                            $namespace .= '\\' . (string) $tokens[$j][1];
+                        } else if ($tokens[$j] === '{' || $tokens[$j] === ';') {
+                            break;
+                        }
+                    }
+                }
+
+                if ($tokens[$i][0] === 353) {
+                    for ($j = $i + 1; $j < count($tokens); $j++) {
+                        if ($tokens[$j] === '{') {
+                            $class = $tokens[$i +2][1];
+                        }
+                    }
+                }
+            }
+        }
+        $className = $namespace . '\\' . $class;
         return hphp_create_object($className, [$testMethod]);
     }
 
