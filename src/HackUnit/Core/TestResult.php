@@ -30,11 +30,6 @@ class TestResult
         $this->errorCount++;
     }
 
-    public function getSummary(): string
-    {
-        return sprintf("%d run, %d failed", $this->runCount, $this->errorCount);
-    }
-
     public function getFailures(): Vector<Origin>
     {
         return $this->failures;

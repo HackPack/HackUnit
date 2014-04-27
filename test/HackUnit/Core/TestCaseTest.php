@@ -15,7 +15,7 @@ class TestCaseTest extends TestCase
         $test = $this->test;
         if ($test) {
             $result = $test->run(new TestResult());
-            $this->expect($result->getSummary())->toEqual('1 run, 0 failed');
+            $this->expect($result->getTestCount())->toEqual(1);
         }
     }
 
@@ -32,21 +32,12 @@ class TestCaseTest extends TestCase
     {
         $test = new WasRun('testBrokenMethod');
         $result = $test->run(new TestResult());
-        $this->expect($result->getSummary())->toEqual('1 run, 1 failed');
+        $count = $result->getTestCount();
+        $failures = $result->getFailures();
+        $this->expect($count)->toEqual(1);
+        $this->expect(count($failures))->toEqual(1);
     }
-
-    public function testFailedResultFormatting(): void
-    {
-        $result = new TestResult();
-        $result->testStarted();
-        try {
-            throw new \Exception("Failure!");
-        } catch (\Exception $e) {
-            $result->testFailed($e);
-        }
-        $this->expect($result->getSummary())->toEqual('1 run, 1 failed');
-    }
-
+  
     public function testSuite(): void
     {
         $result = new TestResult();
@@ -54,6 +45,9 @@ class TestCaseTest extends TestCase
         $suite->add(new WasRun('testMethod'));
         $suite->add(new WasRun('testBrokenMethod'));
         $result = $suite->run($result);
-        $this->expect($result->getSummary())->toEqual('2 run, 1 failed');
+        $count = $result->getTestCount();
+        $failures = $result->getFailures();
+        $this->expect($count)->toEqual(2);
+        $this->expect(count($failures))->toEqual(1);
     }
 }
