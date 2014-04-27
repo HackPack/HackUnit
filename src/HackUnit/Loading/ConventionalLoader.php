@@ -77,7 +77,7 @@ class ConventionalLoader implements LoaderInterface
         $methods = get_class_methods($testCase);
         foreach ($methods as $method) {
             if (preg_match(ConventionalLoader::$testMethodPattern, $method)) {
-                $test = $this->instantiator->fromFile($testPath, [$method]);
+                $test = $this->instantiator->fromObject($testCase, [$method]);
                 $this->testCases->add($test);
             }
         }

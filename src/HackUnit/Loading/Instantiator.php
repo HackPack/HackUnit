@@ -7,6 +7,12 @@ class Instantiator
     const int T_STRING = 307;
     const int T_CLASS = 353;
 
+    public function fromObject<T>(T $object, array<mixed> $args): T
+    {
+        $className = get_class($object);
+        return hphp_create_object($className, $args);
+    }
+
     public function fromFile<T>(string $classPath, array<mixed> $args): T
     {
         $fp = fopen($classPath, 'r');
