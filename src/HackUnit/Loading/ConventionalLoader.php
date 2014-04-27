@@ -10,11 +10,13 @@ class ConventionalLoader implements LoaderInterface
     private static string $testMethodPattern = '/^test/';
 
     private Vector<TestCase> $testCases;
+    private Instantiator $instantiator;
 
     public function __construct(protected string $path, protected Vector<string> $exclude = Vector {})
     {
         $this->testCases = Vector {};
         $this->exclude = $this->exclude->map(fun('realpath'));
+        $this->instantiator = new Instantiator();
     }
 
     public function loadSuite(): TestSuite
@@ -71,51 +73,14 @@ class ConventionalLoader implements LoaderInterface
     protected function addTestCase(string $testPath): void
     {
         $this->includeClass($testPath);
-        $testCase = $this->createTestCaseInstance($testPath, 'noop');
+        $testCase = $this->instantiator->fromFile($testPath, ['noop']);
         $methods = get_class_methods($testCase);
         foreach ($methods as $method) {
             if (preg_match(ConventionalLoader::$testMethodPattern, $method)) {
-                $test = $this->createTestCaseInstance($testPath, $method);
+                $test = $this->instantiator->fromFile($testPath, [$method]);
                 $this->testCases->add($test);
             }
         }
-    }
-
-    protected function createTestCaseInstance(string $testPath, string $testMethod): TestCase
-    {
-        $fp = fopen($testPath, 'r');
-        $namespace = $class = $buffer = '';
-        $i = 0;
-        while (!$class) {
-            if (feof($fp)) break;
-            $buffer .= (string) fread($fp, 512);
-            $tokens = token_get_all($buffer);
-
-            if (strpos($buffer, '{') === false) continue;
-
-            for (; $i < count($tokens); $i++) {
-
-                if ($tokens[$i][0] === 377) {
-                    for ($j = $i + 1; $j < count($tokens); $j++) {
-                        if ($tokens[$j][0] === 307) {
-                            $namespace .= '\\' . (string) $tokens[$j][1];
-                        } else if ($tokens[$j] === '{' || $tokens[$j] === ';') {
-                            break;
-                        }
-                    }
-                }
-
-                if ($tokens[$i][0] === 353) {
-                    for ($j = $i + 1; $j < count($tokens); $j++) {
-                        if ($tokens[$j] === '{') {
-                            $class = $tokens[$i +2][1];
-                        }
-                    }
-                }
-            }
-        }
-        $className = $namespace . '\\' . $class;
-        return hphp_create_object($className, [$testMethod]);
     }
 
     protected function includeClass(string $testPath): void
