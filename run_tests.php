@@ -2,7 +2,6 @@
 $autoloader = include( __DIR__ . '/vendor/autoload.php');
 $autoloader->add('HackUnit', __DIR__ . '/test');
 
-use HackUnit\ClassLoader;
 use HackUnit\Core\TestResult;
 use HackUnit\Loading\ConventionalLoader;
 use HackUnit\UI\Text;
