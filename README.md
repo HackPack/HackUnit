@@ -10,5 +10,5 @@ Running tests
 -------------
 
 ```
-hhvm run_tests.php
+bin/hackunit --bootstrap test/bootstrap.php --exclude test/fixtures/ test/
 ```
