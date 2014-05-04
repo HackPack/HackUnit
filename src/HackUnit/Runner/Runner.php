@@ -1,7 +1,10 @@
 <?hh //strict
 namespace HackUnit\Runner;
 
-class Runner<TLoader>
+use HackUnit\Core\TestResult;
+use HackUnit\Runner\Loading\LoaderInterface;
+
+class Runner<TLoader as LoaderInterface>
 {
     protected TLoader $loader;
 
@@ -13,5 +16,13 @@ class Runner<TLoader>
     public function getLoader(): TLoader
     {
         return $this->loader;
+    }
+
+    public function run(): TestResult
+    {
+        $result = new TestResult();
+        $suite = $this->getLoader()->loadSuite();
+        $suite->run($result);
+        return $result;
     }
 }

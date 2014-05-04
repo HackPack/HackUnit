@@ -7,6 +7,10 @@ class Options
 
     protected ?string $excludedPaths;
 
+    protected static array<string> $longOpts = array(
+        'exclude'
+    );
+
     /**
      * @todo Annotate type as "this" when fixed in
      * nightly. Currently broken when using namespaces
@@ -32,5 +36,17 @@ class Options
     {
         $paths = preg_split('/\s+/', $this->excludedPaths);
         return new Set($paths);
+    }
+
+    public static function fromCli(array<string> $argv): Options
+    {
+        $cli = getopt('', static::$longOpts);
+        $options = new static();
+
+        if (array_key_exists('exclude', $cli)) {
+            $options->setExcludedPaths($cli['exclude']);
+        }
+
+        return $options->setTestPath($argv[count($argv) - 1]);
     }
 }

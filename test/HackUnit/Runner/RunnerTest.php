@@ -23,4 +23,16 @@ class RunnerTest extends TestCase
 
         $this->expect($loader->getPath())->toEqual(__DIR__);
     }
+
+    public function test_run_returns_result_from_loader(): void
+    {
+        $factory = $this->factory ?: ($opts) ==> new StandardLoader('null');
+        $options = new Options();
+        $options->setTestPath(__DIR__ . '/../../fixtures/loading');
+        $runner = new Runner($options, $factory);
+
+        $result = $runner->run();
+
+        $this->expect($result->getTestCount())->toEqual(6);
+    }
 }
