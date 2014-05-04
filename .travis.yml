@@ -3,5 +3,8 @@ language: php
 php:
     - "hhvm"
 
+before_script:
+    - composer install --prefer-source
+
 script:
     - bin/hackunit --bootstrap test/bootstrap.php --exclude test/fixtures/ test/
