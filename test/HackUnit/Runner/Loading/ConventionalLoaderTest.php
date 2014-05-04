@@ -59,7 +59,7 @@ class ConventionalLoaderTest extends TestCase
 
     public function test_getTestCasePaths_should_exclude_dirs(): void
     {
-        $loader = new ConventionalLoader($this->path, Vector {$this->path . '/excluded'});
+        $loader = new ConventionalLoader($this->path, Set {$this->path . '/excluded'});
         $paths = $loader->getTestCasePaths();
         $this->expect($paths->count())->toEqual(2);
     }

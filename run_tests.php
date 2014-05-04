@@ -7,7 +7,7 @@ use HackUnit\Runner\Loading\ConventionalLoader;
 use HackUnit\UI\Text;
 
 function main(): void {
-    $loader = new ConventionalLoader(__DIR__ . '/test', Vector {__DIR__ . '/test/fixtures'});
+    $loader = new ConventionalLoader(__DIR__ . '/test', Set {__DIR__ . '/test/fixtures'});
     $suite = $loader->loadSuite();
     $result = $suite->run(new TestResult());
     $text = new Text($result);
