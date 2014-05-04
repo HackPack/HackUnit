@@ -30,6 +30,12 @@ class TestResult
         $this->errorCount++;
     }
 
+    public function getExitCode(): int
+    {
+        return ($this->failures->count() > 0)
+            ? 1 : 0;
+    }
+
     public function getFailures(): Vector<Origin>
     {
         return $this->failures;

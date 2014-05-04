@@ -7,11 +7,9 @@ use HackUnit\Runner\Options;
 
 class Console<TLoader as LoaderInterface>
 {
-    protected Runner<TLoader> $runner;
+    protected Runner<LoaderInterface> $runner;
 
-    protected Options $options;
-
-    public function __construct(Options $options)
+    public function __construct(protected Options $options)
     {
         $factory = class_meth('\HackUnit\Runner\Loading\StandardLoader', 'create');
         $this->options = $this->options = $options;
@@ -27,5 +25,7 @@ class Console<TLoader as LoaderInterface>
         $result = $this->runner->run();
         $ui = new Text($result);
         print $ui->getReport();
+        // UNSAFE
+        exit($result->getExitCode());
     }
 }

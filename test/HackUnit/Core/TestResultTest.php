@@ -37,6 +37,12 @@ class TestResultTest extends TestCase
         $this->expect($location)->toEqual(__FILE__ . ':33');
     }
 
+    public function test_getExitCode_returns_1_if_failures(): void
+    {
+        $result = $this->getResult();
+        $this->expect($result->getExitCode())->toEqual(1);
+    }
+
     protected function getResult(): TestResult
     {
         $result = new TestResult();
