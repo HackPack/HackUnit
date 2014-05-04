@@ -5,15 +5,15 @@ use HackUnit\Core\TestCase;
 
 require_once __DIR__ . '/../../../../test/fixtures/loading/excluded/ThreeTest.php';
 
-class ConventionalLoaderTest extends TestCase
+class StandardLoaderTest extends TestCase
 {
-    protected ?ConventionalLoader $loader;
+    protected ?StandardLoader $loader;
     protected string $path = '';
 
     <<Override>> public function setUp(): void
     {
         $this->path = __DIR__ . '/../../../../test/fixtures/loading';
-        $this->loader = new ConventionalLoader($this->path);
+        $this->loader = new StandardLoader($this->path);
     }
 
     public function test_getTestCasePaths_should_return_paths_to_test_cases(): void
@@ -59,7 +59,7 @@ class ConventionalLoaderTest extends TestCase
 
     public function test_getTestCasePaths_should_exclude_dirs(): void
     {
-        $loader = new ConventionalLoader($this->path, Set {$this->path . '/excluded'});
+        $loader = new StandardLoader($this->path, Set {$this->path . '/excluded'});
         $paths = $loader->getTestCasePaths();
         $this->expect($paths->count())->toEqual(2);
     }

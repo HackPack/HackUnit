@@ -2,7 +2,7 @@
 namespace HackUnit\Runner;
 
 use HackUnit\Core\TestCase;
-use HackUnit\Runner\Loading\ConventionalLoader;
+use HackUnit\Runner\Loading\StandardLoader;
 
 class RunnerTest extends TestCase
 {
@@ -10,7 +10,7 @@ class RunnerTest extends TestCase
     {
         $options = new Options();
         $options->setTestPath(__DIR__);
-        $runner = new Runner($options, ($opts) ==> new ConventionalLoader((string)$opts->getTestPath()));
+        $runner = new Runner($options, ($opts) ==> new StandardLoader((string)$opts->getTestPath()));
 
         $loader = $runner->getLoader();
 

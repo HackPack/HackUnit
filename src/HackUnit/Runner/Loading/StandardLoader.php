@@ -4,7 +4,7 @@ namespace HackUnit\Runner\Loading;
 use HackUnit\Core\TestCase;
 use HackUnit\Core\TestSuite;
 
-class ConventionalLoader implements LoaderInterface
+class StandardLoader implements LoaderInterface
 {
     private static string $testPattern = '/Test.php$/';
     private static string $testMethodPattern = '/^test/';
@@ -55,7 +55,7 @@ class ConventionalLoader implements LoaderInterface
             }
 
             if (is_file($newPath)) {
-                if (! preg_match(ConventionalLoader::$testPattern, $newPath)) continue;
+                if (! preg_match(StandardLoader::$testPattern, $newPath)) continue;
                 $accum->add($newPath);
                 continue;
             }
@@ -81,7 +81,7 @@ class ConventionalLoader implements LoaderInterface
         $testCase = $this->instantiator->fromFile($testPath, ['noop']);
         $methods = get_class_methods($testCase);
         foreach ($methods as $method) {
-            if (preg_match(ConventionalLoader::$testMethodPattern, $method)) {
+            if (preg_match(StandardLoader::$testMethodPattern, $method)) {
                 $test = $this->instantiator->fromObject($testCase, [$method]);
                 $this->testCases->add($test);
             }
