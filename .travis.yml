@@ -1,7 +1,7 @@
-language:php
+language: php
 
 php:
-  - hhvm
+    - "hhvm"
 
 script:
-  - bin/hackunit --bootstrap test/bootstrap.php --exclude test/fixtures/ test/
+    - bin/hackunit --bootstrap test/bootstrap.php --exclude test/fixtures/ test/
