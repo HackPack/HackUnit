@@ -4,7 +4,7 @@
 $files = array(
     __DIR__ . '/../../vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',
-    dirname(__DIR__) . '/vendor/autoload.php'
+    __DIR__ . '/../vendor/autoload.php'
 );
 
 $found = false;
@@ -24,6 +24,7 @@ if (!$found) {
 }
 
 use HackUnit\UI\Console;
+use HackUnit\Runner\Options;
 
-$app = new Console();
+$app = new Console(Options::fromCli($_SERVER['argv']));
 $app->run();

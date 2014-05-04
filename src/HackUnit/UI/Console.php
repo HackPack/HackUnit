@@ -11,11 +11,10 @@ class Console<TLoader as LoaderInterface>
 
     protected Options $options;
 
-    public function __construct()
+    public function __construct(Options $options)
     {
         $factory = class_meth('\HackUnit\Runner\Loading\StandardLoader', 'create');
-        // UNSAFE
-        $this->options = Options::fromCli($_SERVER['argv']);
+        $this->options = $this->options = $options;
         $this->runner = new Runner($this->options, $factory);
     }
 
