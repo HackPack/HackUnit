@@ -7,8 +7,11 @@ class Options
 
     protected ?string $excludedPaths;
 
+    protected ?string $bootstrap;
+
     protected static array<string> $longOpts = array(
-        'exclude'
+        'exclude:',
+        'bootstrap:'
     );
 
     /**
@@ -38,6 +41,17 @@ class Options
         return new Set($paths);
     }
 
+    public function setBootstrap(string $bootstrap): Options
+    {
+        $this->bootstrap = $bootstrap;
+        return $this;
+    }
+
+    public function getBootstrap(): ?string
+    {
+        return realpath($this->bootstrap);
+    }
+
     public static function fromCli(array<string> $argv): Options
     {
         $cli = getopt('', static::$longOpts);
@@ -45,6 +59,10 @@ class Options
 
         if (array_key_exists('exclude', $cli)) {
             $options->setExcludedPaths($cli['exclude']);
+        }
+
+        if (array_key_exists('bootstrap', $cli)) {
+            $options->setBootstrap($cli['bootstrap']);
         }
 
         return $options->setTestPath($argv[count($argv) - 1]);
