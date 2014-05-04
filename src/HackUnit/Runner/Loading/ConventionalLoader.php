@@ -65,6 +65,11 @@ class ConventionalLoader implements LoaderInterface
         return $accum;
     }
 
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+
     protected function isExcluded(string $path): bool
     {
         return $this->exclude->linearSearch(realpath($path)) != -1;
