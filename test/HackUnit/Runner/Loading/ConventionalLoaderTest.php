@@ -1,9 +1,9 @@
 <?hh //strict
-namespace HackUnit\Loading;
+namespace HackUnit\Runner\Loading;
 
 use HackUnit\Core\TestCase;
 
-require_once __DIR__ . '/../../../test/fixtures/loading/excluded/ThreeTest.php';
+require_once __DIR__ . '/../../../../test/fixtures/loading/excluded/ThreeTest.php';
 
 class ConventionalLoaderTest extends TestCase
 {
@@ -12,7 +12,7 @@ class ConventionalLoaderTest extends TestCase
 
     <<Override>> public function setUp(): void
     {
-        $this->path = __DIR__ . '/../../../test/fixtures/loading';
+        $this->path = __DIR__ . '/../../../../test/fixtures/loading';
         $this->loader = new ConventionalLoader($this->path);
     }
 

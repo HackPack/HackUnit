@@ -4,7 +4,7 @@ namespace HackUnit\UI;
 use HackUnit\Core\TestResult;
 use HackUnit\Error\Origin;
 
-class Text
+class Text implements ReporterInterface
 {
     protected Vector<Origin> $failures;
 

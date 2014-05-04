@@ -1,5 +1,5 @@
 <?hh //strict
-namespace HackUnit\Loading;
+namespace HackUnit\Runner\Loading;
 
 use HackUnit\Core\TestCase;
 use HackUnit\Core\TestSuite;
