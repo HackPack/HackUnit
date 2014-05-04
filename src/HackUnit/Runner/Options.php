@@ -49,7 +49,8 @@ class Options
 
     public function getBootstrap(): ?string
     {
-        return realpath($this->bootstrap);
+        $path = realpath($this->bootstrap);
+        return $path ?: null;
     }
 
     public static function fromCli(array<string> $argv): Options

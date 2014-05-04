@@ -16,7 +16,7 @@ class StandardLoader implements LoaderInterface
     public function __construct(protected string $path, protected Set<string> $exclude = Set {})
     {
         $this->testCases = Vector {};
-        $this->exclude = $this->exclude->map(fun('realpath'));
+        $this->exclude = $this->exclude->map(($path) ==> (string) realpath($path));
         $this->instantiator = new Instantiator();
     }
 
