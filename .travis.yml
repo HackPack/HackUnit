@@ -1,0 +1,7 @@
+language:php
+
+php:
+  - hhvm
+
+script:
+  - bin/hackunit --bootstrap test/bootstrap.php --exclude test/fixtures/ test/
