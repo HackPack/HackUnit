@@ -3,6 +3,7 @@ namespace HackUnit\Runner\Loading;
 
 use HackUnit\Core\TestCase;
 use HackUnit\Core\TestSuite;
+use HackUnit\Runner\Options;
 
 class StandardLoader implements LoaderInterface
 {
@@ -68,6 +69,11 @@ class StandardLoader implements LoaderInterface
     public function getPath(): string
     {
         return $this->path;
+    }
+
+    public static function create(Options $options): StandardLoader
+    {
+        return new static((string) $options->getTestPath(), $options->getExcludedPaths());
     }
 
     protected function isExcluded(string $path): bool

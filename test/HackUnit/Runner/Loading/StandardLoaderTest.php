@@ -2,6 +2,7 @@
 namespace HackUnit\Runner\Loading;
 
 use HackUnit\Core\TestCase;
+use HackUnit\Runner\Options;
 
 require_once __DIR__ . '/../../../../test/fixtures/loading/excluded/ThreeTest.php';
 
@@ -59,7 +60,11 @@ class StandardLoaderTest extends TestCase
 
     public function test_getTestCasePaths_should_exclude_dirs(): void
     {
-        $loader = new StandardLoader($this->path, Set {$this->path . '/excluded'});
+        $options = new Options();
+        $options
+            ->setTestPath($this->path)
+            ->setExcludedPaths($this->path . '/excluded');
+        $loader = StandardLoader::create($options);
         $paths = $loader->getTestCasePaths();
         $this->expect($paths->count())->toEqual(2);
     }

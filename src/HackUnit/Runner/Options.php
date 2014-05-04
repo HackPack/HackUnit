@@ -5,6 +5,8 @@ class Options
 {
     protected ?string $testPath;
 
+    protected ?string $excludedPaths;
+
     /**
      * @todo Annotate type as "this" when fixed in
      * nightly. Currently broken when using namespaces
@@ -18,5 +20,17 @@ class Options
     public function getTestPath(): ?string
     {
         return $this->testPath;
+    }
+
+    public function setExcludedPaths(string $paths): Options
+    {
+        $this->excludedPaths = $paths;
+        return $this;
+    }
+
+    public function getExcludedPaths(): Set<string>
+    {
+        $paths = preg_split('/\s+/', $this->excludedPaths);
+        return new Set($paths);
     }
 }
