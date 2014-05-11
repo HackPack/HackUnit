@@ -66,6 +66,16 @@ class Options
             $options->setBootstrap($cli['bootstrap']);
         }
 
-        return $options->setTestPath($argv[count($argv) - 1]);
+        $testPath = $argv[count($argv) - 1];
+
+        /**
+         * TODO check based on diff between getopt and argv instead of file existence
+         */
+        $isValidPath = file_exists($testPath) && realpath($testPath) != $options->getBootstrap(); 
+        if ($isValidPath) {
+            $options->setTestPath($argv[count($argv) - 1]);
+        }
+
+        return $options;
     }
 }
