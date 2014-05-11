@@ -42,14 +42,14 @@ class StandardLoader implements LoaderInterface
     public function getTestCasePaths(string $searchPath = '', Set<string> $accum = Set {}): Set<string>
     {
         $searchPath = $searchPath ? $searchPath : $this->path;
-        $files = scandir($searchPath);
+        $files = is_dir($searchPath) ? scandir($searchPath) : [$searchPath];
 
         foreach ($files as $file) {
             if ($file == '.' || $file == '..') {
                 continue;
             }
 
-            $newPath = $searchPath . "/" . (string)$file;
+            $newPath = is_file($searchPath) ? $searchPath : $searchPath . "/" . (string)$file;
 
             if ($this->isExcluded($newPath)) {
                 continue;

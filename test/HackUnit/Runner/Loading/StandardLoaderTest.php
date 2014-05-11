@@ -27,6 +27,14 @@ class StandardLoaderTest extends TestCase
         $this->expect($paths->contains($this->path . '/excluded/ThreeTest.php'))->toEqual(true);
     }
 
+    public function test_getTestCasePaths_should_return_paths_with_single_file(): void
+    {
+        $loader = new StandardLoader($this->path . '/OneTest.php');
+        $paths = $loader->getTestCasePaths();
+        $this->expect($paths->count())->toEqual(1);
+        $this->expect($paths->contains($this->path . '/OneTest.php'))->toEqual(true);
+    }
+
     public function test_load_should_return_classes_ending_in_Test_for_every_method(): void
     {
         if (! $this->loader) throw new \Exception("loader cannot be null");
