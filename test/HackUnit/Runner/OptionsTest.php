@@ -14,4 +14,11 @@ class OptionsTest extends TestCase
         $this->expect($excluded->contains('path/to/excluded1'))->toEqual(true);
         $this->expect($excluded->contains('path/to/excluded2'))->toEqual(true);
     }
+
+    public function test_getTestPath_returns_cwd_if_not_specified(): void
+    {
+        $options = new Options();
+
+        $this->expect($options->getTestPath())->toEqual(getcwd());
+    }
 }

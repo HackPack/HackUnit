@@ -24,9 +24,9 @@ class Options
         return $this;
     }
 
-    public function getTestPath(): ?string
+    public function getTestPath(): string
     {
-        return $this->testPath;
+        return is_null($this->testPath) ? getcwd() : $this->testPath;
     }
 
     public function setExcludedPaths(string $paths): Options
