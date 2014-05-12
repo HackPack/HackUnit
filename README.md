@@ -32,7 +32,8 @@ Top level code must use a hack mode of `//partial` and certain functions like `i
 
 Running HackUnit's tests
 ------------------------
+From the project directory run this:
 
 ```
-bin/hackunit
+bin/hackunit --exclude test/fixtures/
 ```

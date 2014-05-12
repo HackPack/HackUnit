@@ -77,7 +77,9 @@ class Options
          */
         $isValidPath = count($argv) > 1 &&
                        file_exists($testPath) && 
-                       realpath($testPath) != $options->getHackUnitFile();                       
+                       realpath($testPath) != $options->getHackUnitFile() &&
+                       ! $options->getExcludedPaths()->contains($testPath);
+                                             
         if ($isValidPath) {
             $options->setTestPath($argv[count($argv) - 1]);
         }
