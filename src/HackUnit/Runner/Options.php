@@ -7,11 +7,11 @@ class Options
 
     protected ?string $excludedPaths;
 
-    protected ?string $bootstrap;
+    protected ?string $hackUnitFile;
 
     protected static array<string> $longOpts = array(
         'exclude:',
-        'bootstrap:'
+        'hackunit-file:'
     );
 
     /**
@@ -41,15 +41,15 @@ class Options
         return new Set($paths);
     }
 
-    public function setBootstrap(string $bootstrap): Options
+    public function setHackUnitFile(string $hackUnitFile): Options
     {
-        $this->bootstrap = $bootstrap;
+        $this->hackUnitFile = $hackUnitFile;
         return $this;
     }
 
-    public function getBootstrap(): ?string
+    public function getHackUnitFile(): ?string
     {
-        $path = realpath($this->bootstrap);
+        $path = realpath($this->hackUnitFile);
         return $path ?: null;
     }
 
@@ -62,8 +62,8 @@ class Options
             $options->setExcludedPaths($cli['exclude']);
         }
 
-        if (array_key_exists('bootstrap', $cli)) {
-            $options->setBootstrap($cli['bootstrap']);
+        if (array_key_exists('hackunit-file', $cli)) {
+            $options->setHackUnitFile($cli['hackunit-file']);
         }
 
         $testPath = $argv[count($argv) - 1];
@@ -71,7 +71,7 @@ class Options
         /**
          * TODO check based on diff between getopt and argv instead of file existence
          */
-        $isValidPath = file_exists($testPath) && realpath($testPath) != $options->getBootstrap(); 
+        $isValidPath = file_exists($testPath) && realpath($testPath) != $options->getHackUnitFile(); 
         if ($isValidPath) {
             $options->setTestPath($argv[count($argv) - 1]);
         }

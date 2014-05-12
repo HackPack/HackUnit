@@ -18,9 +18,9 @@ class Console<TLoader as LoaderInterface>
 
     public function run(): void
     {
-        if (is_file($this->options->getBootstrap())) {
+        if (is_file($this->options->getHackUnitFile())) {
             // UNSAFE
-            include_once($this->options->getBootstrap());
+            include_once($this->options->getHackUnitFile());
         }
         $result = $this->runner->run();
         $ui = new Text($result);
