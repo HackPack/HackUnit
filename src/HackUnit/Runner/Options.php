@@ -49,7 +49,11 @@ class Options
 
     public function getHackUnitFile(): ?string
     {
-        $path = realpath($this->hackUnitFile);
+        $path = (string) getcwd() . '/Hackunit.php';
+        if (! is_null($this->hackUnitFile)) {
+            $path = $this->hackUnitFile;
+        }
+        $path = realpath($path);
         return $path ?: null;
     }
 
@@ -71,7 +75,9 @@ class Options
         /**
          * TODO check based on diff between getopt and argv instead of file existence
          */
-        $isValidPath = file_exists($testPath) && realpath($testPath) != $options->getHackUnitFile(); 
+        $isValidPath = count($argv) > 1 &&
+                       file_exists($testPath) && 
+                       realpath($testPath) != $options->getHackUnitFile();                       
         if ($isValidPath) {
             $options->setTestPath($argv[count($argv) - 1]);
         }

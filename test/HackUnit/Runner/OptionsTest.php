@@ -21,4 +21,13 @@ class OptionsTest extends TestCase
 
         $this->expect($options->getTestPath())->toEqual(getcwd());
     }
+
+    public function test_getHackUnitFile_searches_cwd_if_hackunit_file_not_specified(): void
+    {
+        chdir(__DIR__);
+        $options = new Options();
+        $expected = realpath(__DIR__ . '/Hackunit.php');
+
+        $this->expect($options->getHackUnitFile())->toEqual($expected);
+    }
 }
