@@ -8,7 +8,9 @@ class Text implements ReporterInterface
 {
     public Map<string, int> $colors = Map {
         'bg-green' => 42,
-        'fg-black' => 30
+        'fg-black' => 30,
+        'bg-red' => 41,
+        'fg-white' => 37
     };
 
     protected Vector<Origin> $failures;
@@ -68,14 +70,17 @@ class Text implements ReporterInterface
     protected function formatFooter(string $footer, bool $hasFailures): string
     {
         $formatted = $footer;
-        if (!$hasFailures && $this->colorIsEnabled) {
+        $lines = explode("\n", $formatted);
+        $padding = max(array_map(fun('strlen'), $lines));
+        if ($this->colorIsEnabled) {
+            $message = array_reduce($lines, ($r, $l) ==> $r . str_pad($l, $padding) . "\n", "");
             $formatted = sprintf(
                 "\033[%d;%dm%s\033[0m", 
-                $this->colors->get('bg-green'),
-                $this->colors->get('fg-black'),
-                $formatted
+                $this->colors->get($hasFailures ? 'bg-red' : 'bg-green'),
+                $this->colors->get($hasFailures ? 'fg-white' : 'fg-black'),
+                trim($message)
             );
         }
-        return $formatted .= "\n";
+        return $formatted . "\n";
     }
 }
