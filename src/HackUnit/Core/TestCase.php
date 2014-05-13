@@ -1,7 +1,7 @@
 <?hh //strict
 namespace HackUnit\Core;
 
-abstract class TestCase
+abstract class TestCase implements TestInterface
 {
     public function __construct(protected string $name)
     {

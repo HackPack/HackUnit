@@ -1,7 +1,7 @@
 <?hh //strict
 namespace HackUnit\Core;
 
-class TestSuite
+class TestSuite implements TestInterface
 {
     public function __construct(protected Vector<TestCase> $tests = Vector {})
     {
