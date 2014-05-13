@@ -36,10 +36,12 @@ class Text implements ReporterInterface
 
     public function getFooter(): string
     {
+        $failureCount = count($this->result->getFailures());
         return sprintf(
-            "%d run, %d failed\n",
+            "%s%d run, %d failed\n",
+            $failureCount > 0 ? '' : 'OK ',
             $this->result->getTestCount(),
-            count($this->result->getFailures())
+            $failureCount
         );
     }
 }

@@ -14,11 +14,19 @@ class TextTest extends TestCase
         $this->expect($ui->getFooter())->toEqual("1 run, 1 failed\n");
     }
 
+    public function test_getFooter_should_return_OK_message_when_no_failures(): void
+    {
+        $result = new TestResult();
+        $result->testStarted();
+        $ui = new Text($result);
+        $this->expect($ui->getFooter())->toEqual("OK 1 run, 0 failed\n");
+    }
+
     public function test_getFailures_should_print_failure_information(): void
     {
         $result = $this->getResult();
         $ui = new Text($result);
-        $expected = $this->getExpectedFailures(19, "test_getFailures_should_print_failure_information");
+        $expected = $this->getExpectedFailures(27, "test_getFailures_should_print_failure_information");
         $this->expect($ui->getFailures())->toEqual($expected);
     }
 
@@ -26,7 +34,7 @@ class TextTest extends TestCase
     {
         $result = $this->getResult();
         $ui = new Text($result);
-        $expectedFailures = $this->getExpectedFailures(27, "test_getReport_should_return_entire_message");
+        $expectedFailures = $this->getExpectedFailures(35, "test_getReport_should_return_entire_message");
         $expected = "\n" . $expectedFailures . "1 run, 1 failed\n";
         $this->expect($ui->getReport())->toEqual($expected);
     }
