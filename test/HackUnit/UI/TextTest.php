@@ -39,6 +39,21 @@ class TextTest extends TestCase
         $this->expect($ui->getReport())->toEqual($expected);
     }
 
+    public function test_getFooter_should_include_color_on_OK_statement_when_color_enabled(): void
+    {
+        $result = new TestResult();
+        $result->testStarted();
+        $ui = new Text($result);
+        $ui->enableColor();
+
+        $expected = sprintf(
+            "\033[%d;%dmOK 1 run, 0 failed\033[0m\n",
+            $ui->colors->get('bg-green'),
+            $ui->colors->get('fg-black')
+        );
+        $this->expect($ui->getFooter())->toEqual($expected);
+    }
+
     protected function getExpectedFailures(int $line, string $method): string
     {
         $expected  = "1) HackUnit\UI\TextTest::$method\n";
