@@ -23,10 +23,10 @@ class Text implements ReporterInterface
 
     public function getReport(): string
     {
-        $failCount = count($this->getFailures());
+        $failCount = count($this->result->getFailures());
         return sprintf(
             "\n%s%s%s",
-            $failCount === 0 ? '' : sprintf(
+            $failCount == 0 ? '' : sprintf(
                 "There %s %d %s:\n\n",
                 $failCount > 1 ? 'were' : 'was',
                 $failCount,
@@ -54,7 +54,7 @@ class Text implements ReporterInterface
         $failureCount = count($this->result->getFailures());
         return $this->formatFooter(sprintf(
             "%s%d run, %d failed",
-            $failureCount > 0 ? '' : 'OK ',
+            $failureCount > 0 ? "FAILURES!\n" : 'OK ',
             $this->result->getTestCount(),
             $failureCount
         ), $failureCount > 0);
