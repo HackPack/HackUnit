@@ -78,7 +78,8 @@ class StandardLoader implements LoaderInterface
 
     protected function isExcluded(string $path): bool
     {
-        return $this->exclude->contains(realpath($path));
+        $real = realpath($path);
+        return $this->exclude->contains($real);
     }
 
     protected function addTestCase(string $testPath): void

@@ -30,7 +30,7 @@ class RunnerTest extends TestCase
     {
         $factory = $this->factory ?: ($opts) ==> new StandardLoader('null');
         $options = new Options();
-        $options->setTestPath(__DIR__ . '/../../fixtures/loading');
+        $options->setTestPath(__DIR__ . '/../Fixtures/Loading');
         $runner = new Runner($options, $factory);
 
         $result = $runner->run();

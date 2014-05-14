@@ -14,7 +14,7 @@ class StandardLoaderTest extends TestCase
 
     <<Override>> public function setUp(): void
     {
-        $this->path = __DIR__ . '/../../Tests/Fixtures/Loading';
+        $this->path = __DIR__ . '/../../Fixtures/Loading';
         $this->loader = new StandardLoader($this->path);
     }
 
@@ -43,18 +43,18 @@ class StandardLoaderTest extends TestCase
         $objects = $this->loader->load();
         $this->expect($objects->count())->toEqual(6);
 
-        $oneTest = $objects->at(0);
-        $oneTest2 = $objects->at(1);
+        $oneTest = $objects->at(2);
+        $oneTest2 = $objects->at(3);
         $this->expect($oneTest->getName())->toEqual('testOne');
         $this->expect($oneTest2->getName())->toEqual('testTwo');
 
-        $twoTest = $objects->at(2);
-        $twoTest2 = $objects->at(3);
+        $twoTest = $objects->at(4);
+        $twoTest2 = $objects->at(5);
         $this->expect($twoTest->getName())->toEqual('testThree');
         $this->expect($twoTest2->getName())->toEqual('testFour');
 
-        $threeTest = $objects->at(4);
-        $threeTest2 = $objects->at(5);
+        $threeTest = $objects->at(0);
+        $threeTest2 = $objects->at(1);
         $this->expect($threeTest->getName())->toEqual('testFive');
         $this->expect($threeTest2->getName())->toEqual('testSix');
     }

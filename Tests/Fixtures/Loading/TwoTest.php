@@ -8,7 +8,7 @@ class TwoTest extends TestCase
     {
     }
 
-    public function testFoure(): void
+    public function testFour(): void
     {
     }
 }
