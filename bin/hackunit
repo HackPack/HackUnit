@@ -23,8 +23,8 @@ if (!$found) {
         'php composer.phar install' . PHP_EOL);
 }
 
-use HackUnit\UI\Console;
-use HackUnit\Runner\Options;
+use HackPack\HackUnit\UI\Console;
+use HackPack\HackUnit\Runner\Options;
 
 $app = new Console(Options::fromCli($_SERVER['argv']));
 $app->run();

@@ -1,5 +1,9 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Tests\Core;
+
+use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestResult;
+use HackPack\HackUnit\Core\TestSuite;
 
 class TestCaseTest extends TestCase
 {

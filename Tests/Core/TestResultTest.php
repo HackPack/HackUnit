@@ -1,5 +1,8 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Tests\Core;
+
+use HackPack\HackUnit\Core\TestResult;
+use HackPack\HackUnit\Core\TestCase;
 
 class TestResultTest extends TestCase
 {
@@ -16,7 +19,7 @@ class TestResultTest extends TestCase
         $failures = $result->getFailures();
         $failure = $failures->at(0);
         $method = $failure['method'];
-        $this->expect($method)->toEqual('HackUnit\Core\TestResultTest::test_getFailures_returns_method');
+        $this->expect($method)->toEqual('HackPack\HackUnit\Tests\Core\TestResultTest::test_getFailures_returns_method');
     }
 
     public function test_getFailures_returns_message(): void
@@ -34,7 +37,7 @@ class TestResultTest extends TestCase
         $failures = $result->getFailures();
         $failure = $failures->at(0);
         $location = $failure['location'];
-        $this->expect($location)->toEqual(__FILE__ . ':33');
+        $this->expect($location)->toEqual(__FILE__ . ':36');
     }
 
     public function test_getExitCode_returns_1_if_failures(): void

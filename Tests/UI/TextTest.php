@@ -1,9 +1,10 @@
 <?hh //strict
-namespace HackUnit\UI;
+namespace HackPack\HackUnit\UI;
 
-use HackUnit\Core\TestCase;
-use HackUnit\Core\TestResult;
-use HackUnit\Core\ExpectationException;
+use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestResult;
+use HackPack\HackUnit\Core\ExpectationException;
+use HackPack\HackUnit\UI\Text;
 
 class TextTest extends TestCase
 {
@@ -26,7 +27,7 @@ class TextTest extends TestCase
     {
         $result = $this->getResult();
         $ui = new Text($result);
-        $expected = $this->getExpectedFailures(27, "test_getFailures_should_print_failure_information");
+        $expected = $this->getExpectedFailures(28, "test_getFailures_should_print_failure_information");
         $this->expect($ui->getFailures())->toEqual($expected);
     }
 
@@ -34,7 +35,7 @@ class TextTest extends TestCase
     {
         $result = $this->getResult();
         $ui = new Text($result);
-        $expectedFailures = $this->getExpectedFailures(35, "test_getReport_should_return_entire_message");
+        $expectedFailures = $this->getExpectedFailures(36, "test_getReport_should_return_entire_message");
         $expected = "\nThere was 1 failure:\n\n" . $expectedFailures . "FAILURES!\n1 run, 1 failed\n";
         $this->expect($ui->getReport())->toEqual($expected);
     }
@@ -70,7 +71,7 @@ class TextTest extends TestCase
 
     protected function getExpectedFailures(int $line, string $method): string
     {
-        $expected  = "1) HackUnit\UI\TextTest::$method\n";
+        $expected  = "1) HackPack\HackUnit\UI\TextTest::$method\n";
         $expected .= "Something is wrong\n\n";
         $expected .= __FILE__ . ":$line\n\n";
         return $expected;

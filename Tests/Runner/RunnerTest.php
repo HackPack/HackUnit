@@ -1,8 +1,10 @@
 <?hh //strict
-namespace HackUnit\Runner;
+namespace HackPack\HackUnit\Tests\Runner;
 
-use HackUnit\Core\TestCase;
-use HackUnit\Runner\Loading\StandardLoader;
+use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Runner\Loading\StandardLoader;
+use HackPack\HackUnit\Runner\Runner;
+use HackPack\HackUnit\Runner\Options;
 
 class RunnerTest extends TestCase
 {
@@ -10,7 +12,7 @@ class RunnerTest extends TestCase
 
     <<Override>> public function setUp(): void
     {
-        $this->factory = class_meth('\HackUnit\Runner\Loading\StandardLoader', 'create');
+        $this->factory = class_meth('\HackPack\HackUnit\Runner\Loading\StandardLoader', 'create');
     }
 
     public function test_runner_constructs_loader_via_factory_using_options(): void

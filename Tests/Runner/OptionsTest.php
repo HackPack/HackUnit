@@ -1,7 +1,8 @@
 <?hh //strict
-namespace HackUnit\Runner;
+namespace HackPack\HackUnit\Tests\Runner;
 
-use HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Runner\Options;
 
 class OptionsTest extends TestCase
 {

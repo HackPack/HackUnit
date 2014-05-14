@@ -1,10 +1,11 @@
 <?hh //strict
-namespace HackUnit\Runner\Loading;
+namespace HackPack\HackUnit\Tests\Runner\Loading;
 
-use HackUnit\Core\TestCase;
-use HackUnit\Runner\Options;
+use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Runner\Options;
+use HackPack\HackUnit\Runner\Loading\StandardLoader;
 
-require_once __DIR__ . '/../../../../test/fixtures/loading/excluded/ThreeTest.php';
+require_once __DIR__ . '/../../Fixtures/Loading/Excluded/ThreeTest.php';
 
 class StandardLoaderTest extends TestCase
 {
@@ -13,7 +14,7 @@ class StandardLoaderTest extends TestCase
 
     <<Override>> public function setUp(): void
     {
-        $this->path = __DIR__ . '/../../../../test/fixtures/loading';
+        $this->path = __DIR__ . '/../../Tests/Fixtures/Loading';
         $this->loader = new StandardLoader($this->path);
     }
 
@@ -24,7 +25,7 @@ class StandardLoaderTest extends TestCase
         $this->expect($paths->count())->toEqual(3);
         $this->expect($paths->contains($this->path . '/OneTest.php'))->toEqual(true);
         $this->expect($paths->contains($this->path . '/TwoTest.php'))->toEqual(true);
-        $this->expect($paths->contains($this->path . '/excluded/ThreeTest.php'))->toEqual(true);
+        $this->expect($paths->contains($this->path . '/Excluded/ThreeTest.php'))->toEqual(true);
     }
 
     public function test_getTestCasePaths_should_return_paths_with_single_file(): void
@@ -71,7 +72,7 @@ class StandardLoaderTest extends TestCase
         $options = new Options();
         $options
             ->setTestPath($this->path)
-            ->setExcludedPaths($this->path . '/excluded');
+            ->setExcludedPaths($this->path . '/Excluded');
         $loader = StandardLoader::create($options);
         $paths = $loader->getTestCasePaths();
         $this->expect($paths->count())->toEqual(2);

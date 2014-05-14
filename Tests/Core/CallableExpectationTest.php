@@ -1,5 +1,9 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Tests\Core;
+
+use HackPack\HackUnit\Core\ExpectationException;
+use HackPack\HackUnit\Core\CallableExpectation;
+use HackPack\HackUnit\Core\TestCase;
 
 class CallableExpectationTest extends TestCase
 {
@@ -13,7 +17,7 @@ class CallableExpectationTest extends TestCase
     public function test_toThrow_does_nothing_if_exception_thrown(): void
     {
         if ($this->callable) {
-            $this->expectCallable($this->callable)->toThrow('\HackUnit\Core\ExpectationException');
+            $this->expectCallable($this->callable)->toThrow('\HackPack\HackUnit\Core\ExpectationException');
         }
     }
 
@@ -23,7 +27,7 @@ class CallableExpectationTest extends TestCase
             $this->expectCallable(() ==> {
                 $expectation = new CallableExpectation($this->callable);
                 $expectation->toThrow('\RuntimeException');
-            })->toThrow('\HackUnit\Core\ExpectationException');
+            })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
         }
     }
 
@@ -33,7 +37,7 @@ class CallableExpectationTest extends TestCase
             $callable = () ==> { $var = 'do nothing';  };
             $expectation = new CallableExpectation($callable);
             $expectation->toThrow('\RuntimeException');
-        })->toThrow('\HackUnit\Core\ExpectationException');
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
     }
 
     public function test_toNotThrow_does_nothing_if_exception_not_thrown(): void
@@ -47,7 +51,7 @@ class CallableExpectationTest extends TestCase
     {
         if ($this->callable) {
             $fun = () ==> { $fn = $this->callable; $fn();};
-            $this->expectCallable($fun)->toThrow('\HackUnit\Core\ExpectationException');
+            $this->expectCallable($fun)->toThrow('\HackPack\HackUnit\Core\ExpectationException');
         }
     }
 }

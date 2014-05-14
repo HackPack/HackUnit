@@ -1,5 +1,7 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Tests\Core;
+
+use HackPack\HackUnit\Core\TestCase;
 
 class WasRun extends TestCase
 {

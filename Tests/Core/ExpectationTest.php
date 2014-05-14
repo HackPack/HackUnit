@@ -1,5 +1,8 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Tests\Core;
+
+use HackPack\HackUnit\Core\Expectation;
+use HackPack\HackUnit\Core\TestCase;
 
 class ExpectationTest extends TestCase
 {
@@ -22,6 +25,6 @@ class ExpectationTest extends TestCase
         $this->expectCallable(() ==> {
             $expectation = new Expectation(1 + 1);
             $expectation->toEqual(3);
-        })->toThrow('\HackUnit\Core\ExpectationException');
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
     }
 }
