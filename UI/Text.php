@@ -1,8 +1,8 @@
 <?hh //strict
-namespace HackUnit\UI;
+namespace HackPack\HackUnit\UI;
 
-use HackUnit\Core\TestResult;
-use HackUnit\Error\Origin;
+use HackPack\HackUnit\Core\TestResult;
+use HackPack\HackUnit\Error\Origin;
 
 class Text implements ReporterInterface
 {

@@ -1,5 +1,5 @@
 <?hh //strict
-namespace HackUnit\Runner;
+namespace HackPack\HackUnit\Runner;
 
 class Options
 {

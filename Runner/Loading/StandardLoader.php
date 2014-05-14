@@ -1,9 +1,9 @@
 <?hh //strict
-namespace HackUnit\Runner\Loading;
+namespace HackPack\HackUnit\Runner\Loading;
 
-use HackUnit\Core\TestCase;
-use HackUnit\Core\TestSuite;
-use HackUnit\Runner\Options;
+use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestSuite;
+use HackPack\HackUnit\Runner\Options;
 
 class StandardLoader implements LoaderInterface
 {

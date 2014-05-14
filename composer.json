@@ -1,5 +1,5 @@
 {
-    "name": "brianium/hackunit",
+    "name": "hackpack/hackunit",
     "type": "library",
     "description": "xUnit library for hacklang written in strict mode",
     "keywords": ["testing", "xunit", "hack", "hhvm"],
@@ -13,8 +13,8 @@
         }
     ],
     "autoload": {
-        "psr-0": {
-            "HackUnit": "src/"
+        "psr-4": {
+            "HackPack\\HackUnit\\": ""
         }
     },
     "bin": ["bin/hackunit"]

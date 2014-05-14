@@ -1,8 +1,8 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Core;
 
-use HackUnit\Error\TraceParser;
-use HackUnit\Error\Origin;
+use HackPack\HackUnit\Error\TraceParser;
+use HackPack\HackUnit\Error\Origin;
 
 class TestResult
 {

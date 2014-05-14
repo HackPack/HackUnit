@@ -1,8 +1,8 @@
 <?hh //strict
-namespace HackUnit\Runner\Loading;
+namespace HackPack\HackUnit\Runner\Loading;
 
-use HackUnit\Core\TestSuite;
-use HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestSuite;
+use HackPack\HackUnit\Core\TestCase;
 
 interface LoaderInterface
 {

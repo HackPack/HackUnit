@@ -1,5 +1,5 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Core;
 
 abstract class TestCase implements TestInterface
 {

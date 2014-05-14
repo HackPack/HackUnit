@@ -1,5 +1,5 @@
 <?hh //strict
-namespace HackUnit\Runner\Loading;
+namespace HackPack\HackUnit\Runner\Loading;
 
 class Instantiator
 {

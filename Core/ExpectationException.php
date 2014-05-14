@@ -1,4 +1,4 @@
 <?hh //strict
-namespace HackUnit\Core;
+namespace HackPack\HackUnit\Core;
 
 class ExpectationException extends \Exception {}

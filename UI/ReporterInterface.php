@@ -1,5 +1,5 @@
 <?hh //strict
-namespace HackUnit\UI;
+namespace HackPack\HackUnit\UI;
 
 interface ReporterInterface
 {

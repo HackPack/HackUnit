@@ -1,5 +1,5 @@
 <?hh //strict
-namespace HackUnit\Error;
+namespace HackPack\HackUnit\Error;
 
 type Origin = shape(
     'method' => string, 

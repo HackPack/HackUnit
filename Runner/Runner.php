@@ -1,8 +1,8 @@
 <?hh //strict
-namespace HackUnit\Runner;
+namespace HackPack\HackUnit\Runner;
 
-use HackUnit\Core\TestResult;
-use HackUnit\Runner\Loading\LoaderInterface;
+use HackPack\HackUnit\Core\TestResult;
+use HackPack\HackUnit\Runner\Loading\LoaderInterface;
 
 class Runner<TLoader as LoaderInterface>
 {

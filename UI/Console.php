@@ -1,9 +1,9 @@
 <?hh //strict
-namespace HackUnit\UI;
+namespace HackPack\HackUnit\UI;
 
-use HackUnit\Runner\Loading\LoaderInterface;
-use HackUnit\Runner\Runner;
-use HackUnit\Runner\Options;
+use HackPack\HackUnit\Runner\Loading\LoaderInterface;
+use HackPack\HackUnit\Runner\Runner;
+use HackPack\HackUnit\Runner\Options;
 
 class Console<TLoader as LoaderInterface>
 {
@@ -11,7 +11,7 @@ class Console<TLoader as LoaderInterface>
 
     public function __construct(protected Options $options)
     {
-        $factory = class_meth('\HackUnit\Runner\Loading\StandardLoader', 'create');
+        $factory = class_meth('\HackPack\HackUnit\Runner\Loading\StandardLoader', 'create');
         $this->options = $this->options = $options;
         $this->runner = new Runner($this->options, $factory);
     }
