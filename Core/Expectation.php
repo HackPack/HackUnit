@@ -20,4 +20,13 @@ class Expectation<T>
             throw new ExpectationException($message); 
         }
     }
+
+    public function toMatch(string $pattern): void
+    {
+        $match = preg_match($pattern, $this->context);
+        if (! $match) {
+            $message = sprintf('Expected %s to match pattern "%s"', $this->getContext(), $pattern);
+            throw new ExpectationException($message);
+        }
+    }
 }

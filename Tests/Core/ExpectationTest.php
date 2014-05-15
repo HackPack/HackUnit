@@ -27,4 +27,21 @@ class ExpectationTest extends TestCase
             $expectation->toEqual(3);
         })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
     }
+
+    public function test_toMatch_does_not_throw_exception_when_matches(): void
+    {
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation("hello");
+            $expectation->toMatch('/^he/');
+        })->toNotThrow();
+    }   
+   
+    public function test_toMatch_throws_ExpectationException_if_fails(): void
+    {
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation("hello");
+            $expectation->toMatch('/^oe/');
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+    }
+
 }
