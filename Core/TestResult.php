@@ -7,6 +7,7 @@ use HackPack\HackUnit\Error\Origin;
 class TestResult
 {
     protected Vector<Origin> $failures;
+    protected ?float $startTime;
 
     public function __construct(protected int $runCount = 0, protected int $errorCount = 0)
     {
@@ -16,6 +17,26 @@ class TestResult
     public function testStarted(): void
     {
         $this->runCount++;
+    }
+
+    public function startTimer(): void
+    {
+        $this->startTime = microtime(true);
+    }
+
+    public function getStartTime(): ?float
+    {
+        return $this->startTime;
+    }
+
+    public function getTime(): ?float
+    {
+        $time = null;
+        $startTime = $this->startTime;
+        if (!is_null($startTime)) {
+            $time = microtime(true) - $startTime;
+        }
+        return $time;
     }
 
     public function getTestCount(): int

@@ -46,6 +46,25 @@ class TestResultTest extends TestCase
         $this->expect($result->getExitCode())->toEqual(1);
     }
 
+    public function test_startTimer_should_set_start_time(): void
+    {
+        $result = new TestResult();
+        $result->startTimer();
+        $time = $result->getStartTime();
+
+        $this->expect(is_null($time))->toEqual(false);
+    }
+
+    public function test_getTime_should_return_time_since_start(): void
+    {
+        $result = new TestResult();
+        $result->startTimer();
+        $startTime = $result->getStartTime();
+        $time = $result->getTime();
+
+        $this->expect($time < $startTime)->toEqual(true);
+    }
+
     protected function getResult(): TestResult
     {
         $result = new TestResult();
