@@ -27,13 +27,14 @@ class Text implements ReporterInterface
     {
         $failCount = count($this->result->getFailures());
         return sprintf(
-            "\n%s%s%s",
+            "%s%s%s%s",
+            $this->getHeader() ?: "\n", 
             $failCount == 0 ? '' : sprintf(
                 "There %s %d %s:\n\n",
                 $failCount > 1 ? 'were' : 'was',
                 $failCount,
                 $failCount > 1 ? 'failures' : 'failure'
-            ), 
+            ),
             $this->getFailures(),
             $this->getFooter()
         );
@@ -49,6 +50,16 @@ class Text implements ReporterInterface
             $failures .= $method . $message . $location;
         }
         return $failures;
+    }
+
+    public function getHeader(): string
+    {
+        $time = $this->result->getTime();
+        if (is_null($time)) return '';
+
+        $unit = ($time == 1) ? 'second' : 'seconds';
+
+        return sprintf("\nTime: %4.2f %s\n\n", $time, $unit);
     }
 
     public function getFooter(): string

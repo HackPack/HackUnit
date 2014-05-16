@@ -37,4 +37,16 @@ class RunnerTest extends TestCase
 
         $this->expect($result->getTestCount())->toEqual(6);
     }
+
+    public function test_run_returns_result_with_a_started_timer(): void
+    { 
+        $factory = $this->factory ?: ($opts) ==> new StandardLoader('null');
+        $options = new Options();
+        $options->setTestPath(__DIR__ . '/../Fixtures/Loading');
+        $runner = new Runner($options, $factory);
+
+        $result = $runner->run();
+
+        $this->expect(is_null($result->getTime()))->toEqual(false);
+    }
 }

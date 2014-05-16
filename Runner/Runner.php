@@ -21,6 +21,7 @@ class Runner<TLoader as LoaderInterface>
     public function run(): TestResult
     {
         $result = new TestResult();
+        $result->startTimer();
         $suite = $this->getLoader()->loadSuite();
         $suite->run($result);
         return $result;
