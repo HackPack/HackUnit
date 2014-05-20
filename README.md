@@ -30,6 +30,13 @@ The goal of HackUnit is to write a testing framework using Hack's strict mode. H
 
 Top level code must use a hack mode of `//partial` and certain functions like `include_once` and `exit` require the use of `//UNSAFE`. These requirements may change as Hack evolves.
 
+hhi files are not included in this repo. If you want to develop locally with all the goodies of type checking, make sure you copy the hhi files into the project directory
+
+```bash
+cp -r /usr/share/hhvm/hack/hhi /path/to/hack-unit
+```
+
+
 Running HackUnit's tests
 ------------------------
 From the project directory run this:
