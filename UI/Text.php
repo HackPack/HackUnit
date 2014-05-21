@@ -4,7 +4,7 @@ namespace HackPack\HackUnit\UI;
 use HackPack\HackUnit\Core\TestResult;
 use HackPack\HackUnit\Error\Origin;
 
-class Text implements ReporterInterface
+class Text implements TextReporterInterface
 {
     public Map<string, int> $colors = Map {
         'bg-green' => 42,
@@ -18,6 +18,11 @@ class Text implements ReporterInterface
     public function __construct()
     {
         $this->colorIsEnabled = false;
+    }
+
+    public function printFeedback(string $feedback, Map<string, string> $options = Map {}): void
+    {
+        print $feedback;
     }
 
     public function getReport(TestResult $result): string
@@ -62,7 +67,7 @@ class Text implements ReporterInterface
 
         $unit = ($time == 1) ? 'second' : 'seconds';
 
-        return sprintf("\nTime: %4.2f %s\n\n", $time, $unit);
+        return sprintf("\n\nTime: %4.2f %s\n\n", $time, $unit);
     }
 
     public function getFooter(TestResult $result): string

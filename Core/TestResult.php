@@ -3,9 +3,12 @@ namespace HackPack\HackUnit\Core;
 
 use HackPack\HackUnit\Error\TraceParser;
 use HackPack\HackUnit\Error\Origin;
+use HackPack\Hacktions\EventEmitter;
 
 class TestResult
 {
+    use EventEmitter;
+
     protected Vector<Origin> $failures;
     protected ?float $startTime;
 
@@ -44,11 +47,17 @@ class TestResult
         return $this->runCount;
     }
 
+    public function testPassed(): void
+    {
+        $this->trigger('testPassed');
+    }
+
     public function testFailed(\Exception $exception): void
     {
         $parser = new TraceParser($exception);
         $this->failures->add($parser->getOrigin());
         $this->errorCount++;
+        $this->trigger('testFailed');
     }
 
     public function getExitCode(): int

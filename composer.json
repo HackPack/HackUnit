@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "hackpack/hacktions": "~1.1"
+        "hackpack/hacktions": "v1.1.1"
     },
     "autoload": {
         "psr-4": {

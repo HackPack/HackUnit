@@ -42,5 +42,5 @@ Running HackUnit's tests
 From the project directory run this:
 
 ```
-bin/hackunit --exclude Tests/Fixtures/
+bin/hackunit --exclude Tests/Fixtures/ Tests/
 ```

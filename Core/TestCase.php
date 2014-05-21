@@ -37,6 +37,7 @@ abstract class TestCase implements TestInterface
         $class = get_class($this);
         try {
             hphp_invoke_method($this, $class, $this->name, []);
+            $result->testPassed();
         } catch (\Exception $e) {
             $result->testFailed($e);
         }

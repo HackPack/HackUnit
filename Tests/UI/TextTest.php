@@ -37,7 +37,7 @@ class TextTest extends TestCase
         $result->startTimer();
         $ui = new Text();
         $expectedFailures = $this->getExpectedFailures(36, "test_getReport_should_return_entire_message");
-        $expected = "\nTime: 0.00 seconds\n\nThere was 1 failure:\n\n" . $expectedFailures . "FAILURES!\n1 run, 1 failed\n";
+        $expected = "\n\nTime: 0.00 seconds\n\nThere was 1 failure:\n\n" . $expectedFailures . "FAILURES!\n1 run, 1 failed\n";
         $this->expect($ui->getReport($result))->toEqual($expected);
     }
 
@@ -75,7 +75,7 @@ class TextTest extends TestCase
         $result = $this->getResult();
         $result->startTimer();
         $ui = new Text();
-        $this->expect($ui->getHeader($result))->toMatch("/\nTime: [0-9]+([.][0-9]{1,2})? seconds?\n\n/");
+        $this->expect($ui->getHeader($result))->toMatch("/\n\nTime: [0-9]+([.][0-9]{1,2})? seconds?\n\n/");
     }
 
     protected function getExpectedFailures(int $line, string $method): string
