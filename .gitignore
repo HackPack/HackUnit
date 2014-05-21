@@ -5,3 +5,4 @@ Vagrantfile
 provisioning/
 .vagrant/
 hhi/
+composer.lock

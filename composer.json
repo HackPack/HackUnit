@@ -12,6 +12,9 @@
             "role": "lead"
         }
     ],
+    "require": {
+        "hackpack/hacktions": "~1.1"
+    },
     "autoload": {
         "psr-4": {
             "HackPack\\HackUnit\\": ""
