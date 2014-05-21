@@ -12,6 +12,8 @@ HackUnit can be run using `bin/hackunit` or if installed via composer - `vendor/
 bin/hackunit [--hackunit-file="..."] [--exclude="..."] [path]
 ```
 
+![HackPack demo](https://raw.github.com/HackPack/HackUnit/master/screenshot.png "HackUnit demo")
+
 ###Hackunit.php###
 The `Hackunit.php` file is included before tests are run. You can specify the path to this file with the `--hackunit-file` switch, or HackUnit will look in the current working directory for one.
 
