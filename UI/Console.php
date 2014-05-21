@@ -25,7 +25,7 @@ class Console<TLoader as LoaderInterface>
         $result = $this->runner->run();
         $ui = new Text();
         $ui->enableColor();
-        print $ui->getReport($result);
+        $ui->printReport($result);
         // UNSAFE
         exit($result->getExitCode());
     }

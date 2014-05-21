@@ -37,6 +37,11 @@ class Text implements ReporterInterface
         );
     }
 
+    public function printReport(TestResult $result): void
+    {
+        print $this->getReport($result);
+    }
+
     public function getFailures(TestResult $result): string
     {
         $failures = "";
