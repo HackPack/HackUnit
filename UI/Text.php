@@ -15,6 +15,10 @@ class Text implements TextReporterInterface
 
     protected bool $colorIsEnabled;
 
+    protected int $maxColumns = 63;
+
+    protected int $currentColumn = 0;
+
     public function __construct()
     {
         $this->colorIsEnabled = false;
@@ -22,7 +26,12 @@ class Text implements TextReporterInterface
 
     public function printFeedback(string $feedback, Map<string, string> $options = Map {}): void
     {
+        if ($this->currentColumn == $this->maxColumns) {
+            print "\n";
+            $this->currentColumn = 0;
+        }
         print $feedback;
+        $this->currentColumn++;
     }
 
     public function getReport(TestResult $result): string
