@@ -9,7 +9,7 @@ class Console<TLoader as LoaderInterface>
 {
     protected Runner<LoaderInterface> $runner;
 
-    const string VERSION = "0.2.0";
+    const string VERSION = "0.3.0";
 
     public function __construct(protected Options $options)
     {
@@ -44,7 +44,7 @@ class Console<TLoader as LoaderInterface>
     protected function getTextUI(): TextReporterInterface
     {
         $ui = new Text();
-        $this->runner->on('testFailed', (...) ==> $ui->printFeedback('F'));
+        $this->runner->on('testFailed', (...) ==> $ui->printFeedback("\033[41;37mF\033[0m"));
         $this->runner->on('testPassed', (...) ==> $ui->printFeedback('.'));
         $ui->enableColor();
         return $ui;

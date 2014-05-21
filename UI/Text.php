@@ -24,7 +24,7 @@ class Text implements TextReporterInterface
         $this->colorIsEnabled = false;
     }
 
-    public function printFeedback(string $feedback, Map<string, string> $options = Map {}): void
+    public function printFeedback(string $feedback): void
     {
         if ($this->currentColumn == $this->maxColumns) {
             print "\n";

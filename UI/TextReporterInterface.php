@@ -9,5 +9,5 @@ interface TextReporterInterface extends ReporterInterface
      * Method for printing live feedback in a text based
      * user interface
      */
-    public function printFeedback(string $feedback, Map<string, string> $options = Map {}): void;
+    public function printFeedback(string $feedback): void;
 }
