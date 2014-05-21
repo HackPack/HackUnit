@@ -13,48 +13,46 @@ class Text implements ReporterInterface
         'fg-white' => 37
     };
 
-    protected Vector<Origin> $failures;
-
     protected bool $colorIsEnabled;
 
-    public function __construct(protected TestResult $result)
+    public function __construct()
     {
-        $this->failures = $result->getFailures();
         $this->colorIsEnabled = false;
     }
 
-    public function getReport(): string
+    public function getReport(TestResult $result): string
     {
-        $failCount = count($this->result->getFailures());
+        $failCount = count($result->getFailures());
         return sprintf(
             "%s%s%s%s",
-            $this->getHeader() ?: "\n", 
+            $this->getHeader($result) ?: "\n", 
             $failCount == 0 ? '' : sprintf(
                 "There %s %d %s:\n\n",
                 $failCount > 1 ? 'were' : 'was',
                 $failCount,
                 $failCount > 1 ? 'failures' : 'failure'
             ),
-            $this->getFailures(),
-            $this->getFooter()
+            $this->getFailures($result),
+            $this->getFooter($result)
         );
     }
 
-    public function getFailures(): string
+    public function getFailures(TestResult $result): string
     {
         $failures = "";
-        for($i = 0; $i < $this->failures->count(); $i++) {
-            $method = sprintf("%d) %s\n", $i + 1, $this->failures[$i]['method']);
-            $message = sprintf("%s\n\n", $this->failures[$i]['message']);
-            $location = sprintf("%s\n\n", $this->failures[$i]['location']);
+        $origins = $result->getFailures();
+        for($i = 0; $i < $origins->count(); $i++) {
+            $method = sprintf("%d) %s\n", $i + 1, $origins[$i]['method']);
+            $message = sprintf("%s\n\n", $origins[$i]['message']);
+            $location = sprintf("%s\n\n", $origins[$i]['location']);
             $failures .= $method . $message . $location;
         }
         return $failures;
     }
 
-    public function getHeader(): string
+    public function getHeader(TestResult $result): string
     {
-        $time = $this->result->getTime();
+        $time = $result->getTime();
         if (is_null($time)) return '';
 
         $unit = ($time == 1) ? 'second' : 'seconds';
@@ -62,13 +60,13 @@ class Text implements ReporterInterface
         return sprintf("\nTime: %4.2f %s\n\n", $time, $unit);
     }
 
-    public function getFooter(): string
+    public function getFooter(TestResult $result): string
     {
-        $failureCount = count($this->result->getFailures());
+        $failureCount = count($result->getFailures());
         return $this->formatFooter(sprintf(
             "%s%d run, %d failed",
             $failureCount > 0 ? "FAILURES!\n" : 'OK ',
-            $this->result->getTestCount(),
+            $result->getTestCount(),
             $failureCount
         ), $failureCount > 0);
     }

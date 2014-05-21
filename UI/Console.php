@@ -23,9 +23,9 @@ class Console<TLoader as LoaderInterface>
             include_once($this->options->getHackUnitFile());
         }
         $result = $this->runner->run();
-        $ui = new Text($result);
+        $ui = new Text();
         $ui->enableColor();
-        print $ui->getReport();
+        print $ui->getReport($result);
         // UNSAFE
         exit($result->getExitCode());
     }
