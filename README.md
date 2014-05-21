@@ -1,5 +1,8 @@
 HackUnit
 ========
+
+> xUnit written in Hack, for Hack
+
 xUnit testing framework written in Facebook's language, [Hack](http://docs.hhvm.com/manual/en/index.php)
 
 Built against HHVM nightly.
