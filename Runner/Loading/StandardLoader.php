@@ -7,7 +7,7 @@ use HackPack\HackUnit\Runner\Options;
 
 class StandardLoader implements LoaderInterface
 {
-    private static string $testPattern = '/Test.php$/';
+    private static string $testPattern = '/Test[.](?:php|hh)$/';
     private static string $testMethodPattern = '/^test/';
 
     private Vector<TestCase> $testCases;
