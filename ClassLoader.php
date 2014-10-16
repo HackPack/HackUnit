@@ -20,6 +20,7 @@ class ClassLoader
             $absPath = $spath . '/' . $path . '.php';
             if (file_exists($absPath)) {
                 // UNSAFE
+                /* HH_FIXME[1002] */
                 include_once($absPath);
                 break;
             }

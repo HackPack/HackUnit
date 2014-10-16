@@ -98,6 +98,7 @@ class StandardLoader implements LoaderInterface
     protected function includeClass(string $testPath): void
     {
         // UNSAFE
+        /* HH_FIXME[1002] */
         include_once($testPath);
     }
 }

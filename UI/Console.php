@@ -22,6 +22,7 @@ class Console<TLoader as LoaderInterface>
     {
         if (is_file($this->options->getHackUnitFile())) {
             // UNSAFE
+            /* HH_FIXME[1002] */
             include_once($this->options->getHackUnitFile());
         }
         $this->printInfo();
