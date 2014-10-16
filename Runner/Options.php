@@ -1,7 +1,7 @@
 <?hh //strict
 namespace HackPack\HackUnit\Runner;
 
-class Options
+<<ConsistentConstruct>> class Options
 {
     protected ?string $testPath;
 

@@ -5,7 +5,7 @@ use HackPack\HackUnit\Core\TestCase;
 use HackPack\HackUnit\Core\TestSuite;
 use HackPack\HackUnit\Runner\Options;
 
-class StandardLoader implements LoaderInterface
+<<ConsistentConstruct>> class StandardLoader implements LoaderInterface
 {
     private static string $testPattern = '/Test[.](?:php|hh)$/';
     private static string $testMethodPattern = '/^test/';
