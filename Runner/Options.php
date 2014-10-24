@@ -76,10 +76,10 @@ namespace HackPack\HackUnit\Runner;
          * TODO check based on diff between getopt and argv instead of file existence
          */
         $isValidPath = count($argv) > 1 &&
-                       file_exists($testPath) && 
+                       file_exists($testPath) &&
                        realpath($testPath) != $options->getHackUnitFile() &&
                        ! $options->getExcludedPaths()->contains($testPath);
-                                             
+
         if ($isValidPath) {
             $options->setTestPath($argv[count($argv) - 1]);
         }
