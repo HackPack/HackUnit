@@ -7,4 +7,4 @@ before_script:
     - composer install --prefer-source
 
 script:
-    - bin/hackunit --bootstrap test/bootstrap.php --exclude test/fixtures/ test/
+    - bin/hackunit --exclude Tests/Fixtures/ Tests/
