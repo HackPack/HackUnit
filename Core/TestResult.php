@@ -11,6 +11,7 @@ class TestResult
 
     protected Vector<Origin> $failures;
     protected ?float $startTime;
+    protected ?float $endTime;
 
     public function __construct(protected int $runCount = 0, protected int $errorCount = 0)
     {
@@ -25,6 +26,7 @@ class TestResult
     public function startTimer(): void
     {
         $this->startTime = microtime(true);
+        $this->endTime = null;
     }
 
     public function getStartTime(): ?float
@@ -34,12 +36,15 @@ class TestResult
 
     public function getTime(): ?float
     {
-        $time = null;
-        $startTime = $this->startTime;
-        if (!is_null($startTime)) {
-            $time = microtime(true) - $startTime;
+        if($this->endTime === null) {
+            $this->endTime = microtime(true);
         }
-        return $time;
+
+        if($this->startTime === null) {
+            return null;
+        }
+
+        return (float)($this->endTime - $this->startTime);
     }
 
     public function getTestCount(): int
