@@ -1,6 +1,8 @@
 HackUnit
 ========
 
+[![Build Status](https://travis-ci.org/HackPack/HackUnit.png)](https://travis-ci.org/HackPack/HackUnit) [![HHVM Status](http://hhvm.h4cc.de/badge/HackPack/HackUnit.svg)](http://hhvm.h4cc.de/package/HackPack/HackUnit)
+
 > xUnit written in Hack, for Hack
 
 xUnit testing framework written in Facebook's language, [Hack](http://docs.hhvm.com/manual/en/index.php)
@@ -25,7 +27,7 @@ Currently the only way to exclude paths from the HackUnit loader is to specify a
 
 How HackUnit loads tests
 ------------------------
-Currently HackUnit follows a convention for loading tests. Test case files must end in the `Test.php` extension - i.e `NumbersTest.php`.
+Currently HackUnit follows a convention for loading tests. Test case files must end in the `Test.php` or `Test.hh` extension - i.e `NumbersTest.php`.
 
 Only methods beginning with the word `test` will be considered for execution by the loader (although this may change soon)
 
