@@ -46,7 +46,7 @@ class CallableExpectationTest extends TestCase
         $expectation = new CallableExpectation($callable);
         $expectation->toNotThrow();
     }
-    
+
     public function test_toNotThrow_throws_exception_if_exception_thrown(): void
     {
         if ($this->callable) {

@@ -9,16 +9,17 @@ class CallableExpectation
 
     public function toThrow(string $exceptionType): void
     {
-        $exception = null;
         try {
             $fun = $this->context;
             $fun();
         } catch (\Exception $e) {
-            $exception = $e;
+            if (!is_a($e, $exceptionType)) {
+                $message = sprintf("%s was thrown in %s (%d).\n%s was expected.", get_class($e), $e->getFile(), $e->getLine(), $exceptionType);
+                throw new ExpectationException($message);
+            }
+            return;
         }
-        if (!is_a($exception, $exceptionType)) {
-            throw new ExpectationException("Expected exception of type $exceptionType to be thrown");
-        }
+        throw new ExpectationException("No exception was thrown.\n$exceptionType was expected.");
     }
 
     public function toNotThrow(): void
@@ -27,11 +28,11 @@ class CallableExpectation
         try {
             $fun = $this->context;
             $fun();
+            $exceptionType = '';
         } catch (\Exception $e) {
-            $thrown = true;
-        }
-        if ($thrown) {
-            throw new ExpectationException("Expected exception to not be thrown");
+            $exceptionType = get_class($e);
+            $msg = sprintf("Unexpected exception thrown.\nType: %s\nFile: %s\nMessage: %s", get_class($e), $e->getFile() . ' (' . (string)$e->getLine() . ')', $e->getMessage());
+            throw new ExpectationException($msg);
         }
     }
 }

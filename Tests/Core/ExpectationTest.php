@@ -34,8 +34,8 @@ class ExpectationTest extends TestCase
             $expectation = new Expectation("hello");
             $expectation->toMatch('/^he/');
         })->toNotThrow();
-    }   
-   
+    }
+
     public function test_toMatch_throws_ExpectationException_if_fails(): void
     {
         $this->expectCallable(() ==> {

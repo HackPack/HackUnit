@@ -16,8 +16,12 @@ class Expectation<T>
     {
         $equals = $this->getContext() == $comparison;
         if (!$equals) {
-            $message = sprintf('Expected %s, got %s', $comparison, $this->getContext());
-            throw new ExpectationException($message); 
+            $message = sprintf(
+                "Actual:\n%sExpected:\n%s",
+                $this->captureVarDump($this->getContext()),
+                $this->captureVarDump($comparison),
+            );
+            throw new ExpectationException($message);
         }
     }
 
@@ -28,5 +32,12 @@ class Expectation<T>
             $message = sprintf('Expected %s to match pattern "%s"', $this->getContext(), $pattern);
             throw new ExpectationException($message);
         }
+    }
+
+    private function captureVarDump(mixed $var) : string
+    {
+        ob_start();
+        trim(implode("\n    ", explode("\n", var_dump($var))));
+        return '    ' . ob_get_clean();
     }
 }
