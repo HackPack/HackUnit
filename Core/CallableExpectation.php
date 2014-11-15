@@ -1,4 +1,5 @@
 <?hh //strict
+
 namespace HackPack\HackUnit\Core;
 
 class CallableExpectation
@@ -7,7 +8,7 @@ class CallableExpectation
     {
     }
 
-    public function toThrow(string $exceptionType): void
+    public function toThrow(string $exceptionType, ?string $expectedMessage = null): void
     {
         try {
             $fun = $this->context;
@@ -17,9 +18,18 @@ class CallableExpectation
                 $message = sprintf("%s was thrown in %s (%d).\n%s was expected.", get_class($e), $e->getFile(), $e->getLine(), $exceptionType);
                 throw new ExpectationException($message);
             }
+
+            if ($expectedMessage !== null && $expectedMessage != $e->getMessage()) {
+                $actualMessage = $e->getMessage();
+                $message = sprintf("Got message of %s, but %s was expected.", $actualMessage, $expectedMessage);
+                throw new ExpectationException($message);
+            }
+
             return;
         }
+
         throw new ExpectationException("No exception was thrown.\n$exceptionType was expected.");
+
     }
 
     public function toNotThrow(): void

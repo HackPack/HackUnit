@@ -54,4 +54,20 @@ class CallableExpectationTest extends TestCase
             $this->expectCallable($fun)->toThrow('\HackPack\HackUnit\Core\ExpectationException');
         }
     }
+
+    public function test_toThrow_throws_exception_if_exception_thrown_with_incorrect_message(): void
+    {
+        $this->expectCallable(() ==> {
+            $callable = () ==> { throw new \HackPack\HackUnit\Core\ExpectationException("Message"); };
+            $expectation = new CallableExpectation($callable);
+            $expectation->toThrow('\\HackPack\HackUnit\Core\ExpectationException', 'Different Message');
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+    }
+
+    public function test_toThrow_does_nothing_if_exception_thrown_with_correct_message(): void
+    {
+        $this->expectCallable(
+          () ==> {  throw new \HackPack\HackUnit\Core\ExpectationException("Message");
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException', 'Message');
+    }
 }
