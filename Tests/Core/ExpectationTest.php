@@ -44,4 +44,29 @@ class ExpectationTest extends TestCase
         })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
     }
 
+    public function test_toBeInstanceOf_does_not_throw_exception_when_match(): void
+    {
+        $instance = new Expectation("string here");
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation($instance);
+            $expectation->toBeInstanceOf('\HackPack\HackUnit\Core\Expectation');
+        })->toNotThrow();
+    }
+
+    public function test_toBeInstanceOf_does_throw_exception_when_does_not_match(): void
+    {
+        $instance = new Expectation("string here");
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation($instance);
+            $expectation->toBeInstanceOf('\HackPack\HackUnit\Core\TestCase');
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+    }
+
+    public function test_toBeInstanceOf_does_throw_exception_when_not_class(): void
+    {
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation("string here");
+            $expectation->toBeInstanceOf('\HackPack\HackUnit\Core\TestCase');
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+    }
 }
