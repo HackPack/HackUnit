@@ -7,7 +7,7 @@ class Instantiator
     const int T_STRING = 307;
     const int T_CLASS = 353;
 
-    private static Map<string, string> $pathMap = Map {}; 
+    private static Map<string, string> $pathMap = Map {};
 
     public function fromClassName<T>(string $className, array<mixed> $args): T
     {
