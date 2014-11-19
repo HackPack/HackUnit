@@ -55,9 +55,14 @@ class Instantiator
                 if ($tokens[$i][0] === Instantiator::T_CLASS) {
                     for ($j = $i + 1; $j < count($tokens); $j++) {
                         if ($tokens[$j] === '{') {
-                            $class = $tokens[$i +2][1];
+                            $class = $tokens[$i + 2][1];
+                            break;
                         }
                     }
+                }
+                if($class) {
+                    // Stop looking for the class name after it is found
+                    break;
                 }
             }
         }
