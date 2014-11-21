@@ -2,6 +2,7 @@
 namespace HackPack\HackUnit\Tests\Core;
 
 use HackPack\HackUnit\Core\Expectation;
+use HackPack\HackUnit\Core\ExpectationException;
 use HackPack\HackUnit\Core\TestCase;
 
 class ExpectationTest extends TestCase
@@ -25,7 +26,24 @@ class ExpectationTest extends TestCase
         $this->expectCallable(() ==> {
             $expectation = new Expectation(1 + 1);
             $expectation->toEqual(3);
-        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+        })->toThrow(ExpectationException::class);
+    }
+
+    public function test_toBeIdenticalTo_throws_when_not_identical(): void
+    {
+        $this->expectCallable(() ==> {
+            $expectation = new Expectation(new Expectation(1));
+            $expectation->toBeIdenticalTo(new Expectation(1));
+        })->toThrow(ExpectationException::class);
+    }
+
+    public function test_toBeIdenticalTo_does_not_throw_when_identical(): void
+    {
+        $this->expectCallable(() ==> {
+            $ex = new Expectation(1);
+            $expectation = new Expectation($ex);
+            $expectation->toBeIdenticalTo($ex);
+        })->toNotThrow();
     }
 
     public function test_toMatch_does_not_throw_exception_when_matches(): void
@@ -41,7 +59,7 @@ class ExpectationTest extends TestCase
         $this->expectCallable(() ==> {
             $expectation = new Expectation("hello");
             $expectation->toMatch('/^oe/');
-        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+        })->toThrow(ExpectationException::class);
     }
 
     public function test_toBeInstanceOf_does_not_throw_exception_when_match(): void
@@ -49,7 +67,7 @@ class ExpectationTest extends TestCase
         $instance = new Expectation("string here");
         $this->expectCallable(() ==> {
             $expectation = new Expectation($instance);
-            $expectation->toBeInstanceOf('\HackPack\HackUnit\Core\Expectation');
+            $expectation->toBeInstanceOf(Expectation::class);
         })->toNotThrow();
     }
 
@@ -58,15 +76,15 @@ class ExpectationTest extends TestCase
         $instance = new Expectation("string here");
         $this->expectCallable(() ==> {
             $expectation = new Expectation($instance);
-            $expectation->toBeInstanceOf('\HackPack\HackUnit\Core\TestCase');
-        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+            $expectation->toBeInstanceOf(TestCase::class);
+        })->toThrow(ExpectationException::class);
     }
 
     public function test_toBeInstanceOf_does_throw_exception_when_not_class(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation("string here");
-            $expectation->toBeInstanceOf('\HackPack\HackUnit\Core\TestCase');
-        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+            $expectation->toBeInstanceOf(TestCase::class);
+        })->toThrow(ExpectationException::class);
     }
 }

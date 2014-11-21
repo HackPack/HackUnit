@@ -26,6 +26,20 @@ class Expectation<T>
         }
     }
 
+    public function toBeIdenticalTo(T $comparison): void
+    {
+        if ($comparison !== $this->context) {
+            $expected = $this->captureVarDump($this->context);
+            $actual = $this->captureVarDump($comparison);
+            $message = sprintf(
+                "Values are not identical.\n\nExpected:\n%sActual:\n%s",
+                $expected,
+                $actual,
+            );
+            throw new ExpectationException($message);
+        }
+    }
+
     public function toMatch(string $pattern): void
     {
         $match = preg_match($pattern, $this->context);
@@ -65,4 +79,5 @@ class Expectation<T>
         );
         throw new ExpectationException($message);
     }
+
 }
