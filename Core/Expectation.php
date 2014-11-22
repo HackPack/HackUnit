@@ -14,12 +14,27 @@ class Expectation<T>
 
     public function toEqual(T $comparison): void
     {
-        $equals = $this->getContext() == $comparison;
-        if (!$equals) {
+        if ($comparison != $this->context) {
+            $expected = $this->captureVarDump($this->context);
+            $actual = $this->captureVarDump($comparison);
             $message = sprintf(
-                "Actual:\n%sExpected:\n%s",
-                $this->captureVarDump($this->getContext()),
-                $this->captureVarDump($comparison),
+                "Unexpected value.\n\nExpected:\n%sActual:\n%s",
+                $expected,
+                $actual,
+            );
+            throw new ExpectationException($message);
+        }
+    }
+
+    public function toBeIdenticalTo(T $comparison): void
+    {
+        if ($comparison !== $this->context) {
+            $expected = $this->captureVarDump($this->context);
+            $actual = $this->captureVarDump($comparison);
+            $message = sprintf(
+                "Values are not identical.\n\nExpected:\n%sActual:\n%s",
+                $expected,
+                $actual,
             );
             throw new ExpectationException($message);
         }
@@ -29,7 +44,11 @@ class Expectation<T>
     {
         $match = preg_match($pattern, $this->context);
         if (! $match) {
-            $message = sprintf('Expected %s to match pattern "%s"', $this->getContext(), $pattern);
+            $message = sprintf(
+                'Expected pattern %s to match "%s"',
+                $pattern,
+                $this->getContext()
+            );
             throw new ExpectationException($message);
         }
     }
@@ -43,16 +62,22 @@ class Expectation<T>
 
     public function toBeInstanceOf(string $expectedClassName): void
     {
-      if (!is_object($this->context)) {
-          $type = gettype($this->context);
-          $message = sprintf("Got a %s value, expected to get an instance of '%s'.", $type, $expectedClassName);
-          throw new ExpectationException($message);
-      }
+        if(is_a($this->context, $expectedClassName)){
+            return;
+        }
 
-      if (!is_a($this->context, $expectedClassName)) {
-        $instanceClassName = get_class($this->context);
-        $message = sprintf("Got an instance of '%s', expected to get an instance of '%s'.", $expectedClassName, $instanceClassName);
+        if (is_object($this->context)) {
+            $type = get_class($this->context);
+        } else {
+            $type = gettype($this->context);
+        }
+
+        $message = sprintf(
+            "Unexpected object type.\n\nExpected: %s\nActual: %s",
+            $expectedClassName,
+            $type
+        );
         throw new ExpectationException($message);
-      }
     }
+
 }

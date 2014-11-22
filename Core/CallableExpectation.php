@@ -15,20 +15,31 @@ class CallableExpectation
             $fun();
         } catch (\Exception $e) {
             if (!is_a($e, $exceptionType)) {
-                $message = sprintf("%s was thrown in %s (%d).\n%s was expected.", get_class($e), $e->getFile(), $e->getLine(), $exceptionType);
+                $message = sprintf(
+                    "Unexpected exception type.\n\nExpected: %s\nActual: %s\nFile: %s (%d)",
+                    $exceptionType,
+                    get_class($e),
+                    $e->getFile(),
+                    $e->getLine(),
+                );
                 throw new ExpectationException($message);
             }
 
             if ($expectedMessage !== null && $expectedMessage != $e->getMessage()) {
                 $actualMessage = $e->getMessage();
-                $message = sprintf("Got message of %s, but %s was expected.", $actualMessage, $expectedMessage);
+                $message = sprintf(
+                    "Unexpected exception message.\n\nException type: %s\nExpected message: %s\nActual message: %s",
+                    get_class($e),
+                    $expectedMessage,
+                    $actualMessage
+                );
                 throw new ExpectationException($message);
             }
 
             return;
         }
 
-        throw new ExpectationException("No exception was thrown.\n$exceptionType was expected.");
+        throw new ExpectationException("Expected exception of type $exceptionType.\nNo exception was thrown.");
 
     }
 
@@ -41,8 +52,14 @@ class CallableExpectation
             $exceptionType = '';
         } catch (\Exception $e) {
             $exceptionType = get_class($e);
-            $msg = sprintf("Unexpected exception thrown.\nType: %s\nFile: %s\nMessage: %s", get_class($e), $e->getFile() . ' (' . (string)$e->getLine() . ')', $e->getMessage());
-            throw new ExpectationException($msg);
+            $message = sprintf(
+                "Unexpected exception thrown.\nType: %s\nFile: %s (%d)\nMessage: %s",
+                get_class($e),
+                $e->getFile(),
+                (string)$e->getLine(),
+                $e->getMessage()
+            );
+            throw new ExpectationException($message);
         }
     }
 }
