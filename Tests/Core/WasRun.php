@@ -26,4 +26,9 @@ class WasRun extends TestCase
     {
         throw new \Exception("broken");
     }
+
+    public function testSkip(): void
+    {
+        $this->markAsSkipped("Skippy");
+    }
 }

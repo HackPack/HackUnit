@@ -39,7 +39,7 @@ class Text implements TextReporterInterface
         $failCount = count($result->getFailures());
         return sprintf(
             "%s%s%s%s",
-            $this->getHeader($result) ?: "\n", 
+            $this->getHeader($result) ?: "\n",
             $failCount == 0 ? '' : sprintf(
                 "There %s %d %s:\n\n",
                 $failCount > 1 ? 'were' : 'was',
@@ -81,13 +81,30 @@ class Text implements TextReporterInterface
 
     public function getFooter(TestResult $result): string
     {
+        $message = $this->footerBuilder($result);
+        return $this->formatFooter($message, count($result->getFailures()) > 0);
+    }
+
+    private function footerBuilder(TestResult $result): string
+    {
+        $output = "";
         $failureCount = count($result->getFailures());
-        return $this->formatFooter(sprintf(
-            "%s%d run, %d failed",
-            $failureCount > 0 ? "FAILURES!\n" : 'OK ',
-            $result->getTestCount(),
-            $failureCount
-        ), $failureCount > 0);
+        $skippedCount = count($result->getSkipped());
+        if ($failureCount > 0 ) {
+            $output .= "FAILURES!\n";
+        } else {
+            $output .= "OK ";
+        }
+
+        $output .= sprintf("%d run, ", $result->getTestCount());
+
+        if ($skippedCount > 0) {
+            $output .= sprintf("%d skipped, ", $skippedCount);
+        }
+
+        $output .= sprintf("%d failed", $failureCount);
+
+        return $output;
     }
 
     public function enableColor(): void
@@ -103,7 +120,7 @@ class Text implements TextReporterInterface
         if ($this->colorIsEnabled) {
             $message = array_reduce($lines, ($r, $l) ==> $r . str_pad($l, $padding) . "\n", "");
             $formatted = sprintf(
-                "\033[%d;%dm%s\033[0m", 
+                "\033[%d;%dm%s\033[0m",
                 $this->colors->get($hasFailures ? 'bg-red' : 'bg-green'),
                 $this->colors->get($hasFailures ? 'fg-white' : 'fg-black'),
                 trim($message)
