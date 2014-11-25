@@ -79,6 +79,11 @@ use HackPack\HackUnit\Runner\Options;
     protected function isExcluded(string $path): bool
     {
         $real = realpath($path);
+
+        // realpath returns false when the path does not exist
+        if($real === false) {
+            return true;
+        }
         return $this->exclude->contains($real);
     }
 

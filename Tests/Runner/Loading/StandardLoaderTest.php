@@ -58,7 +58,7 @@ class StandardLoaderTest extends TestCase
         $this->expect($threeTest->getName())->toEqual('testFive');
         $this->expect($threeTest2->getName())->toEqual('testSix');
     }
-    
+
     public function test_loadSuite_should_use_results_of_load_to_create_a_TestSuite(): void
     {
         if (! $this->loader) throw new \Exception("loader cannot be null");
@@ -76,5 +76,15 @@ class StandardLoaderTest extends TestCase
         $loader = StandardLoader::create($options);
         $paths = $loader->getTestCasePaths();
         $this->expect($paths->count())->toEqual(2);
+    }
+
+    public function test_getTestCasePaths_should_exclude_nonexistent_dirs(): void
+    {
+        $options = new Options();
+        $options
+            ->setTestPath($this->path . '/DoesNotExist');
+        $loader = StandardLoader::create($options);
+        $paths = $loader->getTestCasePaths();
+        $this->expect($paths->count())->toEqual(0);
     }
 }
