@@ -3,38 +3,38 @@ namespace HackPack\HackUnit\Core;
 
 class Expectation<T>
 {
-    public function __construct(protected T $context)
+    public function __construct(protected T $actual)
     {
     }
 
     public function getContext(): T
     {
-        return $this->context;
+        return $this->actual;
     }
 
-    public function toEqual(T $comparison): void
+    public function toEqual(T $expected): void
     {
-        if ($comparison != $this->context) {
-            $expected = $this->captureVarDump($this->context);
-            $actual = $this->captureVarDump($comparison);
+        if ($expected != $this->actual) {
+            $expectedDump = $this->captureVarDump($expected);
+            $actualDump = $this->captureVarDump($this->actual);
             $message = sprintf(
                 "Unexpected value.\n\nExpected:\n%sActual:\n%s",
-                $expected,
-                $actual,
+                $expectedDump,
+                $actualDump,
             );
             throw new ExpectationException($message);
         }
     }
 
-    public function toBeIdenticalTo(T $comparison): void
+    public function toBeIdenticalTo(T $expected): void
     {
-        if ($comparison !== $this->context) {
-            $expected = $this->captureVarDump($this->context);
-            $actual = $this->captureVarDump($comparison);
+        if ($expected !== $this->actual) {
+            $expectedDump = $this->captureVarDump($expected);
+            $actualDump = $this->captureVarDump($this->actual);
             $message = sprintf(
                 "Values are not identical.\n\nExpected:\n%sActual:\n%s",
-                $expected,
-                $actual,
+                $expectedDump,
+                $actualDump,
             );
             throw new ExpectationException($message);
         }
@@ -42,12 +42,11 @@ class Expectation<T>
 
     public function toMatch(string $pattern): void
     {
-        $match = preg_match($pattern, $this->context);
-        if (! $match) {
+        if ( ! preg_match($pattern, $this->actual)) {
             $message = sprintf(
                 'Expected pattern %s to match "%s"',
                 $pattern,
-                $this->getContext()
+                $this->actual,
             );
             throw new ExpectationException($message);
         }
@@ -62,14 +61,14 @@ class Expectation<T>
 
     public function toBeInstanceOf(string $expectedClassName): void
     {
-        if(is_a($this->context, $expectedClassName)){
+        if(is_a($this->actual, $expectedClassName)){
             return;
         }
 
-        if (is_object($this->context)) {
-            $type = get_class($this->context);
+        if (is_object($this->actual)) {
+            $type = get_class($this->actual);
         } else {
-            $type = gettype($this->context);
+            $type = gettype($this->actual);
         }
 
         $message = sprintf(
