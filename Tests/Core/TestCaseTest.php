@@ -41,7 +41,17 @@ class TestCaseTest extends TestCase
         $this->expect($count)->toEqual(1);
         $this->expect(count($failures))->toEqual(1);
     }
-  
+
+    public function testSkippedResult(): void
+    {
+        $test = new WasRun('testSkip');
+        $result = $test->run(new TestResult());
+        $count = $result->getTestCount();
+        $skipped = $result->getSkipped();
+        $this->expect($count)->toEqual(1);
+        $this->expect(count($skipped))->toEqual(1);
+    }
+
     public function testSuite(): void
     {
         $result = new TestResult();

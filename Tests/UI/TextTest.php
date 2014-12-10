@@ -8,6 +8,13 @@ use HackPack\HackUnit\UI\Text;
 
 class TextTest extends TestCase
 {
+    public function test_getFooter_should_return_count_summary_with_skipped(): void
+    {
+        $result = $this->getSkippedResult();
+        $ui = new Text();
+        $this->expect($ui->getFooter($result))->toEqual("OK 1 run, 1 skipped, 0 failed\n");
+    }
+
     public function test_getFooter_should_return_count_summary(): void
     {
         $result = $this->getResult();
@@ -27,7 +34,7 @@ class TextTest extends TestCase
     {
         $result = $this->getResult();
         $ui = new Text();
-        $expected = $this->getExpectedFailures(28, "test_getFailures_should_print_failure_information");
+        $expected = $this->getExpectedFailures(35, "test_getFailures_should_print_failure_information");
         $this->expect($ui->getFailures($result))->toEqual($expected);
     }
 
@@ -36,7 +43,7 @@ class TextTest extends TestCase
         $result = $this->getResult();
         $result->startTimer();
         $ui = new Text();
-        $expectedFailures = $this->getExpectedFailures(36, "test_getReport_should_return_entire_message");
+        $expectedFailures = $this->getExpectedFailures(43, "test_getReport_should_return_entire_message");
         $time = sprintf('%4.2f', $result->getTime());
         $expected = "\n\nTime: $time seconds\n\nThere was 1 failure:\n\n" . $expectedFailures . "FAILURES!\n1 run, 1 failed\n";
         $this->expect($ui->getReport($result))->toEqual($expected);
@@ -85,6 +92,18 @@ class TextTest extends TestCase
         $expected .= "Something is wrong\n\n";
         $expected .= __FILE__ . ":$line\n\n";
         return $expected;
+    }
+
+    protected function getSkippedResult(): TestResult
+    {
+        $result = new TestResult();
+        $result->testStarted();
+        try {
+            throw new \Exception("Something is wrong");
+        } catch (\Exception $e) {
+            $result->testSkipped($e);
+        }
+        return $result;
     }
 
     protected function getResult(): TestResult

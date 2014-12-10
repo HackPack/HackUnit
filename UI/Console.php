@@ -46,6 +46,7 @@ class Console<TLoader as LoaderInterface>
     {
         $ui = new Text();
         $this->runner->on('testFailed', (...) ==> $ui->printFeedback("\033[41;37mF\033[0m"));
+        $this->runner->on('testSkipped', (...) ==> $ui->printFeedback('S'));
         $this->runner->on('testPassed', (...) ==> $ui->printFeedback('.'));
         $ui->enableColor();
         return $ui;

@@ -46,6 +46,15 @@ class TestResultTest extends TestCase
         $this->expect($result->getExitCode())->toEqual(1);
     }
 
+    public function test_getSkipped_returns_message(): void
+    {
+        $result = $this->getSkippedResult();
+        $skipped = $result->getSkipped();
+        $skip = $skipped->at(0);
+        $message = $skip['message'];
+        $this->expect($message)->toEqual('Skipped');
+    }
+
     public function test_startTimer_should_set_start_time(): void
     {
         $result = new TestResult();
@@ -63,6 +72,18 @@ class TestResultTest extends TestCase
         $time = $result->getTime();
 
         $this->expect($time < $startTime)->toEqual(true);
+    }
+
+    protected function getSkippedResult(): TestResult
+    {
+        $result = new TestResult();
+        $result->testStarted();
+        try {
+            throw new \Exception("Skipped");
+        } catch (\Exception $e) {
+            $result->testSkipped($e);
+        }
+        return $result;
     }
 
     protected function getResult(): TestResult

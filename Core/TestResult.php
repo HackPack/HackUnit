@@ -10,12 +10,14 @@ class TestResult
     use EventEmitter;
 
     protected Vector<Origin> $failures;
+    protected Vector<Origin> $skipped;
     protected ?float $startTime;
     protected ?float $endTime;
 
     public function __construct(protected int $runCount = 0, protected int $errorCount = 0)
     {
         $this->failures = Vector {};
+        $this->skipped = Vector {};
     }
 
     public function testStarted(): void
@@ -65,6 +67,14 @@ class TestResult
         $this->trigger('testFailed');
     }
 
+    public function testSkipped(\Exception $exception): void
+    {
+        $parser = new TraceParser($exception);
+        $this->skipped->add($parser->getOrigin());
+        $this->errorCount++;
+        $this->trigger('testSkipped');
+    }
+
     public function getExitCode(): int
     {
         return ($this->failures->count() > 0)
@@ -74,5 +84,10 @@ class TestResult
     public function getFailures(): Vector<Origin>
     {
         return $this->failures;
+    }
+
+    public function getSkipped(): Vector<Origin>
+    {
+        return $this->skipped;
     }
 }

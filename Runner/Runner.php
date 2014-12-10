@@ -26,6 +26,7 @@ class Runner<TLoader as LoaderInterface>
         $result = new TestResult();
         $result->on('testPassed', (...) ==> $this->trigger('testPassed'));
         $result->on('testFailed', (...) ==> $this->trigger('testFailed'));
+        $result->on('testSkipped', (...) ==> $this->trigger('testSkipped'));
         $result->startTimer();
 
         $suite = $this->getLoader()->loadSuite();
