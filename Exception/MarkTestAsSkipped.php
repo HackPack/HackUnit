@@ -2,4 +2,4 @@
 
 namespace HackPack\HackUnit\Exception;
 
-class MarktestAsSkipped extends \Exception {}
+class MarkTestAsSkipped extends \Exception {}
