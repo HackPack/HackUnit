@@ -9,7 +9,7 @@ class Console<TLoader as LoaderInterface>
 {
     protected Runner<LoaderInterface> $runner;
 
-    const string VERSION = "0.3.0";
+    const string VERSION = "0.3.2";
 
     public function __construct(protected Options $options)
     {
