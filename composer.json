@@ -1,15 +1,19 @@
 {
     "name": "hackpack/hackunit",
     "type": "library",
-    "description": "xUnit library for hacklang written in strict mode",
-    "keywords": ["testing", "xunit", "hack", "hhvm"],
+    "description": "xUnit library for hacklang",
+    "keywords": ["testing", "xunit", "hack", "hhvm", "hacklang"],
     "license": "MIT",
     "authors": [
         {
             "name": "Brian Scaturro",
             "email": "scaturrob@gmail.com",
-            "homepage": "http://brianscaturro.com",
-            "role": "lead"
+            "role": "Creator"
+        },
+        {
+            "name": "Isaac Leinweber",
+            "email": "brotchen@gmail.com",
+            "role": "Developer"
         }
     ],
     "require": {
