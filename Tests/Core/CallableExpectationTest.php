@@ -9,11 +9,13 @@ class CallableExpectationTest extends TestCase
 {
     protected ?(function(): void) $callable;
 
-    <<Override>> public function setUp(): void
+    <<setUp>>
+    public function setUp(): void
     {
         $this->callable = $fun = () ==> {throw new ExpectationException('unexpected!');};
     }
 
+    <<test>>
     public function test_toThrow_does_nothing_if_exception_thrown(): void
     {
         if ($this->callable) {
@@ -21,6 +23,7 @@ class CallableExpectationTest extends TestCase
         }
     }
 
+    <<test>>
     public function test_toThrow_throws_exception_if_wrong_exception_type(): void
     {
         if ($this->callable) {
@@ -31,6 +34,7 @@ class CallableExpectationTest extends TestCase
         }
     }
 
+    <<test>>
     public function test_toThrow_throws_exception_if_no_exception_thrown(): void
     {
         $this->expectCallable(() ==> {
@@ -40,6 +44,7 @@ class CallableExpectationTest extends TestCase
         })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
     }
 
+    <<test>>
     public function test_toNotThrow_does_nothing_if_exception_not_thrown(): void
     {
         $callable = () ==> { $var = 'do nothing'; };
@@ -47,6 +52,7 @@ class CallableExpectationTest extends TestCase
         $expectation->toNotThrow();
     }
 
+    <<test>>
     public function test_toNotThrow_throws_exception_if_exception_thrown(): void
     {
         if ($this->callable) {
@@ -55,6 +61,7 @@ class CallableExpectationTest extends TestCase
         }
     }
 
+    <<test>>
     public function test_toThrow_throws_exception_if_exception_thrown_with_incorrect_message(): void
     {
         $this->expectCallable(() ==> {
@@ -64,6 +71,7 @@ class CallableExpectationTest extends TestCase
         })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
     }
 
+    <<test>>
     public function test_toThrow_does_nothing_if_exception_thrown_with_correct_message(): void
     {
         $this->expectCallable(

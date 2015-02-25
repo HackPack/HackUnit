@@ -63,6 +63,16 @@ class TestResult
         $this->trigger('testPassed');
     }
 
+    public function testError(\Exception $exception): void
+    {
+        //TODO: track this
+    }
+
+    public function groupError(\Exception $exception): void
+    {
+        //TODO: track this
+    }
+
     public function testFailed(\Exception $exception): void
     {
         $parser = new TraceParser($exception);

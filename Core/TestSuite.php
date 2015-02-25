@@ -5,48 +5,46 @@ use ReflectionMethod;
 use HackPack\HackUnit\Exception\MarkTestAsSkipped;
 
 type TestGroup = shape(
-    'start' => (function():void),
-    'setup' => (function():void),
-    'tests' => Vector<(function():void)>,
-    'teardown' => (function():void),
-    'end' => (function():void),
+    'start' => Vector<ReflectionMethod>,
+    'setup' => Vector<ReflectionMethod>,
+    'test' => Vector<TestCase>,
+    'teardown' => Vector<ReflectionMethod>,
+    'end' => Vector<ReflectionMethod>,
 );
 
 class TestSuite implements TestInterface
 {
-    protected Vector<TestGroup> $tests;
-
-    public function __construct(Vector<?TestGroup> $tests = Vector {})
+    public function __construct(protected Vector<TestGroup> $tests = Vector {})
     {
-        /* HH_FIXME[4110] */
-        $this->tests = $tests->filter($g ==> $g !== null);
     }
 
-    public function addGroup(TestGroup $group): void
+    public function run(TestResult $result) : void
     {
-        $this->tests->add($group);
+        array_walk($this->tests->toArray(), $group ==> $this->runGroup($group, $result));
     }
 
-    public function run(TestResult $result): TestResult
+    private function runGroup(TestGroup $group, TestResult $result) : void
     {
-        foreach ($this->tests as $group) {
-            $result->groupStarted();
-            $group['start']();
-            foreach($group['tests'] as $test) {
-                $result->testStarted();
-                $group['setup']();
-                try {
-                    $test();
-                    $result->testPassed();
-                } catch(MarkTestAsSkipped $e) {
-                    $result->testSkipped($e);
-                } catch (\Exception $e) {
-                    $result->testFailed($e);
-                }
-                $group['teardown']();
-            }
-            $group['end'];
+        if($group['test']->count() === 0) {
+            return;
         }
-        return $result;
+
+        try{
+            $firstInstance = $group['test']->at(0);
+            $result->groupStarted();
+            array_walk($group['start']->toArray(), $method ==> $method->invoke($firstInstance));
+            array_walk($group['test']->toArray(), $test ==> $this->runTest($test, $group, $result));
+            array_walk($group['end']->toArray(), $method ==> $method->invoke($firstInstance));
+        } catch(\Exception $e) {
+            $result->groupError($e);
+        }
+
+    }
+
+    private function runTest(TestCase $test, TestGroup $group, TestResult $result) : void
+    {
+        array_walk($group['setup']->toArray(), $method ==> $method->invoke($test));
+        $test->run($result);
+        array_walk($group['teardown']->toArray(), $method ==> $method->invoke($test));
     }
 }

@@ -1,28 +1,12 @@
 <?hh //strict
 namespace HackPack\HackUnit\Core;
 
+use HackPack\HackUnit\Exception\MalformedSuite;
 use HackPack\HackUnit\Exception\MarkTestAsSkipped;
 
-<<__ConsistentConstruct>>
 abstract class TestCase implements TestInterface
 {
-    public function __construct()
-    {
-    }
-
-    public function start(): void
-    {
-    }
-
-    public function end(): void
-    {
-    }
-
-    public function setUp(): void
-    {
-    }
-
-    public function tearDown(): void
+    final public function __construct(private \ReflectionMethod $test)
     {
     }
 
@@ -39,5 +23,23 @@ abstract class TestCase implements TestInterface
     public function markAsSkipped(string $message = "Skipped"): void
     {
         throw new MarkTestAsSkipped($message);
+    }
+
+    public function markAsMalformed(): void
+    {
+        throw new MalformedSuite('All HackUnit specific methods must accept zero arguments and return void.');
+    }
+
+    final public function run(TestResult $result): void
+    {
+        try {
+            $result->testStarted();
+            $this->test->invoke($this);
+            $result->testPassed();
+        } catch(MarkTestAsSkipped $e) {
+            $result->testSkipped($e);
+        } catch (\Exception $e) {
+            $result->testFailed($e);
+        }
     }
 }
