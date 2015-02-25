@@ -5,7 +5,7 @@ namespace HackPack\HackUnit\Runner;
 {
     protected ?string $testPath;
 
-    protected ?string $excludedPaths;
+    protected Set<string> $excludedPaths = Set{};
 
     protected ?string $hackUnitFile;
 
@@ -29,16 +29,15 @@ namespace HackPack\HackUnit\Runner;
         return is_null($this->testPath) ? Set{getcwd()} : Set{$this->testPath};
     }
 
-    public function setExcludedPaths(string $paths): Options
+    public function addExcludedPath(string $path): Options
     {
-        $this->excludedPaths = $paths;
+        $this->excludedPaths->add($path);
         return $this;
     }
 
     public function getExcludedPaths(): Set<string>
     {
-        $paths = preg_split('/\s+/', $this->excludedPaths);
-        return new Set($paths);
+        return $this->excludedPaths;
     }
 
     public function setHackUnitFile(string $hackUnitFile): Options
@@ -57,33 +56,22 @@ namespace HackPack\HackUnit\Runner;
         return $path ?: null;
     }
 
-    public static function fromCli(array<string> $argv): Options
+    public static function fromCli(Vector<string> $argv): Options
     {
         $cli = getopt('', static::$longOpts);
         $options = new static();
 
         if (array_key_exists('exclude', $cli)) {
-            $options->setExcludedPaths($cli['exclude']);
+            $options->excludedPaths->add($cli['exclude']);
         }
 
         if (array_key_exists('hackunit-file', $cli)) {
-            $options->setHackUnitFile($cli['hackunit-file']);
+            $options->hackUnitFile = $cli['hackunit-file'];
         }
 
-        $testPath = $argv[count($argv) - 1];
-
-        /**
-         * TODO check based on diff between getopt and argv instead of file existence
-         */
-        $isValidPath = count($argv) > 1 &&
-                       file_exists($testPath) &&
-                       realpath($testPath) != $options->getHackUnitFile() &&
-                       ! $options->getExcludedPaths()->contains($testPath);
-
-        if ($isValidPath) {
-            $options->setTestPath($argv[count($argv) - 1]);
+        if($argv) {
+            $options->testPath = $argv->pop();
         }
-
         return $options;
     }
 }

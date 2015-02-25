@@ -25,6 +25,9 @@ if (!$found) {
 
 use HackPack\HackUnit\UI\Console;
 use HackPack\HackUnit\Runner\Options;
+use HackPack\HackUnit\Runner\Loading\StandardLoader;
 
-$app = new Console(Options::fromCli($_SERVER['argv']));
+$options = Options::fromCli(Vector::fromItems($_SERVER['argv']));
+$loader = StandardLoader::create($options);
+$app = new Console($options, $loader);
 $app->run();

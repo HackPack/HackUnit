@@ -66,11 +66,13 @@ class TestResult
     public function testError(\Exception $exception): void
     {
         //TODO: track this
+        echo $exception->getMessage();
     }
 
     public function groupError(\Exception $exception): void
     {
         //TODO: track this
+        echo $exception->getMessage();
     }
 
     public function testFailed(\Exception $exception): void

@@ -9,11 +9,8 @@ class Runner<TLoader as LoaderInterface>
 {
     use EventEmitter;
 
-    protected TLoader $loader;
-
-    public function __construct(protected Options $options, (function(Options): TLoader) $factory)
+    public function __construct(protected Options $options, protected TLoader $loader)
     {
-        $this->loader = $factory($options);
     }
 
     public function getLoader(): TLoader

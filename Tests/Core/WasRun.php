@@ -5,25 +5,36 @@ use HackPack\HackUnit\Core\TestCase;
 
 class WasRun extends TestCase
 {
-    public string $log = '';
+    public Vector<string> $log = Vector{};
 
-    <<Override>> public function setUp(): void
+     public function load(): void
     {
-        $this->log = 'setUp ';
+        $this->log->add('load');
     }
 
-    <<Override>> public function tearDown(): void
+     public function unload(): void
     {
-        $this->log .= 'tearDown ';
+        $this->log->add('unload');
+    }
+
+     public function setUp(): void
+    {
+        $this->log->add('setUp');
+    }
+
+     public function tearDown(): void
+    {
+        $this->log->add('tearDown');
     }
 
     public function testMethod(): void
     {
-        $this->log .= 'testMethod ';
+        $this->log->add('testMethod');
     }
 
     public function testBrokenMethod(): void
     {
+        $this->log->add('brokenMethod');
         throw new \Exception("broken");
     }
 

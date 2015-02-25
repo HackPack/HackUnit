@@ -5,87 +5,111 @@ use HackPack\HackUnit\Core\TestCase;
 use HackPack\HackUnit\Runner\Options;
 use HackPack\HackUnit\Runner\Loading\StandardLoader;
 
-require_once __DIR__ . '/../../Fixtures/Loading/Excluded/ThreeTest.php';
-
 class StandardLoaderTest extends TestCase
 {
-    protected ?StandardLoader $loader;
+    protected static Set<string> $includes = Set{};
     protected string $path = '';
 
-    <<Override>>
-    public function setUp(): void
+    <<setUp>>
+    public function setPath(): void
     {
-        $this->path = __DIR__ . '/../../Fixtures/Loading';
-        $this->loader = new StandardLoader($this->path);
+        $this->path = dirname(dirname(__DIR__)) . '/Fixtures/Loading';
+        self::$includes = Set{$this->path};
     }
 
-    public function test_getTestCasePaths_should_return_paths_to_test_cases(): void
+    <<test>>
+    public function test_getFilesWithTests_should_return_paths_to_test_cases(): void
     {
-        if (! $this->loader) throw new \Exception("loader and path cannot be null");
-        $paths = $this->loader->getTestCasePaths();
+        $loader = new StandardLoader(self::$includes->toSet());
+        $loader->loadTests();
+        $paths = $loader->getFilesWithTests();
         $this->expect($paths->count())->toEqual(3);
         $this->expect($paths->contains($this->path . '/OneTest.hh'))->toEqual(true);
         $this->expect($paths->contains($this->path . '/TwoTest.php'))->toEqual(true);
-        $this->expect($paths->contains($this->path . '/Excluded/ThreeTest.php'))->toEqual(true);
+        $this->expect($paths->contains($this->path . '/Excluded/Three.php'))->toEqual(true);
     }
 
-    public function test_getTestCasePaths_should_return_paths_with_single_file(): void
+    <<test>>
+    public function test_getFilesWithTests_should_return_paths_with_single_file(): void
     {
-        $loader = new StandardLoader($this->path . '/OneTest.hh');
-        $paths = $loader->getTestCasePaths();
+        $loader = new StandardLoader(Set{$this->path . '/OneTest.hh'});
+        $loader->loadTests();
+        $paths = $loader->getFilesWithTests();
         $this->expect($paths->count())->toEqual(1);
         $this->expect($paths->contains($this->path . '/OneTest.hh'))->toEqual(true);
     }
 
-    public function test_load_should_return_classes_ending_in_Test_for_every_method(): void
+    <<test>>
+    public function test_loadTests_should_return_test_group_for_every_class_that_extends_TestCase(): void
     {
-        if (! $this->loader) throw new \Exception("loader cannot be null");
+        $loader = new StandardLoader(self::$includes->toSet());
         $pattern = '/Test$/';
-        $objects = $this->loader->load();
-        $this->expect($objects->count())->toEqual(6);
+        $groups = $loader->loadTests();
 
-        $oneTest = $objects->at(2);
-        $oneTest2 = $objects->at(3);
-        $this->expect($oneTest->getName())->toEqual('testOne');
-        $this->expect($oneTest2->getName())->toEqual('testTwo');
+        // Make sure the test files were included
+        $this->expect(class_exists('\OneTest', false))->toEqual(true);
+        $this->expect(class_exists('\TwoTest', false))->toEqual(true);
+        $this->expect(class_exists('\ThreeTest', false))->toEqual(true);
+        $this->expect(class_exists('\TestMeNot', false))->toEqual(true);
 
-        $twoTest = $objects->at(4);
-        $twoTest2 = $objects->at(5);
-        $this->expect($twoTest->getName())->toEqual('testThree');
-        $this->expect($twoTest2->getName())->toEqual('testFour');
+        $this->expect($groups->count())->toEqual(3);
+        foreach($groups as $group) {
+            switch(get_class($group['test']->at(0))) {
+            case \OneTest::class:
+                $this->expect($group['test']->at(1) instanceof \OneTest)->toEqual(true);
+                $this->expect($group['test']->count())->toEqual(2);
+                $this->expect($group['start']->count())->toEqual(0);
+                $this->expect($group['end']->count())->toEqual(0);
+                $this->expect($group['setup']->count())->toEqual(1);
+                $this->expect($group['teardown']->count())->toEqual(0);
+                break;
 
-        $threeTest = $objects->at(0);
-        $threeTest2 = $objects->at(1);
-        $this->expect($threeTest->getName())->toEqual('testFive');
-        $this->expect($threeTest2->getName())->toEqual('testSix');
+            case \TwoTest::class:
+                $this->expect($group['test']->at(1) instanceof \TwoTest)->toEqual(true);
+                $this->expect($group['test']->count())->toEqual(2);
+                $this->expect($group['start']->count())->toEqual(0);
+                $this->expect($group['end']->count())->toEqual(0);
+                $this->expect($group['setup']->count())->toEqual(0);
+                $this->expect($group['teardown']->count())->toEqual(1);
+                break;
+
+            case \ThreeTest::class:
+                $this->expect($group['test']->at(1) instanceof \ThreeTest)->toEqual(true);
+                $this->expect($group['test']->count())->toEqual(2);
+                $this->expect($group['start']->count())->toEqual(1);
+                $this->expect($group['end']->count())->toEqual(1);
+                $this->expect($group['setup']->count())->toEqual(0);
+                $this->expect($group['teardown']->count())->toEqual(0);
+                break;
+
+            default:
+                throw new \Exception('Unexpected test class.');
+            }
+        }
     }
 
-    public function test_loadSuite_should_use_results_of_load_to_create_a_TestSuite(): void
-    {
-        if (! $this->loader) throw new \Exception("loader cannot be null");
-        $suite = $this->loader->loadSuite();
-        $tests = $suite->getTests();
-        $this->expect($tests->count())->toEqual(6);
-    }
-
-    public function test_getTestCasePaths_should_exclude_dirs(): void
+    <<test>>
+    public function test_getFilesWithTests_should_exclude_dirs(): void
     {
         $options = new Options();
         $options
             ->setTestPath($this->path)
-            ->setExcludedPaths($this->path . '/Excluded');
+            ->addExcludedPath($this->path . '/Excluded');
         $loader = StandardLoader::create($options);
-        $paths = $loader->getTestCasePaths();
+        $loader->loadTests();
+        $paths = $loader->getFilesWithTests();
         $this->expect($paths->count())->toEqual(2);
     }
 
-    public function test_getTestCasePaths_should_exclude_nonexistent_dirs(): void
+    <<test>>
+    public function test_getFilesWithTests_should_exclude_nonexistent_dirs(): void
     {
         $options = new Options();
         $options
             ->setTestPath($this->path . '/DoesNotExist');
         $loader = StandardLoader::create($options);
-        $paths = $loader->getTestCasePaths();
+        $loader->loadTests();
+        $paths = $loader->getFilesWithTests();
         $this->expect($paths->count())->toEqual(0);
     }
 }

@@ -5,11 +5,11 @@ use ReflectionMethod;
 use HackPack\HackUnit\Exception\MarkTestAsSkipped;
 
 type TestGroup = shape(
-    'start' => Vector<ReflectionMethod>,
+    'start' => Vector<(function():void)>,
     'setup' => Vector<ReflectionMethod>,
     'test' => Vector<TestCase>,
     'teardown' => Vector<ReflectionMethod>,
-    'end' => Vector<ReflectionMethod>,
+    'end' => Vector<(function():void)>,
 );
 
 class TestSuite implements TestInterface
@@ -30,11 +30,10 @@ class TestSuite implements TestInterface
         }
 
         try{
-            $firstInstance = $group['test']->at(0);
             $result->groupStarted();
-            array_walk($group['start']->toArray(), $method ==> $method->invoke($firstInstance));
+            array_walk($group['start']->toArray(), $method ==> $method());
             array_walk($group['test']->toArray(), $test ==> $this->runTest($test, $group, $result));
-            array_walk($group['end']->toArray(), $method ==> $method->invoke($firstInstance));
+            array_walk($group['end']->toArray(), $method ==> $method());
         } catch(\Exception $e) {
             $result->groupError($e);
         }

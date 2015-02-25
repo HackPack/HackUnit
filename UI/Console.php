@@ -11,17 +11,14 @@ class Console<TLoader as LoaderInterface>
 
     const string VERSION = "0.3.2";
 
-    public function __construct(protected Options $options)
+    public function __construct(protected Options $options, LoaderInterface $loader)
     {
-        $factory = class_meth('\HackPack\HackUnit\Runner\Loading\StandardLoader', 'create');
-        $this->options = $this->options = $options;
-        $this->runner = new Runner($this->options, $factory);
+        $this->runner = new Runner($options, $loader);
     }
 
     public function run(): void
     {
         if (is_file($this->options->getHackUnitFile())) {
-            // UNSAFE
             /* HH_FIXME[1002] */
             include_once($this->options->getHackUnitFile());
         }
@@ -30,7 +27,6 @@ class Console<TLoader as LoaderInterface>
         $result = $this->runner->run();
         $ui->printReport($result);
 
-        // UNSAFE
         exit($result->getExitCode());
     }
 
