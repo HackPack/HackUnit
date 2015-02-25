@@ -24,9 +24,9 @@ namespace HackPack\HackUnit\Runner;
         return $this;
     }
 
-    public function getTestPath(): string
+    public function getIncludedPaths(): Set<string>
     {
-        return is_null($this->testPath) ? getcwd() : $this->testPath;
+        return is_null($this->testPath) ? Set{getcwd()} : Set{$this->testPath};
     }
 
     public function setExcludedPaths(string $paths): Options

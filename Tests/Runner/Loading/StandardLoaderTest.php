@@ -12,7 +12,8 @@ class StandardLoaderTest extends TestCase
     protected ?StandardLoader $loader;
     protected string $path = '';
 
-    <<Override>> public function setUp(): void
+    <<Override>>
+    public function setUp(): void
     {
         $this->path = __DIR__ . '/../../Fixtures/Loading';
         $this->loader = new StandardLoader($this->path);

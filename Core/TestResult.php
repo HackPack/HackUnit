@@ -20,6 +20,10 @@ class TestResult
         $this->skipped = Vector {};
     }
 
+    public function groupStarted() : void
+    {
+    }
+
     public function testStarted(): void
     {
         $this->runCount++;

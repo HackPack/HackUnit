@@ -3,9 +3,18 @@ namespace HackPack\HackUnit\Core;
 
 use HackPack\HackUnit\Exception\MarkTestAsSkipped;
 
+<<__ConsistentConstruct>>
 abstract class TestCase implements TestInterface
 {
-    public function __construct(protected string $name)
+    public function __construct()
+    {
+    }
+
+    public function start(): void
+    {
+    }
+
+    public function end(): void
     {
     }
 
@@ -15,11 +24,6 @@ abstract class TestCase implements TestInterface
 
     public function tearDown(): void
     {
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
     }
 
     public function expect<T>(T $context): Expectation<T>
@@ -35,22 +39,5 @@ abstract class TestCase implements TestInterface
     public function markAsSkipped(string $message = "Skipped"): void
     {
         throw new MarkTestAsSkipped($message);
-    }
-
-    public function run(TestResult $result): TestResult
-    {
-        $result->testStarted();
-        $this->setUp();
-        $class = get_class($this);
-        try {
-            hphp_invoke_method($this, $class, $this->name, []);
-            $result->testPassed();
-        } catch(MarkTestAsSkipped $e) {
-            $result->testSkipped($e);
-        } catch (\Exception $e) {
-            $result->testFailed($e);
-        }
-        $this->tearDown();
-        return $result;
     }
 }

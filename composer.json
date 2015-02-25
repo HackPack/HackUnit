@@ -17,7 +17,8 @@
         }
     ],
     "require": {
-        "hackpack/hacktions": "v1.1.1"
+        "hackpack/hacktions": "1.1.*",
+        "kilahm/hack-class-scanner": "~1.3"
     },
     "autoload": {
         "psr-4": {

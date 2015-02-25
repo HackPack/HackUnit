@@ -2,108 +2,71 @@
 namespace HackPack\HackUnit\Runner\Loading;
 
 use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestGroup;
 use HackPack\HackUnit\Core\TestSuite;
 use HackPack\HackUnit\Runner\Options;
+use kilahm\Scanner\ClassScanner;
+use ReflectionClass;
+use ReflectionMethod;
 
-<<__ConsistentConstruct>> class StandardLoader implements LoaderInterface
+<<__ConsistentConstruct>>
+class StandardLoader implements LoaderInterface
 {
-    private static string $testPattern = '/Test[.](?:php|hh)$/';
-    private static string $testMethodPattern = '/^test/';
+    private static string $methodNamePattern = '/^test/';
+    private static string $attributeName = 'test';
 
-    private Vector<TestCase> $testCases;
-    private Instantiator $instantiator;
+    private ClassScanner $scanner;
 
-    public function __construct(protected string $path, protected Set<string> $exclude = Set {})
+    public static function create(Options $options): this
     {
-        $this->testCases = Vector {};
-        $this->exclude = $this->exclude->map(($path) ==> (string) realpath($path));
-        $this->instantiator = new Instantiator();
+        return new static($options->getIncludedPaths(), $options->getExcludedPaths());
+    }
+
+    public function __construct(Set<string> $include, Set<string> $exclude = Set {})
+    {
+        $this->scanner = new ClassScanner($include, $exclude);
     }
 
     public function loadSuite(): TestSuite
     {
-        $testCases = $this->load();
-        $suite = new TestSuite();
-        foreach ($testCases as $testCase) {
-            $suite->add($testCase);
+        return new TestSuite($this->scanner->mapClassToFile()
+            ->mapWithKey(($class, $path) ==> $this->loadTestGroup($class, $path))
+            ->toVector()
+        );
+    }
+
+    protected function loadTestGroup(string $classname, string $filename): ?TestGroup
+    {
+        $this->includeClass($filename);
+        $classMirror = new ReflectionClass($classname);
+
+        // Only subclasses of TestCase
+        if(! $classMirror->isSubclassOf(TestCase::class)) {
+            return null;
         }
-        return $suite;
-    }
 
-    public function load(): Vector<TestCase>
-    {
-        $paths = $this->getTestCasePaths();
-        foreach ($paths as $path) {
-            $this->addTestCase($path);
-        }
-        return $this->testCases;
-    }
+        // Only methods named or attributed correctly
+        $methods = Vector::fromItems($classMirror->getMethods(ReflectionMethod::IS_PUBLIC))
+            ->filter($method ==>
+                preg_match(self::$methodNamePattern, $method->getName()) ||
+                $method->getAttributeRecursive(self::$attributeName) !== null
+        );
 
-    public function getTestCasePaths(string $searchPath = '', Set<string> $accum = Set {}): Set<string>
-    {
-        $searchPath = $searchPath ? $searchPath : $this->path;
-        $files = is_dir($searchPath) ? scandir($searchPath) : [$searchPath];
+        // Instance to attach all of the closures to
+        $instance = $classMirror->newInstance();
 
-        foreach ($files as $file) {
-            if ($file == '.' || $file == '..') {
-                continue;
-            }
-
-            $newPath = is_file($searchPath) ? $searchPath : $searchPath . "/" . (string)$file;
-
-            if ($this->isExcluded($newPath)) {
-                continue;
-            }
-
-            if (is_file($newPath)) {
-                if (! preg_match(StandardLoader::$testPattern, $newPath)) continue;
-                $accum->add($newPath);
-                continue;
-            }
-
-            $this->getTestCasePaths($newPath, $accum);
-        }
-        return $accum;
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    public static function create(Options $options): StandardLoader
-    {
-        return new static((string) $options->getTestPath(), $options->getExcludedPaths());
-    }
-
-    protected function isExcluded(string $path): bool
-    {
-        $real = realpath($path);
-
-        // realpath returns false when the path does not exist
-        if($real === false) {
-            return true;
-        }
-        return $this->exclude->contains($real);
-    }
-
-    protected function addTestCase(string $testPath): void
-    {
-        $this->includeClass($testPath);
-        $testCase = $this->instantiator->fromFile($testPath, ['noop']);
-        $methods = get_class_methods($testCase);
-        foreach ($methods as $method) {
-            if (preg_match(StandardLoader::$testMethodPattern, $method)) {
-                $test = $this->instantiator->fromObject($testCase, [$method]);
-                $this->testCases->add($test);
-            }
-        }
+        return shape(
+            'start' => $classMirror->getMethod('start')->getClosure($instance),
+            'setup' => $classMirror->getMethod('setUp')->getClosure($instance),
+            'tests' => $methods->map($method ==> $method->getClosure($instance)),
+            'teardown' => $classMirror->getMethod('tearDown')->getClosure($instance),
+            'end' => $classMirror->getMethod('end')->getClosure($instance),
+        );
     }
 
     protected function includeClass(string $testPath): void
     {
-        // UNSAFE
         /* HH_FIXME[1002] */
-        include_once($testPath);
+        require_once($testPath);
     }
 }
