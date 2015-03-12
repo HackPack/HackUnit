@@ -62,4 +62,32 @@ class CallableExpectation
             throw new ExpectationException($message);
         }
     }
+
+    public function toOutputString(string $expectedOutput): void
+    {
+        $fun = $this->context;
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        ob_start();
+        $obLevel = ob_get_level();
+
+        $fun();
+
+        if (ob_get_level() != $obLevel) {
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+
+            $message = 'Test code or tested code did not (only) close its own output buffers';
+            throw new ExpectationException($message);
+        }
+
+        $actualOutput = ob_get_contents();
+        ob_end_clean();
+
+        $expectation = new Expectation($actualOutput);
+        $expectation->toEqual($expectedOutput);
+    }
 }
