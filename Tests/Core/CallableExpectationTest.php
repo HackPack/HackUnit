@@ -70,4 +70,31 @@ class CallableExpectationTest extends TestCase
           () ==> {  throw new \HackPack\HackUnit\Core\ExpectationException("Message");
         })->toThrow('\HackPack\HackUnit\Core\ExpectationException', 'Message');
     }
+
+    public function test_toOutputString_does_nothing_when_true(): void
+    {
+        $this->expectCallable(() ==> {
+            $callable = () ==> { echo "an output string"; };
+            $expectation = new CallableExpectation($callable);
+            $expectation->toOutputString("an output string");
+        })->toNotThrow();
+    }
+
+    public function test_toOutputString_throws_ExpectationException_if_fails(): void
+    {
+        $this->expectCallable(() ==> {
+            $callable = () ==> { echo "an output string"; };
+            $expectation = new CallableExpectation($callable);
+            $expectation->toOutputString("something different");
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+    }
+
+    public function test_toOutputString_throws_ExpectationException_if_ob_was_closed(): void
+    {
+        $this->expectCallable(() ==> {
+            $callable = () ==> { echo "an output string"; ob_end_clean(); };
+            $expectation = new CallableExpectation($callable);
+            $expectation->toOutputString("an output string");
+        })->toThrow('\HackPack\HackUnit\Core\ExpectationException');
+    }
 }
