@@ -1,5 +1,5 @@
 #!/usr/bin/env hhvm
-<?hh //partial
+<?hh
 
 $files = array(
     __DIR__ . '/../../vendor/autoload.php',
