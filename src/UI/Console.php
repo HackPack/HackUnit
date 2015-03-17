@@ -4,14 +4,15 @@ namespace HackPack\HackUnit\UI;
 use HackPack\HackUnit\Runner\Loading\LoaderInterface;
 use HackPack\HackUnit\Runner\Runner;
 use HackPack\HackUnit\Runner\Options;
+use kilahm\Clio\Clio;
 
 class Console<TLoader as LoaderInterface>
 {
     protected Runner<LoaderInterface> $runner;
 
-    const string VERSION = "0.3.2";
+    const string VERSION = "0.4.0-dev";
 
-    public function __construct(protected Options $options, LoaderInterface $loader)
+    public function __construct(protected Clio $clio, protected Options $options, LoaderInterface $loader)
     {
         $this->runner = new Runner($options, $loader);
     }

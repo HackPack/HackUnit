@@ -26,8 +26,10 @@ if (!$found) {
 use HackPack\HackUnit\UI\Console;
 use HackPack\HackUnit\Runner\Options;
 use HackPack\HackUnit\Runner\Loading\StandardLoader;
+use kilahm\Clio\Clio;
 
-$options = Options::fromCli(Vector::fromItems($_SERVER['argv']));
+$clio = Clio::fromCli();
+$options = Options::fromCli($clio);
 $loader = StandardLoader::create($options);
-$app = new Console($options, $loader);
+$app = new Console($clio, $options, $loader);
 $app->run();

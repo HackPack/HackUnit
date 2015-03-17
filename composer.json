@@ -18,11 +18,12 @@
     ],
     "require": {
         "hackpack/hacktions": "1.1.*",
-        "hackpack/hack-class-scanner": "1.0.*"
+        "hackpack/hack-class-scanner": "1.0.*",
+        "kilahm/clio": "0.1.*"
     },
     "autoload": {
         "psr-4": {
-            "HackPack\\HackUnit\\": ""
+            "HackPack\\HackUnit\\": "src/"
         },
         "files": [
             "Enum.php"
