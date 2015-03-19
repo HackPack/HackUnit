@@ -12,7 +12,7 @@ class RunnerTest extends TestCase
     public function test_run_returns_result_from_loader(): void
     {
         $options = new Options();
-        $options->setTestPath(__DIR__ . '/../Fixtures/Loading');
+        $options->addIncludePath(__DIR__ . '/../Fixtures/Loading');
         $runner = new Runner($options, StandardLoader::create($options));
 
         $result = $runner->run();
@@ -24,7 +24,7 @@ class RunnerTest extends TestCase
     public function test_run_returns_result_with_a_started_timer(): void
     {
         $options = new Options();
-        $options->setTestPath(__DIR__ . '/../Fixtures/Loading');
+        $options->addIncludePath(__DIR__ . '/../Fixtures/Loading');
         $runner = new Runner($options, StandardLoader::create($options));
 
         $result = $runner->run();

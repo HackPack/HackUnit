@@ -9,12 +9,6 @@ use kilahm\Clio\Clio;
     protected Set<string> $excludedPaths = Set{};
     protected string $hackUnitFile = '';
 
-    public function setTestPath(string $testPath): this
-    {
-        $this->testPath = $testPath;
-        return $this;
-    }
-
     public function addIncludePath(string $path): this
     {
         if($path !== '') {
@@ -25,6 +19,9 @@ use kilahm\Clio\Clio;
 
     public function getIncludedPaths(): Set<string>
     {
+        if($this->includePaths->isEmpty()) {
+            return Set{getcwd()};
+        }
         return $this->includePaths;
     }
 
@@ -84,7 +81,7 @@ use kilahm\Clio\Clio;
             ->transformedBy($toPath)
             ->describedAs('File or folder to exclude.');
 
-        $include = $clio->arg('path/to/tests')
+        $include = $clio->arg('path-to-tests')
             ->describedAs(
                 'Base path for all tests.  The path will be recursively searched for test cases.' . PHP_EOL .
                 'If path is a file, only that file will be searched for test cases.' . PHP_EOL .
@@ -95,12 +92,12 @@ use kilahm\Clio\Clio;
         $options = new static();
 
         foreach($clio->allArguments() as $arg) {
-            $path = realpath($arg->value());
+            $path = realpath($arg);
             if( ! is_string($path)) {
                 $clio->showHelp('Could not find path ' . $path);
                 exit();
             }
-            $options->addIncludePath($arg->value());
+            $options->addIncludePath($arg);
         }
 
         foreach($excludes->allValues() as $path) {

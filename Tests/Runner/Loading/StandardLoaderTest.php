@@ -93,7 +93,7 @@ class StandardLoaderTest extends TestCase
     {
         $options = new Options();
         $options
-            ->setTestPath($this->path)
+            ->addIncludePath($this->path)
             ->addExcludedPath($this->path . '/Excluded');
         $loader = StandardLoader::create($options);
         $loader->loadTests();
@@ -105,8 +105,7 @@ class StandardLoaderTest extends TestCase
     public function test_getFilesWithTests_should_exclude_nonexistent_dirs(): void
     {
         $options = new Options();
-        $options
-            ->setTestPath($this->path . '/DoesNotExist');
+        $options->addIncludePath($this->path . '/DoesNotExist');
         $loader = StandardLoader::create($options);
         $loader->loadTests();
         $paths = $loader->getFilesWithTests();
