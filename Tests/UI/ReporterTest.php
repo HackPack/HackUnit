@@ -8,6 +8,10 @@ use HackPack\HackUnit\UI\Text;
 
 class TextTest extends TestCase
 {
+    private function makeClio() : Clio
+    {
+        return new Clio('test', )
+    }
     public function test_getFooter_should_return_count_summary_with_skipped(): void
     {
         $result = $this->getSkippedResult();

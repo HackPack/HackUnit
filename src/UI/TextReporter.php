@@ -3,35 +3,19 @@ namespace HackPack\HackUnit\UI;
 
 use HackPack\HackUnit\Core\TestResult;
 use HackPack\HackUnit\Error\Origin;
+use kilahm\Clio\Clio;
+use kilahm\Clio\TextColor;
+use kilahm\Clio\Format\Text as cText;
 
-class Text implements TextReporterInterface
+class TextReporter implements ReporterInterface
 {
-    public Map<string, int> $colors = Map {
-        'bg-green' => 42,
-        'fg-black' => 30,
-        'bg-red' => 41,
-        'fg-white' => 37
-    };
-
-    protected bool $colorIsEnabled;
 
     protected int $maxColumns = 63;
 
     protected int $currentColumn = 0;
 
-    public function __construct()
+    public function __construct(protected Clio $clio)
     {
-        $this->colorIsEnabled = false;
-    }
-
-    public function printFeedback(string $feedback): void
-    {
-        if ($this->currentColumn == $this->maxColumns) {
-            print "\n";
-            $this->currentColumn = 0;
-        }
-        print $feedback;
-        $this->currentColumn++;
     }
 
     public function getReport(TestResult $result): string
@@ -49,11 +33,6 @@ class Text implements TextReporterInterface
             $this->getFailures($result),
             $this->getFooter($result)
         );
-    }
-
-    public function printReport(TestResult $result): void
-    {
-        print $this->getReport($result);
     }
 
     public function getFailures(TestResult $result): string
@@ -114,18 +93,16 @@ class Text implements TextReporterInterface
 
     protected function formatFooter(string $footer, bool $hasFailures): string
     {
-        $formatted = $footer;
-        $lines = explode("\n", $formatted);
-        $padding = max(array_map(fun('strlen'), $lines));
-        if ($this->colorIsEnabled) {
-            $message = array_reduce($lines, ($r, $l) ==> $r . str_pad($l, $padding) . "\n", "");
-            $formatted = sprintf(
-                "\033[%d;%dm%s\033[0m",
-                $this->colors->get($hasFailures ? 'bg-red' : 'bg-green'),
-                $this->colors->get($hasFailures ? 'fg-white' : 'fg-black'),
-                trim($message)
-            );
-        }
-        return $formatted . "\n";
+        $lines = Vector::fromItems(explode(PHP_EOL, $footer));
+        $width = max($lines->map($line ==> strlen($line)));
+        return implode(PHP_EOL, $lines->map($line ==> {
+            $text = cText::style($line)->toWidth($width)->left();
+            if($hasFailures) {
+                $text->fg(TextColor::white)->bg(TextColor::red);
+            } else {
+                $text->fg(TextColor::black)->bg(TextColor::green);
+            }
+            $text->render();
+        })) . PHP_EOL;
     }
 }

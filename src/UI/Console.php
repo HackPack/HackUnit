@@ -5,6 +5,8 @@ use HackPack\HackUnit\Runner\Loading\LoaderInterface;
 use HackPack\HackUnit\Runner\Runner;
 use HackPack\HackUnit\Runner\Options;
 use kilahm\Clio\Clio;
+use kilahm\Clio\Format\Style;
+use kilahm\Clio\TextColor;
 
 class Console<TLoader as LoaderInterface>
 {
@@ -24,7 +26,6 @@ class Console<TLoader as LoaderInterface>
             include_once($this->options->getHackUnitFile());
         }
         $this->printInfo();
-        $ui = $this->getTextUI();
         $result = $this->runner->run();
         $ui->printReport($result);
 
@@ -39,13 +40,16 @@ class Console<TLoader as LoaderInterface>
         );
     }
 
-    protected function getTextUI(): TextReporterInterface
+    protected function getTextUI(): void
     {
-        $ui = new Text();
-        $this->runner->on('testFailed', (...) ==> $ui->printFeedback("\033[41;37mF\033[0m"));
-        $this->runner->on('testSkipped', (...) ==> $ui->printFeedback('S'));
-        $this->runner->on('testPassed', (...) ==> $ui->printFeedback('.'));
-        $ui->enableColor();
-        return $ui;
+        $this->runner->on('testFailed', (...) ==> $this->clio->show(
+            $this->clio->style('F')->with(Style::error())
+        ));
+        $this->runner->on('testSkipped', (...) ==> $this->clio->show(
+            $this->clio->style('S')->with(Style::warn())
+        ));
+        $this->runner->on('testPassed', (...) ==> $this->clio->show(
+            $this->clio->style('.')->fg(TextColor::green)->render()
+        ));
     }
 }

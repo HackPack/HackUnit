@@ -17,9 +17,9 @@
         }
     ],
     "require": {
-        "hackpack/hacktions": "1.1.*",
-        "hackpack/hack-class-scanner": "1.0.*",
-        "kilahm/clio": "0.1.*"
+        "hackpack/hacktions": "~1.1",
+        "hackpack/hack-class-scanner": "~1.0",
+        "kilahm/clio": "~0.1.1"
     },
     "autoload": {
         "psr-4": {
