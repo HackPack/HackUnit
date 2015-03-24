@@ -63,13 +63,16 @@ use kilahm\Clio\Clio;
     public static function fromCli(Clio $clio): this
     {
         // Use clio to get the settings from the cli
-        $toPath = (string $in) : string ==> {
-            $path = realpath($in);
-            if(is_string($path)) {
-                return $path;
+        $path = '';
+        $toPath = (
+            (string $in) : string ==> {
+                $path = realpath($in);
+                if(is_string($path)) {
+                    return $path;
+                }
+                return '';
             }
-            return '';
-        };
+        );
 
         $hackunitfile = $clio->option('hackunit-file')->aka('h')
             ->withRequiredValue()
@@ -86,7 +89,7 @@ use kilahm\Clio\Clio;
                 'Base path for all tests.  The path will be recursively searched for test cases.' . PHP_EOL .
                 'If path is a file, only that file will be searched for test cases.' . PHP_EOL .
                 'Multiple files/paths may be specified.'
-        );
+            );
 
         // Inject the settings from the cli
         $options = new static();
@@ -94,7 +97,7 @@ use kilahm\Clio\Clio;
         foreach($clio->allArguments() as $arg) {
             $path = realpath($arg);
             if( ! is_string($path)) {
-                $clio->showHelp('Could not find path ' . $path);
+                $clio->line('Could not find path ' . $arg);
                 exit();
             }
             $options->addIncludePath($arg);

@@ -5,5 +5,9 @@ use HackPack\HackUnit\Core\TestResult;
 
 interface ReporterInterface
 {
-    public function getReport(TestResult $result): string;
+    public function showInfo(): void;
+    public function showSuccess(...): void;
+    public function showFailure(...): void;
+    public function showSkipped(...): void;
+    public function showReport(TestResult $result): void;
 }

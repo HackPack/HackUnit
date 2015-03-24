@@ -14,7 +14,7 @@ class TestCaseTest extends TestCase
         $test = new WasRun(new ReflectionMethod(WasRun::class, 'testMethod'));
         $result = new TestResult();
         $test->run($result);
-        $this->expect($result->getTestCount())->toEqual(1);
+        $this->expect($result->testCount())->toEqual(1);
     }
 
     <<test>>
@@ -32,7 +32,7 @@ class TestCaseTest extends TestCase
         $test = new WasRun(new ReflectionMethod(WasRun::class, 'testBrokenMethod'));
         $result = new TestResult();
         $test->run($result);
-        $count = $result->getTestCount();
+        $count = $result->testCount();
         $failures = $result->getFailures();
         $this->expect($count)->toEqual(1);
         $this->expect(count($failures))->toEqual(1);
@@ -44,8 +44,8 @@ class TestCaseTest extends TestCase
         $test = new WasRun(new ReflectionMethod(WasRun::class, 'testSkip'));
         $result = new TestResult();
         $test->run($result);
-        $count = $result->getTestCount();
-        $skipped = $result->getSkipped();
+        $count = $result->testCount();
+        $skipped = $result->skipCount();
         $this->expect($count)->toEqual(1);
         $this->expect(count($skipped))->toEqual(1);
     }
@@ -75,7 +75,7 @@ class TestCaseTest extends TestCase
         $suite = new TestSuite(Vector{$group});
         $result = new TestResult();
         $suite->run($result);
-        $count = $result->getTestCount();
+        $count = $result->testCount();
         $failures = $result->getFailures();
         $this->expect($count)->toEqual(2);
         $this->expect(count($failures))->toEqual(1);

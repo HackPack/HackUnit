@@ -2,9 +2,11 @@
 namespace HackPack\HackUnit\Tests\Runner;
 
 use HackPack\HackUnit\Core\TestCase;
+use HackPack\HackUnit\Core\TestResult;
 use HackPack\HackUnit\Runner\Loading\StandardLoader;
 use HackPack\HackUnit\Runner\Runner;
 use HackPack\HackUnit\Runner\Options;
+use HackPack\HackUnit\UI\NullReporter;
 
 class RunnerTest extends TestCase
 {
@@ -13,11 +15,17 @@ class RunnerTest extends TestCase
     {
         $options = new Options();
         $options->addIncludePath(__DIR__ . '/../Fixtures/Loading');
-        $runner = new Runner($options, StandardLoader::create($options));
+        $result = new TestResult();
+        $runner = new Runner(
+            NullReporter::create(),
+            $options,
+            StandardLoader::create($options),
+            $result,
+        );
 
-        $result = $runner->run();
+        $runner->run();
 
-        $this->expect($result->getTestCount())->toEqual(6);
+        $this->expect($result->testCount())->toEqual(6);
     }
 
     <<test>>
@@ -25,10 +33,15 @@ class RunnerTest extends TestCase
     {
         $options = new Options();
         $options->addIncludePath(__DIR__ . '/../Fixtures/Loading');
-        $runner = new Runner($options, StandardLoader::create($options));
+        $result = new TestResult();
+        $runner = new Runner(
+            NullReporter::create(),
+            $options,
+            StandardLoader::create($options),
+            $result,
+        );
 
-        $result = $runner->run();
-
-        $this->expect(is_null($result->getTime()))->toEqual(false);
+        $runner->run();
+        $this->expect(is_null($result->getStartTime()))->toEqual(false);
     }
 }

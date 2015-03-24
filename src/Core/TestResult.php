@@ -9,19 +9,21 @@ class TestResult
 {
     use EventEmitter;
 
-    protected Vector<Origin> $failures;
-    protected Vector<Origin> $skipped;
+    protected Vector<Origin> $failures = Vector{};
     protected ?float $startTime;
     protected ?float $endTime;
+    protected int $failCount = 0;
+    protected int $skipCount = 0;
+    protected int $runCount = 0;
+    protected int $groupCount = 0;
 
-    public function __construct(protected int $runCount = 0, protected int $errorCount = 0)
+    public function __construct()
     {
-        $this->failures = Vector {};
-        $this->skipped = Vector {};
     }
 
     public function groupStarted() : void
     {
+        $this->groupCount++;
     }
 
     public function testStarted(): void
@@ -35,27 +37,27 @@ class TestResult
         $this->endTime = null;
     }
 
+    public function stopTimer(): void
+    {
+        if($this->endTime === null) {
+            $this->endTime = microtime(true);
+        }
+    }
+
     public function getStartTime(): ?float
     {
         return $this->startTime;
     }
 
-    public function getTime(): ?float
+    public function getTime(): float
     {
-        if($this->endTime === null) {
-            $this->endTime = microtime(true);
+        $end = $this->endTime === null ? microtime(true) : $this->endTime;
+        $start = $this->startTime;
+        if($start === null) {
+            throw new \LogicException('Timer must be started before the test run time is computed.');
         }
 
-        if($this->startTime === null) {
-            return null;
-        }
-
-        return (float)($this->endTime - $this->startTime);
-    }
-
-    public function getTestCount(): int
-    {
-        return $this->runCount;
+        return (float)($end - $start);
     }
 
     public function testPassed(): void
@@ -79,15 +81,13 @@ class TestResult
     {
         $parser = new TraceParser($exception);
         $this->failures->add($parser->getOrigin());
-        $this->errorCount++;
+        $this->failCount++;
         $this->trigger('testFailed');
     }
 
     public function testSkipped(\Exception $exception): void
     {
-        $parser = new TraceParser($exception);
-        $this->skipped->add($parser->getOrigin());
-        $this->errorCount++;
+        $this->skipCount++;
         $this->trigger('testSkipped');
     }
 
@@ -102,8 +102,24 @@ class TestResult
         return $this->failures;
     }
 
-    public function getSkipped(): Vector<Origin>
+    public function failCount(): int
     {
-        return $this->skipped;
+        return $this->failCount;
     }
+
+    public function skipCount(): int
+    {
+        return $this->skipCount;
+    }
+
+    public function groupCount(): int
+    {
+        return $this->groupCount;
+    }
+
+    public function testCount(): int
+    {
+        return $this->runCount;
+    }
+
 }

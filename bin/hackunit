@@ -1,6 +1,9 @@
 #!/usr/bin/env hhvm
 <?hh
 
+require_once __DIR__ . '/hackunit.php';
+
+
 $files = array(
     __DIR__ . '/../../vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',
@@ -23,13 +26,4 @@ if (!$found) {
         'php composer.phar install' . PHP_EOL);
 }
 
-use HackPack\HackUnit\UI\Console;
-use HackPack\HackUnit\Runner\Options;
-use HackPack\HackUnit\Runner\Loading\StandardLoader;
-use kilahm\Clio\Clio;
-
-$clio = Clio::fromCli();
-$options = Options::fromCli($clio);
-$loader = StandardLoader::create($options);
-$app = new Console($clio, $options, $loader);
-$app->run();
+HackPack\HackUnit\run();

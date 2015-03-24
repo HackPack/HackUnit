@@ -7,10 +7,10 @@ use HackPack\HackUnit\Core\TestCase;
 class TestResultTest extends TestCase
 {
     <<test>>
-    public function test_getTestCount_should_return_number_of_tests_run(): void
+    public function test_testCount_should_return_number_of_tests_run(): void
     {
         $result = $this->getResult();
-        $count = $result->getTestCount();
+        $count = $result->testCount();
         $this->expect($count)->toEqual(1);
     }
 
@@ -53,16 +53,6 @@ class TestResultTest extends TestCase
     }
 
     <<test>>
-    public function test_getSkipped_returns_message(): void
-    {
-        $result = $this->getSkippedResult();
-        $skipped = $result->getSkipped();
-        $skip = $skipped->at(0);
-        $message = $skip['message'];
-        $this->expect($message)->toEqual('Skipped');
-    }
-
-    <<test>>
     public function test_startTimer_should_set_start_time(): void
     {
         $result = new TestResult();
@@ -80,6 +70,8 @@ class TestResultTest extends TestCase
         $startTime = $result->getStartTime();
         $time = $result->getTime();
 
+        $this->expect($startTime === null)->toEqual(false);
+        invariant($startTime !== null, '');
         $this->expect($time < $startTime)->toEqual(true);
     }
 
