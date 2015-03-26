@@ -54,10 +54,10 @@ class StandardLoaderTest extends TestCase
 
         $this->expect($groups->count())->toEqual(3);
         foreach($groups as $group) {
-            switch(get_class($group['test']->at(0))) {
+            switch(get_class($group['tests']->at(0)['instance'])) {
             case \OneTest::class:
-                $this->expect($group['test']->at(1) instanceof \OneTest)->toEqual(true);
-                $this->expect($group['test']->count())->toEqual(2);
+                $this->expect($group['tests']->at(1)['instance'] instanceof \OneTest)->toEqual(true);
+                $this->expect($group['tests']->count())->toEqual(2);
                 $this->expect($group['start']->count())->toEqual(0);
                 $this->expect($group['end']->count())->toEqual(0);
                 $this->expect($group['setup']->count())->toEqual(1);
@@ -65,8 +65,8 @@ class StandardLoaderTest extends TestCase
                 break;
 
             case \TwoTest::class:
-                $this->expect($group['test']->at(1) instanceof \TwoTest)->toEqual(true);
-                $this->expect($group['test']->count())->toEqual(2);
+                $this->expect($group['tests']->at(1)['instance'] instanceof \TwoTest)->toEqual(true);
+                $this->expect($group['tests']->count())->toEqual(2);
                 $this->expect($group['start']->count())->toEqual(0);
                 $this->expect($group['end']->count())->toEqual(0);
                 $this->expect($group['setup']->count())->toEqual(0);
@@ -74,8 +74,8 @@ class StandardLoaderTest extends TestCase
                 break;
 
             case \ThreeTest::class:
-                $this->expect($group['test']->at(1) instanceof \ThreeTest)->toEqual(true);
-                $this->expect($group['test']->count())->toEqual(2);
+                $this->expect($group['tests']->at(1)['instance'] instanceof \ThreeTest)->toEqual(true);
+                $this->expect($group['tests']->count())->toEqual(2);
                 $this->expect($group['start']->count())->toEqual(1);
                 $this->expect($group['end']->count())->toEqual(1);
                 $this->expect($group['setup']->count())->toEqual(0);

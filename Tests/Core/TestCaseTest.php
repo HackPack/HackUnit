@@ -11,27 +11,27 @@ class TestCaseTest extends TestCase
     <<test>>
     public function testResult(): void
     {
-        $test = new WasRun(new ReflectionMethod(WasRun::class, 'testMethod'));
+        $test = new WasRun();
         $result = new TestResult();
-        $test->run($result);
+        $test->run($result, new ReflectionMethod(WasRun::class, 'testMethod'));
         $this->expect($result->testCount())->toEqual(1);
     }
 
     <<test>>
     public function testTemplateMethod(): void
     {
-        $test = new WasRun(new ReflectionMethod(WasRun::class, 'testMethod'));
+        $test = new WasRun();
         $result = new TestResult();
-        $test->run($result);
+        $test->run($result, new ReflectionMethod(WasRun::class, 'testMethod'));
         $this->expect($test->log)->toEqual(Vector{'testMethod'});
     }
 
     <<test>>
     public function testFailedResult(): void
     {
-        $test = new WasRun(new ReflectionMethod(WasRun::class, 'testBrokenMethod'));
+        $test = new WasRun();
         $result = new TestResult();
-        $test->run($result);
+        $test->run($result, new ReflectionMethod(WasRun::class, 'testBrokenMethod'));
         $count = $result->testCount();
         $failures = $result->getFailures();
         $this->expect($count)->toEqual(1);
@@ -39,11 +39,11 @@ class TestCaseTest extends TestCase
     }
 
     <<test>>
-    public function testSkippedResult(): void
+    public function skippedResult(): void
     {
-        $test = new WasRun(new ReflectionMethod(WasRun::class, 'testSkip'));
+        $test = new WasRun();
         $result = new TestResult();
-        $test->run($result);
+        $test->run($result, new ReflectionMethod(WasRun::class, 'testSkip'));
         $count = $result->testCount();
         $skipped = $result->skipCount();
         $this->expect($count)->toEqual(1);
@@ -53,9 +53,9 @@ class TestCaseTest extends TestCase
     <<test>>
     public function testSuite(): void
     {
-        $firstTest = new WasRun(new ReflectionMethod(WasRun::class, 'testMethod'));
-        $secondTest = new WasRun(new ReflectionMethod(WasRun::class, 'testBrokenMethod'));
-        $startend = new WasRun(new ReflectionMethod(WasRun::class, 'markAsMalformed'));
+        $firstTest = new WasRun();
+        $secondTest = new WasRun();
+        $startend = new WasRun();
 
         $group = shape(
             'start' => Vector{
@@ -64,7 +64,16 @@ class TestCaseTest extends TestCase
             'setup' => Vector{
                 new ReflectionMethod(WasRun::class, 'setUp')
             },
-            'test' => Vector{$firstTest, $secondTest},
+            'tests' => Vector{
+                shape(
+                    'instance' => $firstTest,
+                    'method' => new ReflectionMethod(WasRun::class, 'testMethod')
+                ),
+                shape(
+                    'instance' => $secondTest,
+                    'method' => new ReflectionMethod(WasRun::class, 'brokenMethod')
+                ),
+            },
             'teardown' => Vector{
                 new ReflectionMethod(WasRun::class, 'tearDown')
             },

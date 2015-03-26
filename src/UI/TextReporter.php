@@ -15,25 +15,25 @@ class TextReporter implements ReporterInterface
     const string VERSION = "0.4.0-dev";
     private bool $colorIsEnabled = false;
 
-    private static StyleGroup $stylePass = shape(
+    public static StyleGroup $stylePass = shape(
         'fg' => TextColor::green,
         'bg' => BackgroundColor::normal,
         'effects' => Vector{}
     );
 
-    private static StyleGroup $styleFail = shape(
+    public static StyleGroup $styleFail = shape(
         'fg' => TextColor::white,
         'bg' => BackgroundColor::red,
         'effects' => Vector{},
     );
 
-    private static StyleGroup $styleSkip = shape(
+    public static StyleGroup $styleSkip = shape(
         'fg' => TextColor::black,
         'bg' => BackgroundColor::light_yellow,
         'effects' => Vector{}
     );
 
-    private static StyleGroup $styleInfo = shape(
+    public static StyleGroup $styleInfo = shape(
         'fg' => TextColor::blue,
         'bg' => BackgroundColor::normal,
         'effects' => Vector{}
@@ -51,23 +51,32 @@ class TextReporter implements ReporterInterface
 
     public function showFailure(...): void
     {
-        $this->clio->show(
-            $this->clio->style('F')->with(self::$styleFail)
-        );
+        if($this->colorIsEnabled) {
+            $out = $this->clio->style('F')->with(self::$styleFail);
+        } else {
+            $out = 'F';
+        }
+        $this->clio->show($out);
     }
 
     public function showSuccess(...): void
     {
-        $this->clio->show(
-            $this->clio->style('.')->with(self::$stylePass)
-        );
+        if($this->colorIsEnabled) {
+            $out = $this->clio->style('.')->with(self::$stylePass);
+        } else {
+            $out = '.';
+        }
+        $this->clio->show($out);
     }
 
     public function showSkipped(...): void
     {
-        $this->clio->show(
-            $this->clio->style('S')->with(self::$styleSkip)
-        );
+        if($this->colorIsEnabled) {
+            $out = $this->clio->style('S')->with(self::$styleSkip);
+        } else {
+            $out = 'S';
+        }
+        $this->clio->show($out);
     }
 
     public function showReport(TestResult $result): void
@@ -87,12 +96,16 @@ class TextReporter implements ReporterInterface
 
     public function getFailureHead(int $failCount): string
     {
-        return sprintf(
-            "There %s %d %s:\n\n",
+        $head = sprintf(
+            'There %s %d %s:',
             $failCount > 1 ? 'were' : 'was',
             $failCount,
             $failCount > 1 ? 'failures' : 'failure'
         );
+        if($this->colorIsEnabled) {
+            $head = $this->clio->style($head)->with(self::$styleFail);
+        }
+        return $head;
     }
 
     public function getFailures(TestResult $result): string
@@ -105,12 +118,24 @@ class TextReporter implements ReporterInterface
         $failures = '';
         $origins = $result->getFailures();
         foreach($result->getFailures() as $i => $origin) {
-            $method = sprintf("%d) %s\n", $i + 1, $origin['method']);
-            $message = sprintf("%s\n", $origin['message']);
-            $location = sprintf("%s\n\n", $origin['location']);
-            $failures .= $method . $message . $location;
+            $failures .= $this->banner($i + 1) .
+                $origin['test method'] . 'failed at line ' . $origin['test location']['line'] . PHP_EOL .
+                $origin['message'] . PHP_EOL;
         }
         return $this->getFailureHead($failCount) . PHP_EOL . PHP_EOL . $failures;
+    }
+
+    protected function banner(int $failNumber) : string
+    {
+        // TODO: use clio to format this
+        return str_pad(' Failure ' . $failNumber . ' ', $this->screenWidth(), '-', STR_PAD_BOTH) . PHP_EOL;
+    }
+
+    <<__Memoize>>
+    protected function screenWidth() : int
+    {
+        // TODO: use clio to get the screen width
+        return (int)exec('tput cols');
     }
 
     public function getHeader(TestResult $result): string
@@ -126,7 +151,9 @@ class TextReporter implements ReporterInterface
     public function getFooter(TestResult $result): string
     {
         $numbers = Vector{};
-        $numbers->add(sprintf("%d tests run", $result->testCount()));
+        $testCount = $result->testCount();
+        $testWord = $testCount === 1 ? 'test' : 'tests';
+        $numbers->add(sprintf("%d %s run", $testCount, $testWord));
 
         $skipCount = $result->skipCount();
         if ($skipCount > 0) {
@@ -134,9 +161,18 @@ class TextReporter implements ReporterInterface
         }
 
         $failCount = $result->failCount();
-        $foot = $failCount > 0 ?
-            $this->clio->style('FAILURES')->with(self::$styleFail) :
-            $this->clio->style('PASS')->with(self::$stylePass);
+        $skipCount = $result->skipCount();
+        if($this->colorIsEnabled) {
+            $foot = $failCount > 0 ?
+                $this->clio->style('FAIL')->with(self::$styleFail) :
+                (
+                    $skipCount > 0 ?
+                    $this->clio->style('CONDITIONAL PASS')->with(self::$styleSkip) :
+                    $this->clio->style('PASS')->with(self::$stylePass)
+                );
+        } else {
+            $foot = $failCount > 0 ? 'FAIL' : ($skipCount > 0 ? 'CONDITIONAL PASS' : 'PASS');
+        }
 
         if($failCount > 0) {
             $numbers->add(sprintf("%d failed", $failCount));

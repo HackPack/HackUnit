@@ -6,7 +6,7 @@ use HackPack\HackUnit\Exception\MarkTestAsSkipped;
 
 abstract class TestCase implements TestInterface
 {
-    final public function __construct(private \ReflectionMethod $test)
+    final public function __construct()
     {
     }
 
@@ -20,6 +20,11 @@ abstract class TestCase implements TestInterface
         return new CallableExpectation($callable);
     }
 
+    public function skip(): void
+    {
+        $this->markAsSkipped();
+    }
+
     public function markAsSkipped(string $message = "Skipped"): void
     {
         throw new MarkTestAsSkipped($message);
@@ -30,14 +35,14 @@ abstract class TestCase implements TestInterface
         throw new MalformedSuite('All HackUnit specific methods must accept zero arguments and return void.');
     }
 
-    final public function run(TestResult $result): void
+    final public function run(TestResult $result, \ReflectionMethod $test): void
     {
         try {
             $result->testStarted();
-            $this->test->invoke($this);
+            $test->invoke($this);
             $result->testPassed();
         } catch(MarkTestAsSkipped $e) {
-            $result->testSkipped($e);
+            $result->testSkipped();
         } catch (\Exception $e) {
             $result->testFailed($e);
         }

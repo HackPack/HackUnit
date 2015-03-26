@@ -64,7 +64,7 @@ class StandardLoader implements LoaderInterface
         $group = shape(
             'start' => Vector{},
             'setup' => Vector{},
-            'test' => Vector{},
+            'tests' => Vector{},
             'teardown' => Vector{},
             'end' => Vector{},
         );
@@ -86,8 +86,9 @@ class StandardLoader implements LoaderInterface
             }
 
             if($method->getAttribute(TestGroupAttribute::test) !== null) {
-                $group['test']->add($classMirror->newInstance(
-                    $this->verifyMethodSignature($method)
+                $group['tests']->add(shape(
+                    'instance' => $classMirror->newInstance(),
+                    'method' => $this->verifyMethodSignature($method)
                 ));
             }
 
@@ -103,7 +104,7 @@ class StandardLoader implements LoaderInterface
             }
         }
 
-        return $group['test']->isEmpty() ? null : $group;
+        return $group['tests']->isEmpty() ? null : $group;
     }
 
     protected function verifyMethodSignature(ReflectionMethod $method) : ReflectionMethod

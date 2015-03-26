@@ -17,10 +17,6 @@ class TestResult
     protected int $runCount = 0;
     protected int $groupCount = 0;
 
-    public function __construct()
-    {
-    }
-
     public function groupStarted() : void
     {
         $this->groupCount++;
@@ -85,7 +81,7 @@ class TestResult
         $this->trigger('testFailed');
     }
 
-    public function testSkipped(\Exception $exception): void
+    public function testSkipped(): void
     {
         $this->skipCount++;
         $this->trigger('testSkipped');

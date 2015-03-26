@@ -8,6 +8,7 @@ use kilahm\Clio\Clio;
     protected Set<string> $includePaths = Set{};
     protected Set<string> $excludedPaths = Set{};
     protected string $hackUnitFile = '';
+    protected bool $colors = true;
 
     public function addIncludePath(string $path): this
     {
@@ -36,6 +37,17 @@ use kilahm\Clio\Clio;
     public function getExcludedPaths(): Set<string>
     {
         return $this->excludedPaths;
+    }
+
+    public function setColors(bool $withColors): this
+    {
+        $this->colors = $withColors;
+        return $this;
+    }
+
+    public function withColor(): bool
+    {
+        return $this->colors;
     }
 
     public function setHackUnitFile(string $hackUnitFile): this
@@ -84,6 +96,9 @@ use kilahm\Clio\Clio;
             ->transformedBy($toPath)
             ->describedAs('File or folder to exclude.');
 
+        $colors = $clio->flag('no-colors')->aka('c')
+            ->describedAs('Disable ANSI color codes.');
+
         $include = $clio->arg('path-to-tests')
             ->describedAs(
                 'Base path for all tests.  The path will be recursively searched for test cases.' . PHP_EOL .
@@ -107,6 +122,11 @@ use kilahm\Clio\Clio;
             $options->addExcludedPath($path);
         }
 
+        if($colors->wasPresent()) {
+            $options->setColors(false);
+        } else {
+            $options->setColors(true);
+        }
         return $options;
     }
 }

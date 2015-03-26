@@ -8,14 +8,14 @@ use HackPack\HackUnit\Core\TestCase;
 class ExpectationTest extends TestCase
 {
     <<test>>
-    public function test_getContext_returns_value_being_tested(): void
+    public function getContext_returns_value_being_tested(): void
     {
         $expectation = new Expectation(1 + 1);
         $this->expect($expectation->getContext())->toEqual(2);
     }
 
     <<test>>
-    public function test_toEqual_does_not_throw_exception_when_true(): void
+    public function toEqual_does_not_throw_exception_when_true(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation(1 + 1);
@@ -24,7 +24,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toEqual_throws_ExpectationException_if_fails(): void
+    public function toEqual_throws_ExpectationException_if_fails(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation(1 + 1);
@@ -33,7 +33,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toBeIdenticalTo_throws_when_not_identical(): void
+    public function toBeIdenticalTo_throws_when_not_identical(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation(new Expectation(1));
@@ -42,7 +42,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toBeIdenticalTo_does_not_throw_when_identical(): void
+    public function toBeIdenticalTo_does_not_throw_when_identical(): void
     {
         $this->expectCallable(() ==> {
             $ex = new Expectation(1);
@@ -52,7 +52,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toMatch_does_not_throw_exception_when_matches(): void
+    public function toMatch_does_not_throw_exception_when_matches(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation("hello");
@@ -61,7 +61,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toMatch_throws_ExpectationException_if_fails(): void
+    public function toMatch_throws_ExpectationException_if_fails(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation("hello");
@@ -70,7 +70,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toBeInstanceOf_does_not_throw_exception_when_match(): void
+    public function toBeInstanceOf_does_not_throw_exception_when_match(): void
     {
         $instance = new Expectation("string here");
         $this->expectCallable(() ==> {
@@ -80,7 +80,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toBeInstanceOf_does_throw_exception_when_does_not_match(): void
+    public function toBeInstanceOf_does_throw_exception_when_does_not_match(): void
     {
         $instance = new Expectation("string here");
         $this->expectCallable(() ==> {
@@ -90,7 +90,7 @@ class ExpectationTest extends TestCase
     }
 
     <<test>>
-    public function test_toBeInstanceOf_does_throw_exception_when_not_class(): void
+    public function toBeInstanceOf_does_throw_exception_when_not_class(): void
     {
         $this->expectCallable(() ==> {
             $expectation = new Expectation("string here");

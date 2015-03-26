@@ -15,6 +15,9 @@ function run() : void
     $options = Options::fromCli($clio);
     $loader = StandardLoader::create($options);
     $reporter = new TextReporter($clio);
+    if($options->withColor()) {
+        $reporter->enableColor();
+    }
     $runner = new Runner($reporter, $options, $loader, new TestResult());
     $runner->run();
 }
