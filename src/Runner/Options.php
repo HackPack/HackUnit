@@ -109,6 +109,11 @@ use kilahm\Clio\Clio;
         // Inject the settings from the cli
         $options = new static();
 
+        $args = $clio->allArguments();
+        if($args->isEmpty()) {
+            $clio->showHelp('Please specify the base path(s) to your tests.');
+            exit(1);
+        }
         foreach($clio->allArguments() as $arg) {
             $path = realpath($arg);
             if( ! is_string($path)) {
