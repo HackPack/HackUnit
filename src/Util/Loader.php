@@ -3,13 +3,16 @@
 namespace HackPack\HackUnit\Util;
 
 use HackPack\HackUnit\Assertion\AssertionBuilder;
+use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Test\Suite;
 
 final class Loader
 {
+
     public function __construct(
         private Set<string> $includes,
         private Set<string> $excludes,
+        private Vector<(function(MalformedSuite):void)> $malformedListeners = Vector{},
     )
     {
     }
@@ -106,68 +109,91 @@ final class Loader
 
     private function isSuiteSetup(\ReflectionMethod $methodMirror) : bool
     {
-        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            // Inform the user?
+        // Need to mark with <<setup('suite')>>
+        $setup = $methodMirror->getAttribute('setup');
+        if(! is_array($setup) || array_search('suite', $setup) === false) {
             return false;
         }
-        $setup = $methodMirror->getAttribute('setup');
 
-        // Need to mark with <<setup('suite')>>
-        return
-            is_array($setup) &&
-            array_search('suite', $setup) !== false;
+        // No parameters
+        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
+            $this->emitMalformedSuite(new MalformedSuite(
+                $methodMirror,
+                'Setup methods must not require parameters.',
+            ));
+            return false;
+        }
 
+        return true;
     }
 
     private function isTestSetup(\ReflectionMethod $methodMirror) : bool
     {
-        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            // Inform the user?
-            return false;
-        }
+        // Need to mark with <<setup('test')>> or <<setup>>
         $setup = $methodMirror->getAttribute('setup');
-        if(! is_array($setup)) {
-            // Need to mark with <<setup>>
+        if(
+            ! is_array($setup) ||
+            (count($setup) > 0 && array_search('suite', $setup) === false)
+        ) {
             return false;
         }
 
-        // Parameter is optional for tests
-        return
-            count($setup) === 0 ||
-            array_search('test', $setup) !== false;
+        // No parameters
+        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
+            $this->emitMalformedSuite(new MalformedSuite(
+                $methodMirror,
+                'Setup methods must not require parameters.',
+            ));
+            return false;
+        }
+
+        return true;
     }
 
     private function isSuiteTeardown(\ReflectionMethod $methodMirror) : bool
     {
-        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            // Inform the user?
+        // Need to mark with <<teardown('suite')>>
+        $teardown = $methodMirror->getAttribute('teardown');
+        if(
+            ! is_array($teardown) ||
+            array_search('suite', $teardown) === false
+        ) {
             return false;
         }
-        $teardown = $methodMirror->getAttribute('teardown');
 
-        // Need to mark with <<teardown('suite')>>
-        return
-            is_array($teardown) &&
-            array_search('suite', $teardown) !== false;
+        // No parameters
+        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
+            $this->emitMalformedSuite(new MalformedSuite(
+                $methodMirror,
+                'Teardown methods must not require parameters.',
+            ));
+            return false;
+        }
 
+        return true;
     }
 
     private function isTestTeardown(\ReflectionMethod $methodMirror) : bool
     {
-        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            // Inform the user?
-            return false;
-        }
+        // Need to mark with <<teardown('test')>> or <<teardown>>
         $teardown = $methodMirror->getAttribute('teardown');
-        if(! is_array($teardown)) {
-            // Need to mark with <<teardown>>
+        if(
+            ! is_array($teardown) ||
+            (count($teardown) > 0 && array_search('test', $teardown) === false)
+        ) {
             return false;
         }
 
-        // Parameter is optional for tests
-        return
-            count($teardown) === 0 ||
-            array_search('test', $teardown) !== false;
+        // No parameters
+        if($methodMirror->getNumberOfRequiredParameters() !== 0) {
+            $this->emitMalformedSuite(new MalformedSuite(
+                $methodMirror,
+                'Teardown methods must not require parameters.',
+            ));
+            return false;
+        }
+
+        return true;
     }
 
     private function isTest(\ReflectionMethod $methodMirror) : bool
@@ -181,12 +207,18 @@ final class Loader
         $params = new Vector($methodMirror->getParameters());
 
         if($params->count() !== 1) {
-            // Inform the user?
+            $this->emitMalformedSuite(new MalformedSuite(
+                $methodMirror,
+                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assertion\AssertionBuilder',
+            ));
             return false;
         }
 
         if($params->at(0)->getTypeText() !== AssertionBuilder::class) {
-            // Inform the user?
+            $this->emitMalformedSuite(new MalformedSuite(
+                $methodMirror,
+                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assertion\AssertionBuilder',
+            ));
             return false;
         }
 
@@ -198,5 +230,18 @@ final class Loader
         // Is there a better way of dynamically including files?
         /* HH_FIXME[1002] */
         require_once($fileName);
+    }
+
+    private function emitMalformedSuite(MalformedSuite $event) : void
+    {
+        foreach($this->malformedListeners as $l) {
+            $l($event);
+        }
+    }
+
+    public function onMalformedSuite((function(MalformedSuite):void) $listener) : this
+    {
+        $this->malformedListeners->add($listener);
+        return $this;
     }
 }

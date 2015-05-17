@@ -1,9 +1,6 @@
 #!/usr/bin/env hhvm
 <?hh
 
-require_once __DIR__ . '/hackunit.php';
-
-
 $files = array(
     __DIR__ . '/../../vendor/autoload.php',
     __DIR__ . '/../../../autoload.php',
@@ -26,4 +23,5 @@ if (!$found) {
         'php composer.phar install' . PHP_EOL);
 }
 
-HackPack\HackUnit\run();
+$app = HackPack\HackUnit\HackUnit::fromCli();
+$app->run();

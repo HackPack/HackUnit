@@ -23,6 +23,13 @@ final class Options
         $clio->arg('path')
             ->describedAs('File or directory to include when loading test suites.  Multiple files and/or directories may be specified.');
 
+        foreach($clio->allArguments() as $path) {
+            $fullPath = realpath($path);
+            if($fullPath === false) {
+                $clio->showHelp('Unable to locate path ' . $path);
+                exit(1);
+            }
+        }
         $options->includes->addAll($clio->allArguments());
         $options->excludes->addAll($excludes->allValues());
 

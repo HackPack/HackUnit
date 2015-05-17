@@ -39,10 +39,21 @@ class Reporter
         $this->clio->line('SUCCESS!');
     }
 
+    public function reportPass() : void
+    {
+        $this->clio->line('Test Passed!');
+    }
+
+    public function reportUntestedException(\Exception $e) : void
+    {
+        $this->clio->line($e->getMessage());
+    }
+
     public function displaySummary() : void
     {
         if($this->starttime !== null) {
-            $report = sprintf('Finished testing in %.2f seconds.', (float)($this->starttime - microtime(true)));
+            $start = $this->starttime;
+            $report = sprintf('Finished testing in %.2f seconds.', (float)(microtime(true) - $start));
         } else {
             $report = 'Finished testing.';
         }
