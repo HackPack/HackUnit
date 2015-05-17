@@ -47,10 +47,8 @@ final class Loader
 
     private function buildSuite(\ReflectionClass $classMirror) : ?Suite
     {
-        $constructor = $classMirror->getConstructor();
-        if( $constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
-            // Test suites must never require params to be constructed.
-            // Inform the user somehow?
+        // Must have <<TestSuite>> attribute
+        if($classMirror->getAttribute('TestSuite') === null) {
             return null;
         }
 
@@ -58,15 +56,36 @@ final class Loader
         $classFile = $classMirror->getFileName();
         if( ! is_string($className) || ! is_string($classFile)) {
             // Reflector unable to figure the class name/file
-            // This indicates something is wrong, so consertavitely do not
+            // This indicates something is wrong, so conservatively do not
             // load this suite
-            // Inform the user?
+            return null;
+        }
+
+        $constructor = $classMirror->getConstructor();
+        if( $constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
+            // Test suites must never require params to be constructed.
+            $this->emitMalformedSuite(MalformedSuite::badClass(
+                $classMirror,
+                'Test suite classes must not require parameters in their constructors.'
+            ));
+            return null;
+        }
+
+        $methods = (new Vector($classMirror->getMethods()))->filter($m ==> {
+            $attrs = new Map($m->getAttributes());
+            return
+                $attrs->containsKey('Test') ||
+                $attrs->containsKey('Setup') ||
+                $attrs->containsKey('TearDown');
+        });
+
+        if($methods->isEmpty()) {
             return null;
         }
 
         $instance = $classMirror->newInstance();
         $suite = new Suite($classFile, $className);
-        foreach($classMirror->getMethods() as $methodMirror) {
+        foreach($methods as $methodMirror) {
             if(
                 $methodMirror->isAbstract() ||
                 $methodMirror->isConstructor() ||
@@ -74,6 +93,10 @@ final class Loader
                 $methodMirror->isStatic()
             ) {
                 // Must be normal instance method
+                $this->emitMalformedSuite(MalformedSuite::badMethod(
+                    $methodMirror,
+                    'Setup, TearDown, and Test methods must be instance methods and must not be the constructor, the destructor, nor be abstract.',
+                ));
                 continue;
             }
 
@@ -109,15 +132,15 @@ final class Loader
 
     private function isSuiteSetup(\ReflectionMethod $methodMirror) : bool
     {
-        // Need to mark with <<setup('suite')>>
-        $setup = $methodMirror->getAttribute('setup');
+        // Need to mark with <<Setup('suite')>>
+        $setup = $methodMirror->getAttribute('Setup');
         if(! is_array($setup) || array_search('suite', $setup) === false) {
             return false;
         }
 
         // No parameters
         if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            $this->emitMalformedSuite(new MalformedSuite(
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
                 'Setup methods must not require parameters.',
             ));
@@ -129,8 +152,8 @@ final class Loader
 
     private function isTestSetup(\ReflectionMethod $methodMirror) : bool
     {
-        // Need to mark with <<setup('test')>> or <<setup>>
-        $setup = $methodMirror->getAttribute('setup');
+        // Need to mark with <<Setup('test')>> or <<Setup>>
+        $setup = $methodMirror->getAttribute('Setup');
         if(
             ! is_array($setup) ||
             (count($setup) > 0 && array_search('suite', $setup) === false)
@@ -140,7 +163,7 @@ final class Loader
 
         // No parameters
         if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            $this->emitMalformedSuite(new MalformedSuite(
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
                 'Setup methods must not require parameters.',
             ));
@@ -152,8 +175,8 @@ final class Loader
 
     private function isSuiteTeardown(\ReflectionMethod $methodMirror) : bool
     {
-        // Need to mark with <<teardown('suite')>>
-        $teardown = $methodMirror->getAttribute('teardown');
+        // Need to mark with <<TearDown('suite')>>
+        $teardown = $methodMirror->getAttribute('TearDown');
         if(
             ! is_array($teardown) ||
             array_search('suite', $teardown) === false
@@ -163,9 +186,9 @@ final class Loader
 
         // No parameters
         if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            $this->emitMalformedSuite(new MalformedSuite(
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
-                'Teardown methods must not require parameters.',
+                'Tear down methods must not require parameters.',
             ));
             return false;
         }
@@ -175,8 +198,8 @@ final class Loader
 
     private function isTestTeardown(\ReflectionMethod $methodMirror) : bool
     {
-        // Need to mark with <<teardown('test')>> or <<teardown>>
-        $teardown = $methodMirror->getAttribute('teardown');
+        // Need to mark with <<TearDown('test')>> or <<TearDown>>
+        $teardown = $methodMirror->getAttribute('TearDown');
         if(
             ! is_array($teardown) ||
             (count($teardown) > 0 && array_search('test', $teardown) === false)
@@ -186,7 +209,7 @@ final class Loader
 
         // No parameters
         if($methodMirror->getNumberOfRequiredParameters() !== 0) {
-            $this->emitMalformedSuite(new MalformedSuite(
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
                 'Teardown methods must not require parameters.',
             ));
@@ -198,8 +221,8 @@ final class Loader
 
     private function isTest(\ReflectionMethod $methodMirror) : bool
     {
-        // Look for <<test>> attribute
-        if($methodMirror->getAttribute('test') === null) {
+        // Look for <<Test>> attribute
+        if($methodMirror->getAttribute('Test') === null) {
             return false;
         }
 
@@ -207,7 +230,7 @@ final class Loader
         $params = new Vector($methodMirror->getParameters());
 
         if($params->count() !== 1) {
-            $this->emitMalformedSuite(new MalformedSuite(
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
                 'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assertion\AssertionBuilder',
             ));
@@ -215,7 +238,7 @@ final class Loader
         }
 
         if($params->at(0)->getTypeText() !== AssertionBuilder::class) {
-            $this->emitMalformedSuite(new MalformedSuite(
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
                 'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assertion\AssertionBuilder',
             ));
