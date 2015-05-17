@@ -1,0 +1,29 @@
+{
+    "name": "hackpack/hackunit",
+    "description": "An xUnit testing framework for Hack",
+    "type": "library",
+    "keywords": ["testing", "xunit", "hack", "hhvm", "hacklang"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Brian Scaturro",
+            "email": "scaturrob@gmail.com",
+            "role": "Creator"
+        },
+        {
+            "name": "Isaac Leinweber",
+            "email": "brotchen@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "kilahm/clio": "~0.2.0",
+        "hackpack/hack-class-scanner": "~1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "HackPack\\HackUnit\\": "src/"
+        }
+    },
+    "bin": ["bin/hackunit"]
+}
