@@ -10,7 +10,7 @@ final class ContextAssertion<Tcontext>
 {
     use Assertion<Tcontext>;
 
-    public function equalTo(Tcontext $expected) : void
+    public function equalTo(mixed $expected) : void
     {
         $pass = $this->invert ?
             ($this->context == $expected) :
@@ -60,8 +60,12 @@ final class ContextAssertion<Tcontext>
 
     public function contains(string $substring) : void
     {
-        if(is_string($this->context)) {
-
+        if(
+            is_string($this->context) &&
+            strpos($this->context, $substring) !== false
+        ) {
+            $this->emitSuccess(new Success());
         }
+        $this->emitFailure(new Failure());
     }
 }
