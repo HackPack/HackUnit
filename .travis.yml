@@ -8,4 +8,4 @@ before_script:
 
 script:
     - hh_server --check .
-    - bin/hackunit --exclude Tests/Fixtures/ Tests/
+    - hhvm -v Eval.Jit=false bin/hackunit --exclude test/Fixtures test
