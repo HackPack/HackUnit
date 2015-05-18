@@ -31,6 +31,5 @@ class LoaderTest
     <<Test>>
     public function doNotThrow(AssertionBuilder $assert) : void
     {
-        throw new \Exception('Look at this!');
     }
 }
