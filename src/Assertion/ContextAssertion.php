@@ -3,7 +3,6 @@
 namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
-use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
 
 final class ContextAssertion<Tcontext>
@@ -16,7 +15,7 @@ final class ContextAssertion<Tcontext>
             ($this->context == $expected) :
             ($this->context != $expected);
         if($pass) {
-            $this->emitSuccess(new Success());
+            $this->emitSuccess();
             return;
         }
         $this->emitFailure(new Failure());
@@ -28,7 +27,7 @@ final class ContextAssertion<Tcontext>
             ($this->context === $expected) :
             ($this->context !== $expected);
         if($pass) {
-            $this->emitSuccess(new Success());
+            $this->emitSuccess();
             return;
         }
         $this->emitFailure(new Failure());
@@ -40,7 +39,7 @@ final class ContextAssertion<Tcontext>
             ($this->context <= $expected) :
             ($this->context > $expected);
         if($pass) {
-            $this->emitSuccess(new Success());
+            $this->emitSuccess();
             return;
         }
         $this->emitFailure(new Failure());
@@ -52,7 +51,7 @@ final class ContextAssertion<Tcontext>
             ($this->context >= $expected) :
             ($this->context < $expected);
         if($pass) {
-            $this->emitSuccess(new Success());
+            $this->emitSuccess();
             return;
         }
         $this->emitFailure(new Failure());
@@ -64,7 +63,7 @@ final class ContextAssertion<Tcontext>
             is_string($this->context) &&
             strpos($this->context, $substring) !== false
         ) {
-            $this->emitSuccess(new Success());
+            $this->emitSuccess();
         }
         $this->emitFailure(new Failure());
     }

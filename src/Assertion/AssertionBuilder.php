@@ -4,7 +4,6 @@ namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
-use HackPack\HackUnit\Event\Success;
 
 class AssertionBuilder
 {
@@ -12,7 +11,7 @@ class AssertionBuilder
     public function __construct(
         private Vector<(function(Failure):void)> $failureListeners,
         private Vector<(function(Skip):void)> $skipListeners,
-        private Vector<(function(Success):void)> $successListeners,
+        private Vector<(function():void)> $successListeners,
     )
     {
     }

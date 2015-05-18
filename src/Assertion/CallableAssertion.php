@@ -15,7 +15,7 @@ class CallableAssertion
         private (function():void) $context,
         private Vector<(function(Failure):void)> $failureListeners,
         private Vector<(function(Skip):void)> $skipListeners,
-        private Vector<(function(Success):void)> $successListeners,
+        private Vector<(function():void)> $successListeners,
     )
     {
     }
@@ -42,13 +42,13 @@ class CallableAssertion
                 return;
             }
 
-            $this->emitSuccess(new Success());
+            $this->emitSuccess();
             return;
         }
 
         // Context is not callable or did not throw
         $this->invert ?
-            $this->emitSuccess(new Success()) :
+            $this->emitSuccess() :
             $this->emitFailure(new Failure());
     }
 }

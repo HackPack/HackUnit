@@ -4,7 +4,6 @@ namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
-use HackPack\HackUnit\Event\Success;
 
 trait Assertion<Tcontext>
 {
@@ -12,13 +11,13 @@ trait Assertion<Tcontext>
     private Tcontext $context;
     private Vector<(function(Failure):void)> $failureListeners;
     private Vector<(function(Skip):void)> $skipListeners;
-    private Vector<(function(Success):void)> $successListeners;
+    private Vector<(function():void)> $successListeners;
 
     public function __construct(
         Tcontext $context,
         Vector<(function(Failure):void)> $failureListeners,
         Vector<(function(Skip):void)> $skipListeners,
-        Vector<(function(Success):void)> $successListeners,
+        Vector<(function():void)> $successListeners,
     )
     {
         $this->context = $context;
@@ -43,28 +42,24 @@ trait Assertion<Tcontext>
         return $this;
     }
 
-    private function emitSuccess(Success $e) : void
+    private function emitSuccess() : void
     {
-        $this->successListeners->map($l ==> {
-            $l($e);
-            return $l;
-        });
+        foreach($this->successListeners as $l) {
+            $l();
+        }
     }
 
     private function emitFailure(Failure $e) : void
     {
-        $this->failureListeners->map($l ==> {
+        foreach($this->failureListeners as $l) {
             $l($e);
-            return $l;
-        });
+        }
     }
 
-    public function skip() : void
+    public function skip(Skip $e) : void
     {
-        $event = new Skip();
-        $this->skipListeners->map($l ==> {
-            $l($event);
-            return $l;
-        });
+        foreach($this->skipListeners as $l) {
+            $l($e);
+        }
     }
 }

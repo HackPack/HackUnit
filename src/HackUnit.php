@@ -4,7 +4,6 @@ namespace HackPack\HackUnit;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
-use HackPack\HackUnit\Event\Success;
 
 final class HackUnit
 {
@@ -14,7 +13,7 @@ final class HackUnit
     private Vector<(function(Failure):void)> $failureListeners = Vector{};
     private Vector<(function():void)> $passListeners = Vector{};
     private Vector<(function(Skip):void)> $skipListeners = Vector{};
-    private Vector<(function(Success):void)> $successListeners = Vector{};
+    private Vector<(function():void)> $successListeners = Vector{};
     private Vector<(function(\Exception):void)> $untestedExceptionListeners = Vector{};
 
     public static function fromCli() : this
@@ -37,6 +36,8 @@ final class HackUnit
         $app->onStart(inst_meth($reporter, 'startTiming'));
         $app->onFinish(inst_meth($reporter, 'displaySummary'));
         $app->onUntestedException(inst_meth($reporter, 'reportUntestedException'));
+
+        $reporter->identifyPackage();
         return $app;
     }
 
@@ -69,6 +70,7 @@ final class HackUnit
                 $this->runSuite($suite, $assertionBuilder);
             } catch (\Exception $e) {
                 $this->emitUntestedException($e);
+                exit(1);
             }
         }
         $this->finish();
@@ -78,11 +80,7 @@ final class HackUnit
     {
         $suite->setup();
         foreach($suite->cases() as $case) {
-            try{
-                $this->runTest($case, $builder);
-            } catch (\Exception $e) {
-                $this->emitUntestedException($e);
-            }
+            $this->runTest($case, $builder);
         }
         $suite->teardown();
     }
@@ -150,7 +148,7 @@ final class HackUnit
         return $this;
     }
 
-    public function onSuccess((function(Success):void) $listener) : this
+    public function onSuccess((function():void) $listener) : this
     {
         $this->successListeners->add($listener);
         return $this;

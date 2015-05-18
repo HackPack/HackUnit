@@ -4,6 +4,8 @@ namespace HackPack\HackUnit\Util;
 
 final class Options
 {
+    const string VERSION = '0.4-dev';
+
     public Set<string> $includes = Set{};
     public Set<string> $excludes = Set{};
     public bool $colors = true;

@@ -10,11 +10,23 @@ final class Loader
 {
 
     public function __construct(
-        private Set<string> $includes,
-        private Set<string> $excludes,
+        private Set<string> $includes = Set{},
+        private Set<string> $excludes = Set{},
         private Vector<(function(MalformedSuite):void)> $malformedListeners = Vector{},
     )
     {
+    }
+
+    public function including(string $path) : this
+    {
+        $this->includes->add($path);
+        return $this;
+    }
+
+    public function excluding(string $path) : this
+    {
+        $this->excludes->add($path);
+        return $this;
     }
 
     public function testSuites() : Vector<Suite>

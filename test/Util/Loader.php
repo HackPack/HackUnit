@@ -3,23 +3,34 @@
 namespace HackPack\HackUnit\Tests;
 
 use HackPack\HackUnit\Assertion\AssertionBuilder;
+use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Util\Loader;
 
+<<TestSuite>>
 class LoaderTest
 {
-    <<__Memoize>>
-    private function fixurePath() : string
+    private function fixturePath(string $extra) : string
     {
-        return realpath(dirname(__DIR__) . '/Fixtures');
+        return realpath(dirname(__DIR__) . '/Fixtures' . $extra);
     }
 
-    <<test>>
+    <<Test>>
     public function throwIt(AssertionBuilder $assert) : void
     {
+        $errors = Vector{};
+        $loader = new Loader();
+        $loader
+            ->including($this->fixturePath('/ValidSuite.php'))
+            ->onMalformedSuite((MalformedSuite $event) ==> {
+                $errors->add($event);
+            })
+            ;
+        $assert->context($errors->count())->identicalTo(0);
     }
 
-    <<test>>
+    <<Test>>
     public function doNotThrow(AssertionBuilder $assert) : void
     {
+        throw new \Exception('Look at this!');
     }
 }
