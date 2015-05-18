@@ -82,6 +82,7 @@ class Reporter
         }
         $this->clio->show($message);
         $this->testCount++;
+        $this->passCount++;
     }
 
     public function reportUntestedException(\Exception $e) : void
@@ -102,6 +103,42 @@ class Reporter
         // Blank line between the dots and the summary
         $this->clio->line(PHP_EOL);
         $this->clio->line($this->timeReport());
+        $this->clio->line($this->testSummary());
+        $this->clio->show($this->errorReport());
+    }
+
+    public function testSummary() : string
+    {
+        $successCount = (string)$this->successCount;
+        $passCount = (string)$this->passCount;
+        $failedCount = (string)$this->failEvents->count();
+        $skipCount = (string)$this->skipEvents->count();
+
+        if($this->colors) {
+            $successCount = $this->clio->style($successCount)->with(Style::success());
+            $passCount = $this->clio->style($passCount)->with(Style::success());
+
+            $failedStyle = $failedCount === '0' ? Style::success() : Style::error();
+            $skipStyle = $skipCount === '0' ? Style::success() : Style::warn();
+
+            $failedCount = $this->clio->style($failedCount)->with($failedStyle);
+            $skipCount = $this->clio->style($skipCount)->with($skipStyle);
+        }
+
+        return sprintf(
+            'Assertions: %s/%d Tests: %s/%d Failed: %s Skipped %s',
+            $successCount,
+            $this->assertCount,
+            $passCount,
+            $this->testCount,
+            $failedCount,
+            $skipCount,
+        );
+    }
+
+    public function errorReport() : string
+    {
+        return 'Report HERE';
     }
 
     private function timeReport() : string
