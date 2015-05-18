@@ -49,9 +49,9 @@ class Suite
         $this->testSetup->add($f);
     }
 
-    public function registerTest((function(AssertionBuilder):void) $test) : void
+    public function registerTest((function(AssertionBuilder):void) $test, \ReflectionMethod $testMethod) : void
     {
-        $this->cases->add(new TestCase($this, $test));
+        $this->cases->add(new TestCase($this, $test, $testMethod));
     }
 
     public function setup() : void

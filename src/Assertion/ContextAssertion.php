@@ -3,7 +3,6 @@
 namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
-use HackPack\HackUnit\Event\Success;
 
 final class ContextAssertion<Tcontext>
 {
@@ -18,7 +17,13 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
             return;
         }
-        $this->emitFailure(new Failure());
+        $message = sprintf(
+            'Assertion failed.  Expected %s to %s %s.',
+            (string)$this->context,
+            $this->invert ? 'not equal' : 'equal',
+            (string)$expected,
+        );
+        $this->emitFailure($message);
     }
 
     public function identicalTo(Tcontext $expected) : void
@@ -30,7 +35,13 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
             return;
         }
-        $this->emitFailure(new Failure());
+        $message = sprintf(
+            'Assertion failed.  Expected %s to %s %s.',
+            (string)$this->context,
+            $this->invert ? 'not to be identical to' : 'to be identical to',
+            (string)$expected,
+        );
+        $this->emitFailure($message);
     }
 
     public function greaterThan(Tcontext $expected) : void
@@ -42,7 +53,13 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
             return;
         }
-        $this->emitFailure(new Failure());
+        $message = sprintf(
+            'Assertion failed.  Expected %s to %s %s.',
+            (string)$this->context,
+            $this->invert ? 'not be greater than' : 'to be greater than',
+            (string)$expected,
+        );
+        $this->emitFailure($message);
     }
 
     public function lessThan(Tcontext $expected) : void
@@ -54,17 +71,38 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
             return;
         }
-        $this->emitFailure(new Failure());
+        $message = sprintf(
+            'Assertion failed.  Expected %s to %s %s.',
+            (string)$this->context,
+            $this->invert ? 'not be less than' : 'to be less than',
+            (string)$expected,
+        );
+        $this->emitFailure($message);
     }
 
     public function contains(string $substring) : void
     {
+        if( ! is_string($this->context)) {
+            if(is_object($this->context)){
+                $ctype = get_class($this->context);
+            } else {
+                $ctype = gettype($this->context);
+            }
+            $this->emitFailure('Contains assertion is only valid for string contexts. ' . $ctype . ' provided.');
+            return;
+        }
         if(
             is_string($this->context) &&
             strpos($this->context, $substring) !== false
         ) {
             $this->emitSuccess();
         }
-        $this->emitFailure(new Failure());
+        $message = sprintf(
+            'Assertion failed.  Expected %s to %s %s.',
+            (string)$this->context,
+            $this->invert ? 'not contain' : 'to contain',
+            (string)$substring,
+        );
+        $this->emitFailure($message);
     }
 }

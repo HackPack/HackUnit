@@ -138,7 +138,14 @@ class Reporter
 
     public function errorReport() : string
     {
-        return 'Report HERE';
+        $report = '';
+        foreach($this->failEvents as $idx => $e) {
+            $report .= PHP_EOL . PHP_EOL;
+            $report .= $e->testMethod() . PHP_EOL;
+            $report .= $e->testFile() . ' line ' . $e->assertionLine() . PHP_EOL;
+            $report .= $e->getMessage() . PHP_EOL;
+        }
+        return $report;
     }
 
     private function timeReport() : string

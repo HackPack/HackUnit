@@ -2,6 +2,9 @@
 
 namespace HackPack\HackUnit\Util;
 
+use HackPack\HackUnit\Assertion\CallableAssertion;
+use HackPack\HackUnit\Assertion\ContextAssertion;
+
 type TraceItem = shape(
     'file' => string,
     'line' => int,
@@ -29,5 +32,19 @@ class Trace
                 'function' => array_key_exists('function', $t) ? (string)$t['function'] : '',
                 'class' => array_key_exists('class', $t) ? (string)$t['class'] : '',
             ));
+    }
+
+    public static function findAssertionLine(Vector<TraceItem> $trace) : int
+    {
+        foreach($trace as $idx => $item) {
+            if($item['class'] === CallableAssertion::class || $item['class'] === ContextAssertion::class) {
+                // Next item in the stack was the actual caller
+                if($trace->containsKey($idx + 1)) {
+                    return $trace->at($idx + 1)['line'];
+                }
+                return -1;
+            }
+        }
+        return -1;
     }
 }

@@ -8,12 +8,19 @@ use HackPack\HackUnit\Event\Skip;
 class AssertionBuilder
 {
 
+    private ?\ReflectionMethod $testMethod = null;
+
     public function __construct(
         private Vector<(function(Failure):void)> $failureListeners,
         private Vector<(function(Skip):void)> $skipListeners,
         private Vector<(function():void)> $successListeners,
     )
     {
+    }
+
+    public function setMethod(\ReflectionMethod $method) : void
+    {
+        $this->testMethod = $method;
     }
 
     public function context<Tcontext>(Tcontext $context) : ContextAssertion<Tcontext>
@@ -23,6 +30,7 @@ class AssertionBuilder
             $this->failureListeners,
             $this->skipListeners,
             $this->successListeners,
+            $this->testMethod,
         );
     }
 
@@ -33,6 +41,7 @@ class AssertionBuilder
             $this->failureListeners,
             $this->skipListeners,
             $this->successListeners,
+            $this->testMethod,
         );
     }
 }

@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Util\Trace;
 
 trait Assertion<Tcontext>
 {
@@ -12,18 +13,21 @@ trait Assertion<Tcontext>
     private Vector<(function(Failure):void)> $failureListeners;
     private Vector<(function(Skip):void)> $skipListeners;
     private Vector<(function():void)> $successListeners;
+    private ?\ReflectionMethod $testMethod;
 
     public function __construct(
         Tcontext $context,
         Vector<(function(Failure):void)> $failureListeners,
         Vector<(function(Skip):void)> $skipListeners,
         Vector<(function():void)> $successListeners,
+        ?\ReflectionMethod $testMethod,
     )
     {
         $this->context = $context;
         $this->failureListeners = $failureListeners;
         $this->skipListeners = $skipListeners;
         $this->successListeners = $successListeners;
+        $this->testMethod = $testMethod;
     }
 
     public function isNot() : this
@@ -49,8 +53,14 @@ trait Assertion<Tcontext>
         }
     }
 
-    private function emitFailure(Failure $e) : void
+    private function emitFailure(string $message) : void
     {
+        $e = new Failure(
+            $message,
+            $this->context,
+            Trace::generate(),
+            $this->testMethod,
+        );
         foreach($this->failureListeners as $l) {
             $l($e);
         }

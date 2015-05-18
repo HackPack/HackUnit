@@ -133,9 +133,12 @@ final class Loader
             }
 
             if($this->isTest($methodMirror)) {
-                $suite->registerTest((AssertionBuilder $builder) ==> {
-                    $methodMirror->invoke($instance, $builder);
-                });
+                $suite->registerTest(
+                    (AssertionBuilder $builder) ==> {
+                        $methodMirror->invoke($instance, $builder);
+                    },
+                    $methodMirror,
+                );
             }
         }
 

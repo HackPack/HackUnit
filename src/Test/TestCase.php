@@ -9,6 +9,7 @@ class TestCase
     public function __construct(
         private Suite $suite,
         private (function(AssertionBuilder):void) $test,
+        private \ReflectionMethod $testMethod,
     )
     {
     }
@@ -25,6 +26,7 @@ class TestCase
 
     public function run<Tcontext>(AssertionBuilder $builder) : void
     {
+        $builder->setMethod($this->testMethod);
         $t = $this->test;
         $t($builder);
     }
