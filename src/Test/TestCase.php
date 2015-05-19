@@ -10,6 +10,7 @@ class TestCase
         private Suite $suite,
         private (function(AssertionBuilder):void) $test,
         private \ReflectionMethod $testMethod,
+        private bool $skip,
     )
     {
     }
@@ -26,6 +27,10 @@ class TestCase
 
     public function run<Tcontext>(AssertionBuilder $builder) : void
     {
+        if($this->skip){
+            $this->suite->skip($this->testMethod);
+            return;
+        }
         $builder->setMethod($this->testMethod);
         $t = $this->test;
         $t($builder);

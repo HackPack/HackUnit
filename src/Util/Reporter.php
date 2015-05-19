@@ -66,6 +66,11 @@ class Reporter
     {
         $this->skipEvents->add($event);
         $this->testCount++;
+        $message = 'S';
+        if($this->colors) {
+            $message = $this->clio->style($message)->with(Style::warn());
+        }
+        $this->clio->show($message);
     }
 
     public function reportSuccess() : void
@@ -104,6 +109,7 @@ class Reporter
         $this->clio->line(PHP_EOL);
         $this->clio->line($this->timeReport());
         $this->clio->line($this->testSummary());
+        $this->clio->show($this->skipReport());
         $this->clio->show($this->errorReport());
     }
 
@@ -136,16 +142,36 @@ class Reporter
         );
     }
 
+    public function skipReport() : string
+    {
+        if($this->skipEvents->isEmpty()) {
+            return '';
+        }
+        return PHP_EOL . $this->clio->style('Skipped tests:')->with(Style::warn()) . PHP_EOL .
+            implode(PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
+                return implode(PHP_EOL, [
+                    ($idx + 1) . ') ' . $e->testMethod(),
+                    '  In file ' . $e->testFile(),
+                ]);
+            })) .
+            PHP_EOL;
+
+    }
     public function errorReport() : string
     {
+        if($this->failEvents->isEmpty()) {
+            return '';
+        }
         $report = '';
         foreach($this->failEvents as $idx => $e) {
-            $report .= PHP_EOL . PHP_EOL;
-            $report .= $e->testMethod() . PHP_EOL;
-            $report .= $e->testFile() . ' line ' . $e->assertionLine() . PHP_EOL;
-            $report .= $e->getMessage() . PHP_EOL;
+            $report .= implode(PHP_EOL,[
+                '',
+                $this->clio->style(($idx + 1) . ') Test failed in ' . $e->testMethod())->with(Style::error()),
+                'On line ' . $e->assertionLine() . ' of ' . $e->testFile(),
+                $e->getMessage()
+            ]);
         }
-        return $report;
+        return $report . PHP_EOL;
     }
 
     private function timeReport() : string

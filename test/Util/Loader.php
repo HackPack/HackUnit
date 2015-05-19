@@ -28,8 +28,14 @@ class LoaderTest
         $assert->context($errors->count())->identicalTo(0);
     }
 
-    <<Test>>
+    <<Test,Skip>>
     public function doNotThrow(AssertionBuilder $assert) : void
     {
+    }
+
+    <<Test>>
+    public function fail(AssertionBuilder $assert) : void
+    {
+        $assert->context(3)->equalTo(2);
     }
 }

@@ -78,6 +78,7 @@ final class HackUnit
 
     private function runSuite(Test\Suite $suite, Assertion\AssertionBuilder $builder) : void
     {
+        $suite->registerSkipHandlers($this->skipListeners);
         $suite->setup();
         foreach($suite->cases() as $case) {
             $this->runTest($case, $builder);

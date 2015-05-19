@@ -30,7 +30,7 @@ class Failure
         if($this->testMethod === null) {
             return '';
         }
-        return $this->testMethod->getName();
+        return $this->testMethod->class . ' -> ' . $this->testMethod->name;
     }
 
     public function context() : mixed

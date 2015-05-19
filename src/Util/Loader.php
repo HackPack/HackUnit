@@ -96,7 +96,7 @@ final class Loader
         }
 
         $instance = $classMirror->newInstance();
-        $suite = new Suite($classFile, $className);
+        $suite = new Suite($classFile, $className, $classMirror->getAttribute('Skip') !== null);
         foreach($methods as $methodMirror) {
             if(
                 $methodMirror->isAbstract() ||
@@ -138,6 +138,7 @@ final class Loader
                         $methodMirror->invoke($instance, $builder);
                     },
                     $methodMirror,
+                    $methodMirror->getAttribute('Skip') !== null,
                 );
             }
         }

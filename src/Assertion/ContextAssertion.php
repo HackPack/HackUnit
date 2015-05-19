@@ -11,17 +11,15 @@ final class ContextAssertion<Tcontext>
     public function equalTo(mixed $expected) : void
     {
         $pass = $this->invert ?
-            ($this->context == $expected) :
-            ($this->context != $expected);
+            ($this->context != $expected) :
+            ($this->context == $expected);
         if($pass) {
             $this->emitSuccess();
             return;
         }
-        $message = sprintf(
-            'Assertion failed.  Expected %s to %s %s.',
-            (string)$this->context,
-            $this->invert ? 'not equal' : 'equal',
-            (string)$expected,
+        $message = $this->constructErrorMessage(
+            $expected,
+            $this->invert ? 'to not equal' : 'to equal',
         );
         $this->emitFailure($message);
     }
@@ -29,17 +27,15 @@ final class ContextAssertion<Tcontext>
     public function identicalTo(Tcontext $expected) : void
     {
         $pass = $this->invert ?
-            ($this->context === $expected) :
-            ($this->context !== $expected);
+            ($this->context !== $expected) :
+            ($this->context === $expected);
         if($pass) {
             $this->emitSuccess();
             return;
         }
-        $message = sprintf(
-            'Assertion failed.  Expected %s to %s %s.',
-            (string)$this->context,
-            $this->invert ? 'not to be identical to' : 'to be identical to',
-            (string)$expected,
+        $message = $this->constructErrorMessage(
+            $expected,
+            $this->invert ? 'to not be identical to' : 'to be identical to',
         );
         $this->emitFailure($message);
     }
@@ -53,11 +49,9 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
             return;
         }
-        $message = sprintf(
-            'Assertion failed.  Expected %s to %s %s.',
-            (string)$this->context,
-            $this->invert ? 'not be greater than' : 'to be greater than',
-            (string)$expected,
+        $message = $this->constructErrorMessage(
+            $expected,
+            $this->invert ? 'to be less than or equal to' : 'to be greater than',
         );
         $this->emitFailure($message);
     }
@@ -71,11 +65,9 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
             return;
         }
-        $message = sprintf(
-            'Assertion failed.  Expected %s to %s %s.',
-            (string)$this->context,
-            $this->invert ? 'not be less than' : 'to be less than',
-            (string)$expected,
+        $message = $this->constructErrorMessage(
+            $expected,
+            $this->invert ? 'to be greater than or equal to' : 'to be less than',
         );
         $this->emitFailure($message);
     }
@@ -97,12 +89,22 @@ final class ContextAssertion<Tcontext>
         ) {
             $this->emitSuccess();
         }
-        $message = sprintf(
-            'Assertion failed.  Expected %s to %s %s.',
-            (string)$this->context,
-            $this->invert ? 'not contain' : 'to contain',
-            (string)$substring,
+        $message = $this->constructErrorMessage(
+            $substring,
+            $this->invert ? 'not to contain' : 'to contain',
         );
         $this->emitFailure($message);
+    }
+
+    private function constructErrorMessage(mixed $expected, string $expectation) : string
+    {
+        return sprintf(
+            'Expected %s %s %s %s %s.',
+            gettype($this->context),
+            (string)$this->context,
+            $expectation,
+            gettype($expected),
+            (string)$expected,
+        );
     }
 }

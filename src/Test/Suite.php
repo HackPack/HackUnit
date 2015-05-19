@@ -3,6 +3,7 @@
 namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Assertion\AssertionBuilder;
+use HackPack\HackUnit\Event\Skip;
 
 class Suite
 {
@@ -11,10 +12,12 @@ class Suite
     private Vector<(function():void)> $testSetup = Vector{};
     private Vector<(function():void)> $testTeardown = Vector{};
     private Vector<(function():void)> $suiteTeardown = Vector{};
+    private Vector<(function(Skip):void)> $skipListeners = Vector{};
 
     public function __construct(
         private string $file,
         private string $className,
+        private bool $skip,
     )
     {
     }
@@ -49,9 +52,22 @@ class Suite
         $this->testSetup->add($f);
     }
 
-    public function registerTest((function(AssertionBuilder):void) $test, \ReflectionMethod $testMethod) : void
+    public function registerTest((function(AssertionBuilder):void) $test, \ReflectionMethod $testMethod, bool $skip) : void
     {
-        $this->cases->add(new TestCase($this, $test, $testMethod));
+        $this->cases->add(new TestCase($this, $test, $testMethod, $this->skip || $skip));
+    }
+
+    public function registerSkipHandlers(Traversable<(function(Skip):void)> $handlers) : void
+    {
+        $this->skipListeners->addAll($handlers);
+    }
+
+    public function skip(\ReflectionMethod $testMethod) : void
+    {
+        $e = new Skip($testMethod);
+        foreach($this->skipListeners as $l) {
+            $l($e);
+        }
     }
 
     public function setup() : void
