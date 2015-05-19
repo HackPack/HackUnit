@@ -22,6 +22,11 @@ class CallableAssertion
     {
     }
 
+    public function raiseException(?string $exceptionName = null, ?string $message = null) : void
+    {
+        $this->willThrow($exceptionName, $message);
+    }
+
     public function willThrow(?string $exceptionName = null, ?string $message = null) : void
     {
         try{
