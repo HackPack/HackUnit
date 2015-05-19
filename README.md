@@ -24,8 +24,11 @@ This option may be specified multiple times, one for each directory and/or file 
 
 Test Suites
 -----------
-To define a test suite, you simply need to create a class and [annotate](http://docs.hhvm.com/manual/en/hack.attributes.php) the appropriate methods.
+To define a test suite, you simply need to create a class and [annotate](http://docs.hhvm.com/manual/en/hack.attributes.php) the class and the appropriate methods.
 All methods annotated as described below must be instance methods (non-static), and may not be the constructor, nor the destructor.
+
+For HackUnit to recognize a class definition as a test suite, you must annotate the class with a `<<TestSuite>>`
+[attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 
 You may inspect HackUnit’s test files for concrete examples.
 
@@ -36,23 +39,27 @@ Multiple setup methods may be declared, but the execution order is not guarantee
 Each setup method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as setup and it requires a parameter, it will not be executed.
 
 ```php
-<<Setup(‘suite’)>>
-public function setUpSuite() : void
+<<TestSuite>>
+class MySuite
 {
-  // Perform tasks before any tests in this suite are run
-}
+    <<Setup(‘suite’)>>
+    public function setUpSuite() : void
+    {
+      // Perform tasks before any tests in this suite are run
+    }
 
-<<Setup(‘test’)>>
-public function setUpTest() : void
-{
-  // Perform tasks just before each test in this suite is run
-}
+    <<Setup(‘test’)>>
+    public function setUpTest() : void
+    {
+      // Perform tasks just before each test in this suite is run
+    }
 
-<<Setup>>
-public function setUpTest() : void
-{
-  // Multiple set up methods may be defined
-  // If there are no parameters to the stup attribute, the method is treated like a test setup
+    <<Setup>>
+    public function setUpTest() : void
+    {
+      // Multiple set up methods may be defined
+      // If there are no parameters to the stup attribute, the method is treated like a test setup
+    }
 }
 ```
 
@@ -63,22 +70,26 @@ Multiple teardown methods may be declared, but the execution order is not guaran
 Each teardown method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as teardown and it requires a parameter, it will not be executed.
 
 ```php
-<<TearDown(‘suite’)>>
-public function cleanUpAfterSuite() : void
+<<TestSuite>>
+class MySuite
 {
-  // Perform tasks after all tests in this suite are run
-}
+    <<TearDown(‘suite’)>>
+    public function cleanUpAfterSuite() : void
+    {
+      // Perform tasks after all tests in this suite are run
+    }
 
-<<TearDown(‘test’)>>
-public function cleanUpAfterTest() : void
-{
-  // Perform tasks just after each test in this suite is run
-}
+    <<TearDown(‘test’)>>
+    public function cleanUpAfterTest() : void
+    {
+      // Perform tasks just after each test in this suite is run
+    }
 
-<<TearDown>>
-public function cleanUpMoarStuff() : void
-{
-  // This is also a ‘test’ teardown method
+    <<TearDown>>
+    public function cleanUpMoarStuff() : void
+    {
+      // This is also a ‘test’ teardown method
+    }
 }
 ```
 
@@ -94,13 +105,17 @@ namespace My\Namespace\Test;
 
 use \HackPack\HackUnit\Assertion\AssertionBuilder;
 
-<<Test>>
-public function testSomething(AssertionBuilder $assert) : void
+<<TestSuite>>
+class MySuite
 {
-  // Do some testing here!
-  $assert->context(2)->isNot()->equalTo(3);
-  $assert->callable(() ==> {throw new \Exception(‘bad error)})
-    ->willThrow(\Exception::class, ‘bad error’);
+    <<Test>>
+    public function testSomething(AssertionBuilder $assert) : void
+    {
+      // Do some testing here!
+      $assert->context(2)->isNot()->equalTo(3);
+      $assert->callable(() ==> {throw new \Exception(‘bad error)})
+        ->willThrow(\Exception::class, ‘bad error’);
+    }
 }
 ```
 
@@ -151,7 +166,8 @@ To check if a particular function and/or method throws an exception (or does not
 use HackPack\HackUnit\Assertion\AssertionBuilder;
 
 <<TestSuite>>
-class MyTest{
+class MyTest
+{
     <<Test>>
     public function testSomething(AssertionBuilder $assert) : void
     {
@@ -172,6 +188,41 @@ class MyTest{
 There is only one assertion method defined in the callable assertion: `willThrow` (with an alias of `raiseException`) which accepts two strings as optional parameters.  The first one is the name
 of the exception class you expect to be thrown, the second is the exception message you expect.  Setting either parameter to `null` (or not providing it) will
 allow any exception class/message to pass the assertion, respectively.
+
+Skipping Tests
+-------------
+There are two ways to skip execution of a particular test method:
+
+1. Add the attribute `<<Skip>>` to the test method or the test suite.  If the `<<Skip>>` attribute is added to the suite, all tests in that class will be skipped.
+1. Invoke the `skip()` method of the `AssertionBuilder` object passed to your test method.
+
+```php
+use HackPack\HackUnit\Assertion\AssertionBuilder;
+
+<<TestSuite, Skip>>
+class SkippedSuite
+{
+    // All methods here would be skipped
+}
+
+<<TestSuite>>
+class MySuite
+{
+    <<Test, Skip>>
+    public function skippedTest(AssertionBuilder $assert) : void
+    {
+        // This will not be run and the test will be marked skip in the report.
+    }
+
+    <<Test>>
+    public function skippFromMiddleOfTest(AssertionBuilder $assert) : void
+    {
+        // This will be run
+        $assert->skip();
+        // This will not be run and the test will be marked skip in the report.
+    }
+}
+```
 
 Notes
 -----
