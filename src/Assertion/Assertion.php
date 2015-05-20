@@ -53,13 +53,13 @@ trait Assertion<Tcontext>
         }
     }
 
-    private function emitFailure(string $message) : void
+    private function emitFailure(string $message, mixed $comparitor) : void
     {
         $e = new Failure(
             $message,
             $this->context,
-            Trace::generate(),
-            $this->testMethod,
+            $comparitor,
+            Trace::findAssertionCall(),
         );
         foreach($this->failureListeners as $l) {
             $l($e);

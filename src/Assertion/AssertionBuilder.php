@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Util\Trace;
 
 class AssertionBuilder
 {
@@ -43,5 +44,14 @@ class AssertionBuilder
             $this->successListeners,
             $this->testMethod,
         );
+    }
+
+    public function skip() : void
+    {
+        // Caller is one up from here
+        $event = new Skip(Trace::findAssertionCall());
+        foreach($this->skipListeners as $l) {
+            $l($event);
+        }
     }
 }

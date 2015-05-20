@@ -6,17 +6,36 @@ use HackPack\HackUnit\Util\TraceItem;
 
 class Skip
 {
-    public function __construct(private \ReflectionMethod $testMethod)
+    public function __construct(private TraceItem $callSite)
     {
     }
 
-    public function testMethod() : string
+    public function testMethod() : ?string
     {
-        return $this->testMethod->class . ' -> ' . $this->testMethod->name;
+        return $this->callSite['function'] === '' ?
+            null :
+            $this->callSite['function'];
     }
 
-    public function testFile() : string
+    public function testClass() : ?string
     {
-        return (string)$this->testMethod->getFileName();
+        return $this->callSite['class'] === '' ?
+            null :
+            $this->callSite['class'];
+    }
+
+    public function testFile() : ?string
+    {
+        return $this->callSite['file'] === '' ?
+            null :
+            $this->callSite['file'];
+    }
+
+    public function assertionLine() : ?int
+    {
+        return $this->callSite['line'] === -1 ?
+            null :
+            $this->callSite['line'];
     }
 }
+

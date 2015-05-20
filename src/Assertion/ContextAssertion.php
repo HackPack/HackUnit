@@ -21,7 +21,7 @@ final class ContextAssertion<Tcontext>
             $expected,
             $this->invert ? 'to not equal' : 'to equal',
         );
-        $this->emitFailure($message);
+        $this->emitFailure($message, $expected);
     }
 
     public function identicalTo(Tcontext $expected) : void
@@ -37,7 +37,7 @@ final class ContextAssertion<Tcontext>
             $expected,
             $this->invert ? 'to not be identical to' : 'to be identical to',
         );
-        $this->emitFailure($message);
+        $this->emitFailure($message, $expected);
     }
 
     public function greaterThan(Tcontext $expected) : void
@@ -53,7 +53,7 @@ final class ContextAssertion<Tcontext>
             $expected,
             $this->invert ? 'to be less than or equal to' : 'to be greater than',
         );
-        $this->emitFailure($message);
+        $this->emitFailure($message, $expected);
     }
 
     public function lessThan(Tcontext $expected) : void
@@ -69,7 +69,7 @@ final class ContextAssertion<Tcontext>
             $expected,
             $this->invert ? 'to be greater than or equal to' : 'to be less than',
         );
-        $this->emitFailure($message);
+        $this->emitFailure($message, $expected);
     }
 
     public function contains(string $substring) : void
@@ -80,7 +80,7 @@ final class ContextAssertion<Tcontext>
             } else {
                 $ctype = gettype($this->context);
             }
-            $this->emitFailure('Contains assertion is only valid for string contexts. ' . $ctype . ' provided.');
+            $this->emitFailure('Contains assertion is only valid for string contexts. ' . $ctype . ' provided.', $substring);
             return;
         }
         if(
@@ -93,7 +93,7 @@ final class ContextAssertion<Tcontext>
             $substring,
             $this->invert ? 'not to contain' : 'to contain',
         );
-        $this->emitFailure($message);
+        $this->emitFailure($message, $substring);
     }
 
     private function constructErrorMessage(mixed $expected, string $expectation) : string

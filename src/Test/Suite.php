@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Assertion\AssertionBuilder;
 use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Util\Trace;
 
 class Suite
 {
@@ -64,7 +65,14 @@ class Suite
 
     public function skip(\ReflectionMethod $testMethod) : void
     {
-        $e = new Skip($testMethod);
+        $fname = $testMethod->getFileName();
+        $line = $testMethod->getStartLine();
+        $e = new Skip(Trace::buildItem([
+            'file' => is_string($fname) ? $fname : null,
+            'function' => $testMethod->name,
+            'class' => $testMethod->class,
+            'line' => is_int($line) ? $line : null,
+        ]));
         foreach($this->skipListeners as $l) {
             $l($e);
         }

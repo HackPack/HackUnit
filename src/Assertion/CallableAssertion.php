@@ -36,19 +36,19 @@ class CallableAssertion
             if($this->invert){
                 // Didn't expect the exception
                 $msg = 'Exception assertion failed. Unexpected exception ' . get_class($e) . ' thrown on ' . $e->getFile() . ' line ' . $e->getLine();
-                $this->emitFailure($msg);
+                $this->emitFailure($msg, null);
                 return;
             }
 
             if($exceptionName !== null && ! is_a($e, $exceptionName)) {
                 $msg = 'Exception assertion failed.  Expected exception type ' . $exceptionName . ' actual type ' . get_class($e);
-                $this->emitFailure($msg);
+                $this->emitFailure($msg, $exceptionName);
                 return;
             }
 
             if($message !== null && $e->getMessage() !== $message) {
                 $msg = 'Exception assertion failed.  Expected exception message ' . $message . ' actual message ' . $e->getMessage();
-                $this->emitFailure($msg);
+                $this->emitFailure($msg, $message);
                 return;
             }
 
@@ -62,6 +62,6 @@ class CallableAssertion
             return;
         }
         $msg = 'Exception assertion failed.  Expected exception but none was thrown.';
-        $this->emitFailure($msg);
+        $this->emitFailure($msg, $exceptionName);
     }
 }

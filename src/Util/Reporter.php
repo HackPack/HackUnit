@@ -7,10 +7,10 @@ use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
 
 use kilahm\Clio\BackgroundColor;
+use kilahm\Clio\Format\Style;
 use kilahm\Clio\Format\StyleGroup;
 use kilahm\Clio\TextColor;
 use kilahm\Clio\TextEffect;
-use kilahm\Clio\Format\Style;
 
 class Reporter
 {
@@ -150,7 +150,7 @@ class Reporter
         return PHP_EOL . $this->clio->style('Skipped tests:')->with(Style::warn()) . PHP_EOL .
             implode(PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
                 return implode(PHP_EOL, [
-                    ($idx + 1) . ') ' . $e->testMethod(),
+                    ($idx + 1) . ') ' . $this->buildMethodCall($e->testClass(), $e->testMethod()),
                     '  In file ' . $e->testFile(),
                 ]);
             })) .
@@ -164,12 +164,13 @@ class Reporter
         }
         $report = '';
         foreach($this->failEvents as $idx => $e) {
+            $methodName = $this->buildMethodCall($e->testClass(), $e->testMethod());
             $report .= implode(PHP_EOL,[
                 '',
-                $this->clio->style(($idx + 1) . ') Test failed in ' . $e->testMethod())->with(Style::error()),
+                $this->clio->style(($idx + 1) . ') Test failed in ' . $methodName)->with(Style::error()),
                 'On line ' . $e->assertionLine() . ' of ' . $e->testFile(),
                 $e->getMessage()
-            ]);
+            ]) . PHP_EOL;
         }
         return $report . PHP_EOL;
     }
@@ -187,5 +188,20 @@ class Reporter
             return $this->clio->style($message)->fg(TextColor::blue)->render();
         }
         return $message;
+    }
+
+    private function buildMethodCall(?string $className, ?string $methodName, ?StyleGroup $style = null) : string
+    {
+        if($className === null) {
+            $className = 'Unknown class';
+        }
+        if($methodName === null) {
+            $methodName = 'Unknown method';
+        }
+        $out = $className . '->' . $methodName . '()';
+        if($style !== null && $this->colors) {
+            return $this->clio->style($out)->with($style);
+        }
+        return $out;
     }
 }

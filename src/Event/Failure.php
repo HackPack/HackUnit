@@ -10,27 +10,30 @@ class Failure
     public function __construct(
         private string $message,
         private mixed $context,
-        private Vector<TraceItem> $backtrace,
-        private ?\ReflectionMethod $testMethod,
+        private mixed $comparitor,
+        private TraceItem $callSite,
     )
     {
     }
 
-    public function testFile() : string
+    public function testMethod() : ?string
     {
-        if($this->testMethod === null) {
-            return '';
-        }
-
-        return (string)$this->testMethod->getFileName();
+        return $this->callSite['function'];
     }
 
-    public function testMethod() : string
+    public function testClass() : ?string
     {
-        if($this->testMethod === null) {
-            return '';
-        }
-        return $this->testMethod->class . ' -> ' . $this->testMethod->name;
+        return $this->callSite['class'];
+    }
+
+    public function assertionLine() : ?int
+    {
+        return $this->callSite['line'];
+    }
+
+    public function testFile() : ?string
+    {
+        return $this->callSite['file'];
     }
 
     public function context() : mixed
@@ -38,10 +41,11 @@ class Failure
         return $this->context;
     }
 
-    public function assertionLine() : int
+    public function comparitor() : mixed
     {
-        return Trace::findAssertionLine($this->backtrace);
+        return $this->comparitor;
     }
+
 
     public function getMessage() : string
     {
