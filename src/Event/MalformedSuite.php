@@ -2,20 +2,53 @@
 
 namespace HackPack\HackUnit\Event;
 
+use HackPack\HackUnit\Util\Trace;
+use HackPack\HackUnit\Util\TraceItem;
+
 final class MalformedSuite
 {
     public static function badMethod(\ReflectionMethod $methodMirror, string $reason) : this
     {
-        return new static();
+        return new static(
+            Trace::buildItem([
+                'line' => $methodMirror->getStartLine(),
+                'function' => $methodMirror->name,
+                'class' => $methodMirror->class,
+                'file' => $methodMirror->getFileName(),
+            ]),
+            $reason,
+        );
     }
 
-    public static function badClass(\ReflectionClass $classMirror, string $reason) : this
+    public function __construct(
+        private TraceItem $item,
+        private string $reason,
+    )
     {
-        return new static();
     }
 
-    public function __construct()
+    public function line() : ?int
     {
+        return $this->item['line'];
+    }
 
+    public function method() : ?string
+    {
+        return $this->item['function'];
+    }
+
+    public function className() : ?string
+    {
+        return $this->item['class'];
+    }
+
+    public function fileName() : ?string
+    {
+        return $this->item['file'];
+    }
+
+    public function message() : string
+    {
+        return $this->reason;
     }
 }

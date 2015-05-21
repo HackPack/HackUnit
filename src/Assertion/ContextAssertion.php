@@ -18,8 +18,7 @@ final class ContextAssertion<Tcontext>
             return;
         }
         $message = $this->constructErrorMessage(
-            null,
-            $this->invert ? 'to not be' : 'to be',
+            $this->invert ? 'to not be null' : 'to be null',
         );
         $this->emitFailure($message, null);
     }
@@ -34,7 +33,6 @@ final class ContextAssertion<Tcontext>
             return;
         }
         $message = $this->constructErrorMessage(
-            $expected,
             $this->invert ? 'to not equal' : 'to equal',
         );
         $this->emitFailure($message, $expected);
@@ -50,7 +48,6 @@ final class ContextAssertion<Tcontext>
             return;
         }
         $message = $this->constructErrorMessage(
-            $expected,
             $this->invert ? 'to not be identical to' : 'to be identical to',
         );
         $this->emitFailure($message, $expected);
@@ -66,7 +63,6 @@ final class ContextAssertion<Tcontext>
             return;
         }
         $message = $this->constructErrorMessage(
-            $expected,
             $this->invert ? 'to be less than or equal to' : 'to be greater than',
         );
         $this->emitFailure($message, $expected);
@@ -82,7 +78,6 @@ final class ContextAssertion<Tcontext>
             return;
         }
         $message = $this->constructErrorMessage(
-            $expected,
             $this->invert ? 'to be greater than or equal to' : 'to be less than',
         );
         $this->emitFailure($message, $expected);
@@ -106,21 +101,16 @@ final class ContextAssertion<Tcontext>
             $this->emitSuccess();
         }
         $message = $this->constructErrorMessage(
-            $substring,
             $this->invert ? 'not to contain' : 'to contain',
         );
         $this->emitFailure($message, $substring);
     }
 
-    private function constructErrorMessage(mixed $expected, string $expectation) : string
+    private function constructErrorMessage(string $expectation) : string
     {
         return sprintf(
-            'Expected %s %s %s %s %s.',
-            gettype($this->context),
-            (string)$this->context,
+            'Expected context %s comparitor',
             $expectation,
-            gettype($expected),
-            (string)$expected,
         );
     }
 }

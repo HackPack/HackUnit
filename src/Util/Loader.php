@@ -8,6 +8,7 @@ use HackPack\HackUnit\Test\Suite;
 
 final class Loader
 {
+    private int $testCount = 0;
 
     public function __construct(
         private Set<string> $includes = Set{},
@@ -76,22 +77,35 @@ final class Loader
         $constructor = $classMirror->getConstructor();
         if( $constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
             // Test suites must never require params to be constructed.
-            $this->emitMalformedSuite(MalformedSuite::badClass(
-                $classMirror,
+            $this->emitMalformedSuite(MalformedSuite::badMethod(
+                $constructor,
                 'Test suite classes must not require parameters in their constructors.'
             ));
             return null;
         }
 
+        $this->testCount = 0;
         $methods = (new Vector($classMirror->getMethods()))->filter($m ==> {
             $attrs = new Map($m->getAttributes());
+            if($attrs->containsKey('Test')) {
+                $this->testCount += 1;
+            }
             return
                 $attrs->containsKey('Test') ||
                 $attrs->containsKey('Setup') ||
                 $attrs->containsKey('TearDown');
         });
 
-        if($methods->isEmpty()) {
+        if($this->testCount === 0) {
+            $traceItem = Trace::buildItem([
+                'file' => $classMirror->getFileName(),
+                'class' => $classMirror->name,
+            ]);
+            $reason = 'No test methods were found.  Did you forget to mark them with <<Test>>?';
+            $this->emitMalformedSuite(new MalformedSuite(
+                $traceItem,
+                $reason,
+            ));
             return null;
         }
 

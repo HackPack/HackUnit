@@ -10,6 +10,10 @@ use HackPack\HackUnit\Assertion\AssertionBuilder;
 <<TestSuite>>
 class ValidSuite
 {
+    public function __construct(string $notRequired = '')
+    {
+    }
+
     <<Setup('suite','test')>>
     public function setupTestAndSuite() : void
     {

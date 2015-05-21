@@ -3,6 +3,7 @@
 namespace HackPack\HackUnit\Util;
 
 use HackPack\HackUnit\Event\Failure;
+use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
 
@@ -19,6 +20,7 @@ class Reporter
 
     private Vector<Failure> $failEvents = Vector{};
     private Vector<Skip> $skipEvents = Vector{};
+    private Vector<MalformedSuite> $malformedEvents = Vector{};
 
     private int $assertCount = 0;
     private int $successCount = 0;
@@ -103,12 +105,18 @@ class Reporter
         $this->clio->line($e->getMessage());
     }
 
+    public function reportMalformedSuite(MalformedSuite $event) : void
+    {
+        $this->malformedEvents->add($event);
+    }
+
     public function displaySummary() : void
     {
         // Blank line between the dots and the summary
         $this->clio->line(PHP_EOL);
         $this->clio->line($this->timeReport());
         $this->clio->line($this->testSummary());
+        $this->clio->show($this->malformedReport());
         $this->clio->show($this->skipReport());
         $this->clio->show($this->errorReport());
     }
@@ -169,6 +177,8 @@ class Reporter
                 '',
                 $this->clio->style(($idx + 1) . ') Test failed in ' . $methodName)->with(Style::error()),
                 'On line ' . $e->assertionLine() . ' of ' . $e->testFile(),
+                'Context: ' . $this->captureVariable($e->context()),
+                'Comparitor: ' . $this->captureVariable($e->comparitor()),
                 $e->getMessage()
             ]) . PHP_EOL;
         }
@@ -190,6 +200,36 @@ class Reporter
         return $message;
     }
 
+    private function malformedReport() : string
+    {
+        if($this->malformedEvents->isEmpty()) {
+            return '';
+        }
+
+        $report = 'Some test suites were malformed:';
+        if($this->colors) {
+            $report = $this->clio->style($report)->with(Style::warn());
+        }
+
+        foreach($this->malformedEvents as $idx => $event) {
+            $report .= implode(PHP_EOL,[
+                PHP_EOL,
+                ($idx + 1) . ') ' . $this->buildMethodCall($event->className(), $event->method()),
+                $this->buildLineReference($event->line(), $event->fileName()),
+                $event->message(),
+            ]);
+        }
+
+        return $report . PHP_EOL;
+    }
+
+    private function buildLineReference(?int $lineNumber, ?string $fileName) : string
+    {
+        $lineNumber = $lineNumber === null ? '??' : (string)$lineNumber;
+        $fileName = $fileName === null ? 'Unknown file' : (string)$fileName;
+        return 'On line ' . $lineNumber . ' in file ' . $fileName;
+    }
+
     private function buildMethodCall(?string $className, ?string $methodName, ?StyleGroup $style = null) : string
     {
         if($className === null) {
@@ -203,5 +243,22 @@ class Reporter
             return $this->clio->style($out)->with($style);
         }
         return $out;
+    }
+
+    private function captureVariable(mixed $var) : string
+    {
+        if($var === null) {
+            return 'null';
+        }
+
+        ob_start();
+        var_dump($var);
+        $report = ob_get_contents();
+        ob_end_clean();
+        $trimmed = rtrim($report, PHP_EOL);
+        if(strpos($trimmed, PHP_EOL)) {
+            return PHP_EOL . $trimmed;
+        }
+        return $trimmed;
     }
 }

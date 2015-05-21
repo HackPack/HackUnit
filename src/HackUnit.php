@@ -4,6 +4,7 @@ namespace HackPack\HackUnit;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Event\MalformedSuite;
 
 final class HackUnit
 {
@@ -36,6 +37,7 @@ final class HackUnit
         $app->onStart(inst_meth($reporter, 'startTiming'));
         $app->onFinish(inst_meth($reporter, 'displaySummary'));
         $app->onUntestedException(inst_meth($reporter, 'reportUntestedException'));
+        $app->onMalformedSuite(inst_meth($reporter, 'reportMalformedSuite'));
 
         $reporter->identifyPackage();
         return $app;
@@ -158,6 +160,12 @@ final class HackUnit
     public function onUntestedException((function(\Exception):void) $listener) : this
     {
         $this->untestedExceptionListeners->add($listener);
+        return $this;
+    }
+
+    public function onMalformedSuite((function(MalformedSuite):void) $listener) : this
+    {
+        $this->loader->onMalformedSuite($listener);
         return $this;
     }
 
