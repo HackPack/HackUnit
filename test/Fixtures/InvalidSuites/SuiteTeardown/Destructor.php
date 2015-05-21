@@ -1,12 +1,12 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites;
+namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\SuiteTeardown;
 
 <<TestSuite>>
-class SetupParams
+class Destructor
 {
-    <<Setup>>
-    public function setup(string $required) : void
+    <<TearDown('suite')>>
+    public function __destruct()
     {
     }
 

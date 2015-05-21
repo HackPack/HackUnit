@@ -1,11 +1,11 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites;
+namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\Test;
 
 <<TestSuite>>
 class StaticMethods
 {
-    <<Setup>>
+    <<Test>>
     public static function setItUp() : void
     {
     }
