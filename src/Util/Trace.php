@@ -48,8 +48,13 @@ class Trace
                 $item['class'] === AssertionBuilder::class
             ) {
                 // Next item in the stack was the actual caller
-                if($trace->containsKey($idx + 1)) {
-                    return $trace->at($idx + 1);
+                if($trace->containsKey($idx + 2)) {
+                    return shape(
+                        'line' => $trace->at($idx + 1)['line'],
+                        'function' => $trace->at($idx + 2)['function'],
+                        'class' => $trace->at($idx + 2)['class'],
+                        'file' => $trace->at($idx + 1)['file'],
+                    );
                 }
                 return self::emptyTraceItem();
             }

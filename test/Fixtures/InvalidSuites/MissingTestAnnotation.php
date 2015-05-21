@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Test\Fixtures\InvalidSuites;
+namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites;
 
 use HackPack\HackUnit\Assertion\AssertionBuilder;
 

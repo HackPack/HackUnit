@@ -123,26 +123,42 @@ final class Loader
                     $methodMirror,
                     'Setup, TearDown, and Test methods must be instance methods and must not be the constructor, the destructor, nor be abstract.',
                 ));
-                continue;
+                return null;
             }
 
             $invocation = () ==> {
                 $methodMirror->invoke($instance);
             };
 
-            if($this->isSuiteSetup($methodMirror)) {
+            $isSuiteSetup = $this->isSuiteSetup($methodMirror);
+            if($isSuiteSetup === null) {
+                return null;
+            }
+            if($isSuiteSetup) {
                 $suite->registerSuiteSetup($invocation);
             }
 
-            if($this->isSuiteTeardown($methodMirror)) {
+            $isSuiteTeardown = $this->isSuiteTeardown($methodMirror);
+            if($isSuiteTeardown === null) {
+                return null;
+            }
+            if($isSuiteTeardown) {
                 $suite->registerSuiteTeardown($invocation);
             }
 
-            if($this->isTestSetup($methodMirror)) {
+            $isTestSetup = $this->isTestSetup($methodMirror);
+            if($isTestSetup === null) {
+                return null;
+            }
+            if($isTestSetup) {
                 $suite->registerTestSetup($invocation);
             }
 
-            if($this->isTestTeardown($methodMirror)) {
+            $isTestTeardown = $this->isTestTeardown($methodMirror);
+            if($isTestTeardown === null) {
+                return null;
+            }
+            if($isTestTeardown) {
                 $suite->registerTestTeardown($invocation);
             }
 
@@ -160,7 +176,7 @@ final class Loader
         return $suite;
     }
 
-    private function isSuiteSetup(\ReflectionMethod $methodMirror) : bool
+    private function isSuiteSetup(\ReflectionMethod $methodMirror) : ?bool
     {
         // Need to mark with <<Setup('suite')>>
         $setup = $methodMirror->getAttribute('Setup');
@@ -174,13 +190,13 @@ final class Loader
                 $methodMirror,
                 'Setup methods must not require parameters.',
             ));
-            return false;
+            return null;
         }
 
         return true;
     }
 
-    private function isTestSetup(\ReflectionMethod $methodMirror) : bool
+    private function isTestSetup(\ReflectionMethod $methodMirror) : ?bool
     {
         // Need to mark with <<Setup('test')>> or <<Setup>>
         $setup = $methodMirror->getAttribute('Setup');
@@ -197,13 +213,13 @@ final class Loader
                 $methodMirror,
                 'Setup methods must not require parameters.',
             ));
-            return false;
+            return null;
         }
 
         return true;
     }
 
-    private function isSuiteTeardown(\ReflectionMethod $methodMirror) : bool
+    private function isSuiteTeardown(\ReflectionMethod $methodMirror) : ?bool
     {
         // Need to mark with <<TearDown('suite')>>
         $teardown = $methodMirror->getAttribute('TearDown');
@@ -220,13 +236,13 @@ final class Loader
                 $methodMirror,
                 'Tear down methods must not require parameters.',
             ));
-            return false;
+            return null;
         }
 
         return true;
     }
 
-    private function isTestTeardown(\ReflectionMethod $methodMirror) : bool
+    private function isTestTeardown(\ReflectionMethod $methodMirror) : ?bool
     {
         // Need to mark with <<TearDown('test')>> or <<TearDown>>
         $teardown = $methodMirror->getAttribute('TearDown');
@@ -243,7 +259,7 @@ final class Loader
                 $methodMirror,
                 'Teardown methods must not require parameters.',
             ));
-            return false;
+            return null;
         }
 
         return true;
