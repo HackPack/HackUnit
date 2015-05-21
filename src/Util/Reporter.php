@@ -35,7 +35,7 @@ class Reporter
     {
         $message = 'HackUnit by HackPack version ' . Options::VERSION;
         if($this->colors) {
-            $message = $this->clio->style($message)->with(Style::info());
+            $message = $this->clio->style($message)->fg(TextColor::blue)->render();
         }
         $this->clio->line('');
         $this->clio->line($message);
