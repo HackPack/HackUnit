@@ -49,7 +49,13 @@ class AssertionBuilder
     public function skip() : void
     {
         // Caller is one up from here
-        $event = new Skip(Trace::findAssertionCall());
+        $trace = Trace::generate();
+        $event = new Skip(Trace::buildItem([
+            'line' => $trace->at(0)['line'],
+            'function' => $trace->at(1)['function'],
+            'class' => $trace->at(1)['class'],
+            'file' => $trace->at(0)['file'],
+        ]));
         foreach($this->skipListeners as $l) {
             $l($event);
         }

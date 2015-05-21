@@ -85,11 +85,21 @@ class Suite
         }
     }
 
+    public function countSetup() : int
+    {
+        return $this->suiteSetup->count();
+    }
+
     public function teardown() : void
     {
         foreach($this->suiteTeardown as $f) {
             $f();
         }
+    }
+
+    public function countTeardown() : int
+    {
+        return $this->suiteTeardown->count();
     }
 
     public function testSetup() : void
@@ -99,11 +109,21 @@ class Suite
         }
     }
 
+    public function countTestSetup() : int
+    {
+        return $this->testSetup->count();
+    }
+
     public function testTeardown() : void
     {
         foreach($this->testTeardown as $f) {
             $f();
         }
+    }
+
+    public function countTestTeardown() : int
+    {
+        return $this->testTeardown->count();
     }
 
     public function cases() : Vector<TestCase>

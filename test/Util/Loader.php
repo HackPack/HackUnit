@@ -15,7 +15,7 @@ class LoaderTest
     }
 
     <<Test>>
-    public function throwIt(AssertionBuilder $assert) : void
+    public function validateValidSuite(AssertionBuilder $assert) : void
     {
         $errors = Vector{};
         $loader = new Loader();
@@ -26,16 +26,18 @@ class LoaderTest
             })
             ;
         $assert->context($errors->count())->identicalTo(0);
-    }
 
-    <<Test,Skip>>
-    public function doNotThrow(AssertionBuilder $assert) : void
-    {
-    }
+        $suites = $loader->testSuites();
+        $assert->context($suites->count())->identicalTo(1);
 
-    <<Test>>
-    public function fail(AssertionBuilder $assert) : void
-    {
-        $assert->context(3)->equalTo(2);
+        $validSuite = $suites->at(0);
+
+        $assert->context($validSuite->fileName())->identicalTo($this->fixturePath('/ValidSuite.php'));
+        $assert->context($validSuite->className())->identicalTo(\HackPack\HackUnit\Tests\Fixtures\ValidSuite::class);
+        $assert->context($validSuite->countSetup())->identicalTo(2);
+        $assert->context($validSuite->countTeardown())->identicalTo(2);
+        $assert->context($validSuite->countTestSetup())->identicalTo(4);
+        $assert->context($validSuite->countTestTeardown())->identicalTo(4);
+        $assert->context($validSuite->cases()->count())->identicalTo(2);
     }
 }

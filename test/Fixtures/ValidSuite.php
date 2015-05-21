@@ -30,28 +30,28 @@ class ValidSuite
     {
     }
 
-    <<Teardown('suite','test')>>
+    <<TearDown('suite','test')>>
     public function teardownTestAndSuite() : void
     {
     }
 
-    <<Teardown('suite')>>
+    <<TearDown('suite')>>
     public function teardownSuiteOnly() : void
     {
     }
 
-    <<Teardown('test')>>
+    <<TearDown('test')>>
     public function teardownTestOnly() : void
     {
     }
 
-    <<Teardown>>
-    public function genericTeardown() : void
+    <<TearDown>>
+    public function genericTearDown() : void
     {
     }
 
-    <<Setup,teardown>>
-    public function setupAndTeardown() : void
+    <<Setup,TearDown>>
+    public function setupAndTearDown() : void
     {
     }
 
@@ -62,6 +62,10 @@ class ValidSuite
 
     <<Test>>
     public function validTest2(AssertionBuilder $assert) : void
+    {
+    }
+
+    public function notATest(AssertionBuilder $assert) : void
     {
     }
 }
