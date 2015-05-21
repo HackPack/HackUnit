@@ -153,10 +153,12 @@ The available assertions are currently:
  * identicalTo
  * greaterThan
  * lessThan
+ * isNull
  * contains (see below)
 
 All of the assertions may be negated by calling `isNot()`, `willNot()`, or `not()` before calling the assertion method listed above.
-The `contains` assertion uses `strpos` to determine if the string passed is a substring of the context given.  This assertion will always fail if the context is not a string.
+The `contains` assertion uses `strpos` to determine if the string passed is a substring of the context given.  This assertion will always
+fail if the context is not a string.
 
 ###Callable Assertions###
 

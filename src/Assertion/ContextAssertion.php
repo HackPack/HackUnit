@@ -8,6 +8,22 @@ final class ContextAssertion<Tcontext>
 {
     use Assertion<Tcontext>;
 
+    public function isNull() : void
+    {
+        $pass = $this->invert ?
+            ($this->context !== null) :
+            ($this->context === null);
+        if($pass) {
+            $this->emitSuccess();
+            return;
+        }
+        $message = $this->constructErrorMessage(
+            null,
+            $this->invert ? 'to not be' : 'to be',
+        );
+        $this->emitFailure($message, null);
+    }
+
     public function equalTo(mixed $expected) : void
     {
         $pass = $this->invert ?
