@@ -3,7 +3,7 @@
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\TestSetup;
 
 <<TestSuite>>
-class DestructorTest
+class Destructor
 {
     <<Setup>>
     public function __destruct()

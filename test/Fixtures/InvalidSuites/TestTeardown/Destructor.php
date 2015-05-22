@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\Teardown;
+namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\TestTeardown;
 
 <<TestSuite>>
 class Destructor

@@ -3,7 +3,7 @@
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\SuiteSetup;
 
 <<TestSuite>>
-class SetupParams
+class Params
 {
     <<Setup('suite')>>
     public function setup(string $required) : void

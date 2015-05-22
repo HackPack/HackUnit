@@ -3,7 +3,7 @@
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\Test;
 
 <<TestSuite>>
-class ConstructorTest
+class Constructor
 {
     <<Test>>
     public function __construct()

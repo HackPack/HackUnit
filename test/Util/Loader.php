@@ -115,7 +115,7 @@ class LoaderTest
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('setItUp');
         $assert->context($event->className())->identicalTo($this->invalidClass('SuiteSetup\StaticMethods'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -179,7 +179,7 @@ class LoaderTest
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('tearItDown');
         $assert->context($event->className())->identicalTo($this->invalidClass('SuiteTeardown\StaticMethods'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -243,7 +243,7 @@ class LoaderTest
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('tearItDown');
         $assert->context($event->className())->identicalTo($this->invalidClass('TestTeardown\StaticMethods'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -307,7 +307,7 @@ class LoaderTest
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('setItUp');
         $assert->context($event->className())->identicalTo($this->invalidClass('TestSetup\StaticMethods'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -352,11 +352,11 @@ class LoaderTest
         $fileName = $this->fixturePath('/InvalidSuites/Test/TooFewParams.php');
         list($suites, $error) = $this->loadFile($fileName);
 
-        $assert->context($suites->count())->identicalTo(0);
+        $assert->context($suites->count())->identicalTo(1);
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('test');
         $assert->context($event->className())->identicalTo($this->invalidClass('Test\TooFewParams'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -367,11 +367,11 @@ class LoaderTest
         $fileName = $this->fixturePath('/InvalidSuites/Test/TooManyParams.php');
         list($suites, $error) = $this->loadFile($fileName);
 
-        $assert->context($suites->count())->identicalTo(0);
+        $assert->context($suites->count())->identicalTo(1);
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('test');
         $assert->context($event->className())->identicalTo($this->invalidClass('Test\TooManyParams'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -386,7 +386,7 @@ class LoaderTest
         $assert->context($error->count())->identicalTo(1);
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
-        $assert->context($event->method())->identicalTo('setup');
+        $assert->context($event->method())->identicalTo('setItUp');
         $assert->context($event->className())->identicalTo($this->invalidClass('Test\StaticMethods'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
@@ -402,7 +402,7 @@ class LoaderTest
         $event = $error->at(0);
         $assert->context($event->line())->identicalTo(9);
         $assert->context($event->method())->identicalTo('__destruct');
-        $assert->context($event->className())->identicalTo($this->invalidClass('DestructorTest'));
+        $assert->context($event->className())->identicalTo($this->invalidClass('Test\Destructor'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
 
@@ -417,7 +417,7 @@ class LoaderTest
         $event = $errors->at(0);
         $assert->context($event->line())->identicalTo(9);
         $assert->context($event->method())->identicalTo('__construct');
-        $assert->context($event->className())->identicalTo($this->invalidClass('ConstructorTest'));
+        $assert->context($event->className())->identicalTo($this->invalidClass('Test\Constructor'));
         $assert->context($event->fileName())->identicalTo($fileName);
     }
 }
