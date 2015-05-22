@@ -10,6 +10,13 @@ class Skip
     {
     }
 
+    public function assertionLine() : ?int
+    {
+        return $this->callSite['line'] === -1 ?
+            null :
+            $this->callSite['line'];
+    }
+
     public function testMethod() : ?string
     {
         return $this->callSite['function'] === '' ?
@@ -29,13 +36,6 @@ class Skip
         return $this->callSite['file'] === '' ?
             null :
             $this->callSite['file'];
-    }
-
-    public function assertionLine() : ?int
-    {
-        return $this->callSite['line'] === -1 ?
-            null :
-            $this->callSite['line'];
     }
 }
 
