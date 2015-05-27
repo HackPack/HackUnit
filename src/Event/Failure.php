@@ -5,6 +5,8 @@ namespace HackPack\HackUnit\Event;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
+type FailureListener = (function(Failure):void);
+
 class Failure
 {
     public function __construct(

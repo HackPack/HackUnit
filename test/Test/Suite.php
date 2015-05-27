@@ -22,7 +22,7 @@ class Suite
         // Suite skip method is called by tests marked skip
         // So the definition line is reported
         $defineLine = __LINE__ - 4;
-        $suite = new \HackPack\HackUnit\Test\Suite('filename', 'classname', false);
+        $suite = new \HackPack\HackUnit\Test\SuiteImpl('filename', 'classname', false);
         $suite->registerSkipHandlers([
             $e ==> {$this->skipEvents->add($e);}
         ]);
@@ -34,5 +34,10 @@ class Suite
         $assert->context($event->testMethod())->identicalTo(__FUNCTION__);
         $assert->context($event->testClass())->identicalTo(__CLASS__);
         $assert->context($event->testFile())->identicalTo(__FILE__);
+    }
+
+    <<Test>>
+    public function testCasesAreStored() : void
+    {
     }
 }

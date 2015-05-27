@@ -2,20 +2,28 @@
 
 namespace HackPack\HackUnit;
 
+use HackPack\HackUnit\Event\EndListener;
+use HackPack\HackUnit\Event\ExceptionListener;
 use HackPack\HackUnit\Event\Failure;
-use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Event\FailureListener;
 use HackPack\HackUnit\Event\MalformedSuite;
+use HackPack\HackUnit\Event\MalformedSuiteListener;
+use HackPack\HackUnit\Event\PassListener;
+use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Event\SkipListener;
+use HackPack\HackUnit\Event\StartListener;
+use HackPack\HackUnit\Event\SuccessListener;
 
 final class HackUnit
 {
-    private Vector<(function():void)> $startListeners = Vector{};
-    private Vector<(function():void)> $endListeners = Vector{};
+    private Vector<StartListener> $startListeners = Vector{};
+    private Vector<EndListener> $endListeners = Vector{};
 
-    private Vector<(function(Failure):void)> $failureListeners = Vector{};
-    private Vector<(function():void)> $passListeners = Vector{};
-    private Vector<(function(Skip):void)> $skipListeners = Vector{};
-    private Vector<(function():void)> $successListeners = Vector{};
-    private Vector<(function(\Exception):void)> $untestedExceptionListeners = Vector{};
+    private Vector<FailureListener> $failureListeners = Vector{};
+    private Vector<PassListener> $passListeners = Vector{};
+    private Vector<SkipListener> $skipListeners = Vector{};
+    private Vector<SuccessListener> $successListeners = Vector{};
+    private Vector<ExceptionListener> $untestedExceptionListeners = Vector{};
 
     public static function fromCli() : this
     {
@@ -27,7 +35,14 @@ final class HackUnit
             $reporter->withColor();
         }
 
-        $loader = new Util\Loader($options->includes, $options->excludes);
+        $suiteBuilder = ($fileName, $className, $skip) ==> {
+            return new \HackPack\HackUnit\Test\SuiteImpl($fileName, $className, $skip);
+        };
+        $loader = new Util\Loader(
+            $suiteBuilder,
+            $options->includes,
+            $options->excludes
+        );
 
         $app = new static($loader);
         $app->onFailure(inst_meth($reporter, 'reportFailure'));
@@ -60,16 +75,10 @@ final class HackUnit
             throw new Exception\InterruptTest();
         });
 
-        $assertionBuilder = new Assertion\AssertionBuilder(
-            $this->failureListeners,
-            $this->skipListeners,
-            $this->successListeners,
-        );
-
         $this->start();
         foreach($this->loader->testSuites() as $suite) {
             try{
-                $this->runSuite($suite, $assertionBuilder);
+                $this->runSuite($suite);
             } catch (\Exception $e) {
                 $this->emitUntestedException($e);
                 exit(1);
@@ -78,21 +87,21 @@ final class HackUnit
         $this->finish();
     }
 
-    private function runSuite(Test\Suite $suite, Assertion\AssertionBuilder $builder) : void
+    private function runSuite(Test\Suite $suite) : void
     {
         $suite->registerSkipHandlers($this->skipListeners);
         $suite->setup();
         foreach($suite->cases() as $case) {
-            $this->runTest($case, $builder);
+            $this->runTest($case);
         }
         $suite->teardown();
     }
 
-    private function runTest(Test\TestCase $case, Assertion\AssertionBuilder $builder) : void
+    private function runTest(Test\TestCase $case) : void
     {
             $case->setup();
             try{
-                $case->run($builder);
+                $case->run($this->failureListeners, $this->skipListeners, $this->successListeners);
                 $this->emitPass();
             } catch (Exception\InterruptTest $i) {
                 // Other handlers should be done by now

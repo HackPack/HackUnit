@@ -4,6 +4,8 @@ namespace HackPack\HackUnit\Event;
 
 use HackPack\HackUnit\Util\TraceItem;
 
+type SkipListener = (function(Skip):void);
+
 class Skip
 {
     public function __construct(private TraceItem $callSite)

@@ -10,6 +10,11 @@ use HackPack\HackUnit\Util\Loader;
 <<TestSuite>>
 class LoaderTest
 {
+    <<Setup>>
+    public function resetCounts() : void
+    {
+    }
+
     private function fixturePath(string $extra) : string
     {
         $path = realpath(dirname(__DIR__) . '/Fixtures' . $extra);

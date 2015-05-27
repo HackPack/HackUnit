@@ -3,7 +3,10 @@
 namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
+use HackPack\HackUnit\Event\FailureListener;
 use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Event\SkipListener;
+use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Util\Trace;
 
 class AssertionBuilder
@@ -12,9 +15,9 @@ class AssertionBuilder
     private ?\ReflectionMethod $testMethod = null;
 
     public function __construct(
-        private Vector<(function(Failure):void)> $failureListeners,
-        private Vector<(function(Skip):void)> $skipListeners,
-        private Vector<(function():void)> $successListeners,
+        private Vector<FailureListener> $failureListeners,
+        private Vector<SkipListener> $skipListeners,
+        private Vector<SuccessListener> $successListeners,
     )
     {
     }

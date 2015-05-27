@@ -5,6 +5,8 @@ namespace HackPack\HackUnit\Event;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
+type MalformedSuiteListener = (function(MalformedSuite):void);
+
 final class MalformedSuite
 {
     public static function badMethod(\ReflectionMethod $methodMirror, string $reason) : this

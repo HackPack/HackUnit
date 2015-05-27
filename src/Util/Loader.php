@@ -11,6 +11,7 @@ final class Loader
     private int $testCount = 0;
 
     public function __construct(
+        private (function(string,string,bool):Suite) $suiteBuilder,
         private Set<string> $includes = Set{},
         private Set<string> $excludes = Set{},
         private Vector<(function(MalformedSuite):void)> $malformedListeners = Vector{},
@@ -110,7 +111,8 @@ final class Loader
         }
 
         $instance = $classMirror->newInstance();
-        $suite = new Suite($classFile, $className, $classMirror->getAttribute('Skip') !== null);
+        $builder = $this->suiteBuilder;
+        $suite = $builder($classFile, $className, $classMirror->getAttribute('Skip') !== null);
         foreach($methods as $methodMirror) {
             if(
                 $methodMirror->isAbstract() ||
