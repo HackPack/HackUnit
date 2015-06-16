@@ -2,21 +2,29 @@
 
 namespace HackPack\HackUnit\Util;
 
-use HackPack\HackUnit\Assertion\AssertionBuilder;
+use HackPack\HackUnit\Contract\Assert;
+use HackPack\HackUnit\Contract\Test\TestCase;
+use HackPack\HackUnit\Contract\Test\Suite;
 use HackPack\HackUnit\Event\MalformedSuite;
-use HackPack\HackUnit\Test\Suite;
+use HackPack\HackUnit\Event\MalformedSuiteListener;
 
 final class Loader
 {
     private int $testCount = 0;
 
     public function __construct(
-        private (function(string,string,bool):Suite) $suiteBuilder,
+        private (function(\ReflectionClass):Suite) $suiteBuilder,
         private Set<string> $includes = Set{},
         private Set<string> $excludes = Set{},
-        private Vector<(function(MalformedSuite):void)> $malformedListeners = Vector{},
+        private Vector<MalformedSuiteListener> $malformedListeners = Vector{},
     )
     {
+    }
+
+    public function onMalformedSuite((function(MalformedSuite):void) $listener) : this
+    {
+        $this->malformedListeners->add($listener);
+        return $this;
     }
 
     public function including(string $path) : this
@@ -38,7 +46,7 @@ final class Loader
             $this->excludes
         );
 
-        $out = Vector{};
+        $suites = Vector{};
 
         foreach($scanner->mapClassToFile() as $className => $fileName) {
             $this->load($fileName);
@@ -52,11 +60,16 @@ final class Loader
 
             $suite = $this->buildSuite($classMirror);
             if($suite !== null) {
-                $out->add($suite);
+                $suites->add($suite);
             }
         }
 
-        return $out;
+        if($suites->isEmpty()) {
+            // No test suites?  Did they mark them?
+            // TODO
+        }
+
+        return $suites;
     }
 
     private function buildSuite(\ReflectionClass $classMirror) : ?Suite
@@ -110,9 +123,8 @@ final class Loader
             return null;
         }
 
-        $instance = $classMirror->newInstance();
         $builder = $this->suiteBuilder;
-        $suite = $builder($classFile, $className, $classMirror->getAttribute('Skip') !== null);
+        $suite = $builder($classMirror);
         foreach($methods as $methodMirror) {
             if(
                 $methodMirror->isAbstract() ||
@@ -128,16 +140,12 @@ final class Loader
                 return null;
             }
 
-            $invocation = () ==> {
-                $methodMirror->invoke($instance);
-            };
-
             $isSuiteSetup = $this->isSuiteSetup($methodMirror);
             if($isSuiteSetup === null) {
                 return null;
             }
             if($isSuiteSetup) {
-                $suite->registerSuiteSetup($invocation);
+                $suite->registerSuiteSetup($methodMirror);
             }
 
             $isSuiteTeardown = $this->isSuiteTeardown($methodMirror);
@@ -145,7 +153,7 @@ final class Loader
                 return null;
             }
             if($isSuiteTeardown) {
-                $suite->registerSuiteTeardown($invocation);
+                $suite->registerSuiteTeardown($methodMirror);
             }
 
             $isTestSetup = $this->isTestSetup($methodMirror);
@@ -153,7 +161,7 @@ final class Loader
                 return null;
             }
             if($isTestSetup) {
-                $suite->registerTestSetup($invocation);
+                $suite->registerTestSetup($methodMirror);
             }
 
             $isTestTeardown = $this->isTestTeardown($methodMirror);
@@ -161,17 +169,11 @@ final class Loader
                 return null;
             }
             if($isTestTeardown) {
-                $suite->registerTestTeardown($invocation);
+                $suite->registerTestTeardown($methodMirror);
             }
 
             if($this->isTest($methodMirror)) {
-                $suite->registerTest(
-                    (AssertionBuilder $builder) ==> {
-                        $methodMirror->invoke($instance, $builder);
-                    },
-                    $methodMirror,
-                    $methodMirror->getAttribute('Skip') !== null,
-                );
+                $suite->registerTestMethod($methodMirror);
             }
         }
 
@@ -285,10 +287,10 @@ final class Loader
             return false;
         }
 
-        if($params->at(0)->getTypeText() !== AssertionBuilder::class) {
+        if($params->at(0)->getTypeText() !== Assert::class) {
             $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
-                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assertion\AssertionBuilder',
+                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assert',
             ));
             return false;
         }
@@ -308,11 +310,5 @@ final class Loader
         foreach($this->malformedListeners as $l) {
             $l($event);
         }
-    }
-
-    public function onMalformedSuite((function(MalformedSuite):void) $listener) : this
-    {
-        $this->malformedListeners->add($listener);
-        return $this;
     }
 }

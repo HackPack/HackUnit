@@ -2,13 +2,12 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites;
 
-use HackPack\HackUnit\Assertion\AssertionBuilder;
+use HackPack\HackUnit\Assert;
 
 <<TestSuite>>
 class MissingTestAnnotation
 {
-    public function thisCouldBeATest(AssertionBuilder $assert) : void
+    public function thisCouldBeATest(Assert $assert) : void
     {
-        $assert->context('this should not run')->identicalTo('at all');
     }
 }

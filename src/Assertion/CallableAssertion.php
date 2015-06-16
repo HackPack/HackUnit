@@ -3,65 +3,185 @@
 namespace HackPack\HackUnit\Assertion;
 
 use HackPack\HackUnit\Event\Failure;
-use HackPack\HackUnit\Event\Skip;
-use HackPack\HackUnit\Event\Success;
+use HackPack\HackUnit\Event\FailureEmitter;
+use HackPack\HackUnit\Event\FailureListener;
+use HackPack\HackUnit\Event\SuccessEmitter;
+use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Util\Trace;
 
-<<__ConsistentConstruct>>
-class CallableAssertion
+class CallableAssertion implements \HackPack\HackUnit\Contract\Assertion\CallableAssertion
 {
-    use Assertion<(function():void)>;
+    use FailureEmitter;
+    use SuccessEmitter;
 
     public function __construct(
         private (function():void) $context,
-        private Vector<(function(Failure):void)> $failureListeners,
-        private Vector<(function(Skip):void)> $skipListeners,
-        private Vector<(function():void)> $successListeners,
-        private ?\ReflectionMethod $testMethod,
+        Vector<FailureListener> $failureListeners,
+        Vector<SuccessListener> $successListeners,
     )
     {
+        $this->setFailureListeners($failureListeners);
+        $this->setSuccessListeners($successListeners);
     }
 
-    public function raiseException(?string $exceptionName = null, ?string $message = null) : void
-    {
-        $this->willThrow($exceptionName, $message);
-    }
-
-    public function willThrow(?string $exceptionName = null, ?string $message = null) : void
+    public function willThrow() : void
     {
         try{
             $c = $this->context;
             $c();
-        } catch (\Exception $e) {
-            if($this->invert){
-                // Didn't expect the exception
-                $msg = 'Exception assertion failed. Unexpected exception ' . get_class($e) . ' thrown on ' . $e->getFile() . ' line ' . $e->getLine();
-                $this->emitFailure($msg, null);
-                return;
-            }
-
-            if($exceptionName !== null && ! is_a($e, $exceptionName)) {
-                $msg = 'Exception assertion failed.  Expected exception type ' . $exceptionName . ' actual type ' . get_class($e);
-                $this->emitFailure($msg, $exceptionName);
-                return;
-            }
-
-            if($message !== null && $e->getMessage() !== $message) {
-                $msg = 'Exception assertion failed.  Expected exception message ' . $message . ' actual message ' . $e->getMessage();
-                $this->emitFailure($msg, $message);
-                return;
-            }
-
+        } catch(\Exception $e) {
             $this->emitSuccess();
             return;
         }
+        $this->missingException();
+    }
 
-        // Context is not callable or did not throw
-        if($this->invert){
+    public function willThrowClass(string $className) : void
+    {
+        try{
+            $c = $this->context;
+            $c();
+        } catch(\Exception $e) {
+            if(is_a($e, $className)) {
+                $this->emitSuccess();
+                return;
+            }
+            $this->wrongClass($className, get_class($e));
+            return;
+        }
+        $this->missingException();
+    }
+
+    public function willThrowMessage(string $message) : void
+    {
+        try{
+            $c = $this->context;
+            $c();
+        } catch(\Exception $e) {
+            if($e->getMessage() === $message) {
+                $this->emitSuccess();
+                return;
+            }
+            $this->wrongMessage($message, $e->getMessage());
+            return;
+        }
+        $this->missingException();
+    }
+
+    public function willThrowMessageContaining(string $needle) : void
+    {
+        try{
+            $c = $this->context;
+            $c();
+        } catch(\Exception $e) {
+            if(strpos($e->getMessage(), $needle) !== false) {
+                $this->emitSuccess();
+                return;
+            }
+            $this->messageDoesNotContain($needle, $e->getMessage());
+            return;
+        }
+        $this->missingException();
+    }
+
+    public function willThrowClassWithMessage(string $className, string $message) : void
+    {
+        try{
+            $c = $this->context;
+            $c();
+        } catch(\Exception $e) {
+            if($e->getMessage() !== $message) {
+                $this->wrongMessage($message, $e->getMessage());
+                return;
+            }
+            if(! is_a($e, $className)) {
+                $this->wrongClass($className, get_class($e));
+                return;
+            }
             $this->emitSuccess();
             return;
         }
-        $msg = 'Exception assertion failed.  Expected exception but none was thrown.';
-        $this->emitFailure($msg, $exceptionName);
+        $this->missingException();
+    }
+
+    public function willThrowClassWithMessageContaining(string $className, string $needle) : void
+    {
+        try{
+            $c = $this->context;
+            $c();
+        } catch(\Exception $e) {
+            if(strpos($e->getMessage(), $needle) === false) {
+                $this->messageDoesNotContain($needle, $e->getMessage());
+                return;
+            }
+            if(! is_a($e, $className)) {
+                $this->wrongClass($className, get_class($e));
+                return;
+            }
+            $this->emitSuccess();
+            return;
+        }
+        $this->missingException();
+    }
+
+    public function willNotThrow() : void
+    {
+        try{
+            $c = $this->context;
+            $c();
+        } catch(\Exception $e) {
+            $this->emitFailure(new Failure(
+                implode(PHP_EOL, [
+                    'Unexpected exception thrown.',
+                    get_class($e),
+                    $e->getMessage(),
+                ]),
+                Trace::findAssertionCall(),
+            ));
+            return;
+        }
+        $this->emitSuccess();
+    }
+
+    private function missingException() : void
+    {
+        $this->emitFailure(new Failure(
+            'Expected exception to be thrown.',
+            Trace::findAssertionCall(),
+        ));
+    }
+
+    private function wrongClass(string $expected, string $actual) : void
+    {
+        $this->emitFailure(new Failure(
+            'Expected exception of type ' . $expected . ' but ' . $actual . ' was thrown.',
+            Trace::findAssertionCall(),
+        ));
+    }
+
+    private function wrongMessage(string $expected, string $actual) : void
+    {
+        $this->emitFailure(new Failure(
+            implode(PHP_EOL, [
+                'Expected exception message:',
+                $expected,
+                'Actual message:',
+                $actual,
+            ]),
+            Trace::findAssertionCall(),
+        ));
+    }
+
+    private function messageDoesNotContain(string $expected, string $actual) : void
+    {
+        $this->emitFailure(new Failure(
+            implode(PHP_EOL, [
+                'Expected exception message to contain:',
+                $expected,
+                'Actual message:',
+                $actual,
+            ]),
+            Trace::findAssertionCall(),
+        ));
     }
 }

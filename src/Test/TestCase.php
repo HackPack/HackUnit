@@ -2,54 +2,44 @@
 
 namespace HackPack\HackUnit\Test;
 
-use HackPack\HackUnit\Assertion\AssertionBuilder;
-use HackPack\HackUnit\Event\Skip;
-use HackPack\HackUnit\Event\FailureListener;
-use HackPack\HackUnit\Event\SkipListener;
-use HackPack\HackUnit\Event\SuccessListener;
-use HackPack\HackUnit\Event\MalformedSuiteListener;
+use HackPack\HackUnit\Contract\Assert;
 
-class TestCase
+final class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
 {
-    private Vector<SkipListener> $skipListeners = Vector{};
+    public static function build(
+        (function(Assert):void) $test,
+        Vector<(function():void)> $setup,
+        Vector<(function():void)> $teardown,
+    ) : this
+    {
+        return new static($test, $setup, $teardown);
+    }
 
     public function __construct(
-        private (function():void) $setup,
-        private (function(AssertionBuilder):void) $test,
-        private (function():void) $teardown,
-        private bool $skip,
-        private (function():Skip) $skipEventBuilder,
+        private (function(Assert):void) $test,
+        private Vector<(function():void)> $setup,
+        private Vector<(function():void)> $teardown,
     )
     {
     }
 
     public function setup() : void
     {
-        $f = $this->setup;
-        $f();
+        foreach($this->setup as $f) {
+            $f();
+        }
     }
 
     public function teardown() : void
     {
-        $f = $this->teardown;
-        $f();
+        foreach($this->teardown as $f) {
+            $f();
+        }
     }
 
-    public function run(
-        Vector<FailureListener> $failureListeners,
-        Vector<SkipListener> $skipListeners,
-        Vector<SuccessListener> $successListeners,
-    ) : void
+    public function run(Assert $assert) : void
     {
-        if($this->skip) {
-            $builder = $this->skipEventBuilder;
-            $e = $builder();
-            foreach($this->skipListeners as $l) {
-                $l($e);
-            }
-            return;
-        }
         $f = $this->test;
-        $f(new AssertionBuilder($failureListeners, $skipListeners, $successListeners));
+        $f($assert);
     }
 }

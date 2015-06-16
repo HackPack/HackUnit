@@ -11,7 +11,7 @@ class Destructor
     }
 
     <<Test>>
-    public function test(\HackPack\HackUnit\Assertion\AssertionBuilder $assert) : void
+    public function test(\HackPack\HackUnit\Assert $assert) : void
     {
     }
 }

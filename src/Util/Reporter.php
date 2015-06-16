@@ -177,8 +177,6 @@ class Reporter
                 '',
                 $this->clio->style(($idx + 1) . ') Test failed in ' . $methodName)->with(Style::error()),
                 'On line ' . $e->assertionLine() . ' of ' . $e->testFile(),
-                'Context: ' . $this->captureVariable($e->context()),
-                'Comparitor: ' . $this->captureVariable($e->comparitor()),
                 $e->getMessage()
             ]) . PHP_EOL;
         }

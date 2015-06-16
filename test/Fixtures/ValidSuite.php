@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures;
 
-use HackPack\HackUnit\Assertion\AssertionBuilder;
+use HackPack\HackUnit\Assert;
 
 /**
  * Loader should have no problems with this suite
@@ -60,16 +60,16 @@ class ValidSuite
     }
 
     <<Test>>
-    public function validTest1(AssertionBuilder $assert) : void
+    public function validTest1(Assert $assert) : void
     {
     }
 
     <<Test>>
-    public function validTest2(AssertionBuilder $assert) : void
+    public function validTest2(Assert $assert) : void
     {
     }
 
-    public function notATest(AssertionBuilder $assert) : void
+    public function notATest(Assert $assert) : void
     {
     }
 }

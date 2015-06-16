@@ -5,14 +5,10 @@ namespace HackPack\HackUnit\Event;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
-type FailureListener = (function(Failure):void);
-
 class Failure
 {
     public function __construct(
         private string $message,
-        private mixed $context,
-        private mixed $comparitor,
         private TraceItem $callSite,
     )
     {
@@ -37,17 +33,6 @@ class Failure
     {
         return $this->callSite['file'];
     }
-
-    public function context() : mixed
-    {
-        return $this->context;
-    }
-
-    public function comparitor() : mixed
-    {
-        return $this->comparitor;
-    }
-
 
     public function getMessage() : string
     {
