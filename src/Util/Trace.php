@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Util;
 
-use HackPack\HackUnit\Contract\Assert;
+use HackPack\HackUnit\Contract\Assertion\Assertion;
 
 type TraceItem = shape(
     'file' => ?string,
@@ -39,22 +39,26 @@ class Trace
 
     public static function findAssertionCallFromStack(Vector<TraceItem> $trace) : TraceItem
     {
-        //foreach($trace as $idx => $item) {
-            //if(
-                //$item['class'] === AssertionBuilder::class
-            //) {
-                //// Next item in the stack was the actual caller
-                //if($trace->containsKey($idx + 2)) {
-                    //return shape(
-                        //'line' => $trace->at($idx + 1)['line'],
-                        //'function' => $trace->at($idx + 2)['function'],
-                        //'class' => $trace->at($idx + 2)['class'],
-                        //'file' => $trace->at($idx + 1)['file'],
-                    //);
-                //}
-                //return self::emptyTraceItem();
-            //}
-        //}
+        foreach($trace as $idx => $item) {
+            // Always switching classes when making an assertion
+            if($item['class'] === $trace->at($idx + 1)['class']) {
+                continue;
+            }
+
+            // See if current item implements the assertion interface
+            if(array_key_exists(Assertion::class, class_implements($item['class']))) {
+                // Next item in the stack was the actual caller
+                if($trace->containsKey($idx + 1)) {
+                    return shape(
+                        'line' => $trace->at($idx)['line'],
+                        'function' => $trace->at($idx + 1)['function'],
+                        'class' => $trace->at($idx + 1)['class'],
+                        'file' => $trace->at($idx)['file'],
+                    );
+                }
+                return self::emptyTraceItem();
+            }
+        }
         return self::emptyTraceItem();
     }
 

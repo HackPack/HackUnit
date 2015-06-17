@@ -14,7 +14,7 @@ trait SuccessEmitter
 
     public function setSuccessListeners(Traversable<SuccessListener> $listeners) : this
     {
-        $this->successListeners->clear()->setAll(new Vector($listeners));
+        $this->successListeners->clear()->addAll(new Vector($listeners));
         return $this;
     }
 

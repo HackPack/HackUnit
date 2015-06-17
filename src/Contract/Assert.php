@@ -11,5 +11,6 @@ interface Assert
     public function float(float $context) : Assertion\NumericAssertion<float>;
     public function string(string $context) : Assertion\StringAssertion;
     public function whenCalled((function():void) $context) : Assertion\CallableAssertion;
+    public function mixed(mixed $context) : Assertion\MixedAssertion;
     public function skip(string $reason, ?TraceItem $traceItem = null) : void;
 }

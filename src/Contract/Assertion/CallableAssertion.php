@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Contract\Assertion;
 
-interface CallableAssertion
+interface CallableAssertion extends Assertion
 {
     public function willThrow() : void;
     public function willThrowClass(string $className) : void;

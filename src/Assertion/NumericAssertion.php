@@ -18,10 +18,12 @@ class NumericAssertion<Tcontext> implements \HackPack\HackUnit\Contract\Assertio
 
     public function __construct(
         private Tcontext $context,
-        private Vector<FailureListener> $failureListeners,
-        private Vector<SuccessListener> $successListeners,
+        Vector<FailureListener> $failureListeners,
+        Vector<SuccessListener> $successListeners,
     )
     {
+        $this->setFailureListeners($failureListeners);
+        $this->setSuccessListeners($successListeners);
     }
 
     public function not() : this

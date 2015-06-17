@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Contract\Assertion;
 
-interface StringAssertion
+interface StringAssertion extends Assertion
 {
     public function not() : this;
     public function is(string $expected) : this;

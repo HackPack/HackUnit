@@ -18,10 +18,12 @@ class StringAssertion implements \HackPack\HackUnit\Contract\Assertion\StringAss
 
     public function __construct(
         private string $context,
-        private Vector<FailureListener> $failureListeners,
-        private Vector<SuccessListener> $successListeners,
+        Vector<FailureListener> $failureListeners,
+        Vector<SuccessListener> $successListeners,
     )
     {
+        $this->setFailureListeners($failureListeners);
+        $this->setSuccessListeners($successListeners);
     }
 
     public function not() : this

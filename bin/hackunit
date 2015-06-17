@@ -23,5 +23,4 @@ if (!$found) {
         'php composer.phar install' . PHP_EOL);
 }
 
-$app = HackPack\HackUnit\HackUnit::fromCli();
-$app->run();
+HackPack\HackUnit\HackUnit::fromCli();

@@ -45,6 +45,11 @@ final class Assert implements Contract\Assert
         return new Assertion\CallableAssertion($context, $this->failureListeners, $this->successListeners);
     }
 
+    public function mixed(mixed $context) : Contract\Assertion\MixedAssertion
+    {
+        return new Assertion\MixedAssertion($context, $this->failureListeners, $this->successListeners);
+    }
+
     public function skip(string $reason, ?Util\TraceItem $traceItem = null) : void
     {
     }

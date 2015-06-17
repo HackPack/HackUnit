@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Contract\Assertion;
 
-interface NumericAssertion<Tcontext>
+interface NumericAssertion<Tcontext> extends Assertion
 {
     public function not() : this;
     public function eq(Tcontext $expected) : void;

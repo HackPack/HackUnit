@@ -14,7 +14,7 @@ trait FailureEmitter
 
     public function setFailureListeners(Traversable<FailureListener> $listeners) : this
     {
-        $this->failureListeners->clear()->setAll(new Vector($listeners));
+        $this->failureListeners->clear()->addAll($listeners);
         return $this;
     }
 

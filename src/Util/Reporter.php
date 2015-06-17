@@ -103,6 +103,8 @@ class Reporter
         $this->clio->line($message);
         $this->clio->line('Exception message:');
         $this->clio->line($e->getMessage());
+        $this->clio->line('Trace:');
+        $this->clio->line($e->getTraceAsString());
     }
 
     public function reportMalformedSuite(MalformedSuite $event) : void

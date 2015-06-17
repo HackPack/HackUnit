@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Contract\Assertion;
 
-interface BoolAssertion
+interface BoolAssertion extends Assertion
 {
     public function is(bool $expected) : void;
 }

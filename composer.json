@@ -23,7 +23,10 @@
     "autoload": {
         "psr-4": {
             "HackPack\\HackUnit\\": "src/"
-        }
+        },
+        "files": [
+            "src/Event/Listeners.php"
+        ]
     },
     "bin": ["bin/hackunit"]
 }

@@ -276,13 +276,13 @@ final class Loader
             return false;
         }
 
-        // Ensure method takes an AssertionBuilder as the only parameter
+        // Ensure method takes an Assert as the only parameter
         $params = new Vector($methodMirror->getParameters());
 
         if($params->count() !== 1) {
             $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
-                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assertion\AssertionBuilder',
+                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assert',
             ));
             return false;
         }
