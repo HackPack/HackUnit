@@ -41,12 +41,20 @@ class Trace
     {
         foreach($trace as $idx => $item) {
             // Always switching classes when making an assertion
-            if($item['class'] === $trace->at($idx + 1)['class']) {
+            if(
+                (
+                    $trace->containsKey($idx + 1) &&
+                    $item['class'] === $trace->at($idx + 1)['class']
+                )
+                ||
+                $item['class'] === null
+            ) {
                 continue;
             }
 
             // See if current item implements the assertion interface
-            if(array_key_exists(Assertion::class, class_implements($item['class']))) {
+            $implements = class_implements($item['class']);
+            if(is_array($implements) && array_key_exists(Assertion::class, $implements)) {
                 // Next item in the stack was the actual caller
                 if($trace->containsKey($idx + 1)) {
                     return shape(
