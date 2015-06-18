@@ -16,6 +16,7 @@
             "role": "Developer"
         }
     ],
+    "minimum-stability" : "dev",
     "require": {
         "kilahm/clio": "dev-master",
         "hackpack/hack-class-scanner": "dev-master"
