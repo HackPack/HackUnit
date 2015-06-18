@@ -123,7 +123,7 @@ class TraceTest
     {
         $mockAssert = new \HackPack\HackUnit\Tests\Fixtures\Util\Assertion();
         $items = Vector{};
-        $line = __LINE__ + 2;
+        $line = __LINE__ + 3;
         $mockAssert->run(() ==> {
             $items->add(Trace::findAssertionCall());
         });
