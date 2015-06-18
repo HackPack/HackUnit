@@ -28,5 +28,10 @@
             "src/Event/Listeners.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "HackPack\\HackUnit\\Tests\\Fixtures\\": "src/test/Fixtures"
+        }
+    },
     "bin": ["bin/hackunit"]
 }
