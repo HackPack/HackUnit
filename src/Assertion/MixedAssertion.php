@@ -36,130 +36,130 @@ class MixedAssertion implements \HackPack\HackUnit\Contract\Assertion\MixedAsser
     {
         if($this->context === null) {
             $this->negate ?
-                $this->fail('Expected context to be null.') :
+                $this->fail('Expected context to be non-null.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to be non-null.');
+            $this->fail('Expected context to be null.');
     }
 
     public function isBool() : void
     {
         if(is_bool($this->context)) {
             $this->negate ?
-                $this->fail('Expected context to be a bool.') :
+                $this->fail('Expected context to not be a bool.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be a bool.');
+            $this->fail('Expected context to be a bool.');
     }
 
     public function isInt() : void
     {
         if(is_int($this->context)) {
             $this->negate ?
-                $this->fail('Expected context to be an integer.') :
+                $this->fail('Expected context to not be an integer.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be an integer.');
+            $this->fail('Expected context to be an integer.');
     }
 
     public function isFloat() : void
     {
         if(is_float($this->context)) {
             $this->negate ?
-                $this->fail('Expected context to be an float.') :
+                $this->fail('Expected context to not be an float.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be an float.');
+            $this->fail('Expected context to be an float.');
     }
 
     public function isString() : void
     {
         if(is_string($this->context)) {
             $this->negate ?
-                $this->fail('Expected context to be an string.') :
+                $this->fail('Expected context to not be an string.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be an string.');
+            $this->fail('Expected context to be an string.');
     }
 
     public function isArray() : void
     {
         if(is_array($this->context)) {
             $this->negate ?
-                $this->fail('Expected context to be an array.') :
+                $this->fail('Expected context to not be an array.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be an array.');
+            $this->fail('Expected context to be an array.');
     }
 
     public function looselyEquals(mixed $expected) : void
     {
         if($this->context == $expected) {
             $this->negate ?
-                $this->fail('Items expected to be equal.') :
+                $this->fail('Items expected to not be equal.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Items expected to not be equal.');
+            $this->fail('Items expected to be equal.');
     }
 
     public function identicalTo(mixed $expected) : void
     {
         if($this->context === $expected) {
             $this->negate ?
-                $this->fail('Items expected to be identical.') :
+                $this->fail('Items expected to not be identical.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Items expected to not be identical.');
+            $this->fail('Items expected to be identical.');
     }
 
     public function isObject() : void
     {
         if(is_object($this->context)) {
             $this->negate ?
-                $this->fail('Expected context to be an object.') :
+                $this->fail('Expected context to not be an object.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be an object.');
+            $this->fail('Expected context to be an object.');
     }
 
     public function isTypeOf(string $className) : void
     {
         if(is_a($this->context, $className)) {
             $this->negate ?
-                $this->fail('Expected context to be an instance of ' . $className . '.') :
+                $this->fail('Expected context to not be an instance of ' . $className . '.') :
                 $this->emitSuccess();
             return;
         }
         $this->negate ?
             $this->emitSuccess() :
-            $this->fail('Expected context to not be an instance of ' . $className . '.');
+            $this->fail('Expected context to be an instance of ' . $className . '.');
     }
 
     private function fail(string $message) : void

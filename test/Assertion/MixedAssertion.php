@@ -32,6 +32,15 @@ class MixedAssertionTest
         0.0,
     };
 
+    private static Vector<mixed> $allTypes = Vector{
+        true,
+        0,
+        1.0,
+        'a',
+        [],
+        Vector{},
+    };
+
     private Vector<Failure> $failEvents = Vector{};
     private int $successCount = 0;
 
@@ -101,5 +110,65 @@ class MixedAssertionTest
              $assert->int($this->failEvents->count())->eq($expectedFailures);
              $assert->int($this->successCount)->eq(0);
          }
+    }
+
+    <<Test>>
+    public function isBool(Assert $assert) : void
+    {
+        foreach(self::$allTypes as $item) {
+            $this->buildAssertion($item)->isBool();
+        }
+        $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
+        $assert->int($this->successCount)->eq(1);
+    }
+
+    <<Test>>
+    public function isInt(Assert $assert) : void
+    {
+        foreach(self::$allTypes as $item) {
+            $this->buildAssertion($item)->isInt();
+        }
+        $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
+        $assert->int($this->successCount)->eq(1);
+    }
+
+    <<Test>>
+    public function isFloat(Assert $assert) : void
+    {
+        foreach(self::$allTypes as $item) {
+            $this->buildAssertion($item)->isFloat();
+        }
+        $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
+        $assert->int($this->successCount)->eq(1);
+    }
+
+    <<Test>>
+    public function isString(Assert $assert) : void
+    {
+        foreach(self::$allTypes as $item) {
+            $this->buildAssertion($item)->isString();
+        }
+        $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
+        $assert->int($this->successCount)->eq(1);
+    }
+
+    <<Test>>
+    public function isArray(Assert $assert) : void
+    {
+        foreach(self::$allTypes as $item) {
+            $this->buildAssertion($item)->isArray();
+        }
+        $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
+        $assert->int($this->successCount)->eq(1);
+    }
+
+    <<Test>>
+    public function isObject(Assert $assert) : void
+    {
+        foreach(self::$allTypes as $item) {
+            $this->buildAssertion($item)->isObject();
+        }
+        $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
+        $assert->int($this->successCount)->eq(1);
     }
 }
