@@ -17,8 +17,8 @@
         }
     ],
     "require": {
-        "kilahm/clio": "~0.2.0",
-        "hackpack/hack-class-scanner": "~1.0.0"
+        "kilahm/clio": "dev-master",
+        "hackpack/hack-class-scanner": "dev-master"
     },
     "autoload": {
         "psr-4": {
