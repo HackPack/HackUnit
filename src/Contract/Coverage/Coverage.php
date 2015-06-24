@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Contract\Util;
+namespace HackPack\HackUnit\Contract\Coverage;
 
 type CoverageReportItem = shape(
     'file' => string,

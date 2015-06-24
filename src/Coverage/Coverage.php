@@ -1,16 +1,16 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Util;
+namespace HackPack\HackUnit\Coverage;
 
-use HackPack\HackUnit\Contract\Util\CoverageReportItem;
-use HackPack\HackUnit\Contract\Util\SourceLoader;
-use HackPack\HackUnit\Contract\Util\CoverageDriver;
+use HackPack\HackUnit\Contract\Coverage\CoverageReportItem;
+use HackPack\HackUnit\Contract\Coverage\Loader;
+use HackPack\HackUnit\Contract\Coverage\Driver;
 
-class Coverage implements \HackPack\HackUnit\Contract\Util\Coverage
+class Coverage implements \HackPack\HackUnit\Contract\Coverage\Coverage
 {
     public function __construct(
-        private SourceLoader $loader,
-        private CoverageDriver $driver,
+        private Loader $loader,
+        private Driver $driver,
     )
     {
     }
@@ -44,11 +44,11 @@ class Coverage implements \HackPack\HackUnit\Contract\Util\Coverage
 
         $lineCount = $executableLines->count();
         $uncovered = $executableLines->removeAll($linesExecuted);
-        $coveredCount = $uncovered->count();
+        $coveredCount = $lineCount - $uncovered->count();
 
         return shape(
             'file' => $fileName,
-            'fraction covered' => (int)round($coveredCount / $lineCount),
+            'fraction covered' => (int)round(100 * ($coveredCount / $lineCount)),
             'uncovered lines' => $uncovered,
         );
     }

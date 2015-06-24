@@ -1,8 +1,8 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Util;
+namespace HackPack\HackUnit\Coverage\Driver;
 
-class FbCoverageDriver implements \HackPack\HackUnit\Contract\Util\CoverageDriver
+class FbCoverageDriver implements \HackPack\HackUnit\Contract\Coverage\Driver
 {
     private array<string, array<int, int>> $raw = [];
 

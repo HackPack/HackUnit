@@ -26,7 +26,8 @@
             "HackPack\\HackUnit\\": "src/"
         },
         "files": [
-            "src/Event/Listeners.php"
+            "src/Event/Listeners.php",
+            "src/Enum.php"
         ]
     },
     "autoload-dev": {

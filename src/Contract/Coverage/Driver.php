@@ -1,8 +1,8 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Contract\Util;
+namespace HackPack\HackUnit\Contract\Coverage;
 
-interface CoverageDriver
+interface Driver
 {
     /**
      * Driver should map each file name to a set of line numbers actually executed

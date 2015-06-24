@@ -1,8 +1,8 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Contract\Util;
+namespace HackPack\HackUnit\Contract\Coverage;
 
-interface SourceLoader
+interface Loader
 {
     public function fileNames() : Set<string>;
     public function executableLinesFor(string $fileName) : Set<int>;
