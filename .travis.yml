@@ -7,5 +7,4 @@ before_script:
     - composer install --prefer-source
 
 script:
-    - hh_server --check .
     - hhvm -v Eval.Jit=false bin/hackunit --exclude test/Fixtures test
