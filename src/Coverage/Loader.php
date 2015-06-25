@@ -19,12 +19,14 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
 {
     private Map<string, Set<int>> $sourceList = Map{};
     private Map<string, Vector<Token>> $tokenCache = Map{};
+    private Set<string> $fileNames = Set{};
 
     public function __construct(
-        private Set<string> $fileNames,
+        Set<string> $sourceFolders,
         private (function(string):string) $fileOutliner,
     )
     {
+        $this->fileNames = $this->listSourceFiles($sourceFolders);
     }
 
     public function fileNames() : Set<string>
@@ -102,6 +104,10 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
             return Set{};
         }
 
+        if($cMirror->isInterface()) {
+            return Set{};
+        }
+
         $lines = Set{};
         foreach($cMirror->getMethods() as $method) {
             $start = $method->getStartLine();
@@ -114,7 +120,7 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
             ) {
                 continue;
             }
-            $lines->addAll($this->linesForFile($start, $end, $file));
+            $lines->addAll($this->linesForFile($start + 1, $end, $file));
         }
         return $lines;
     }
@@ -136,7 +142,7 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
         ) {
             return Set{};
         }
-        return $this->linesForFile($start, $end, $file);
+        return $this->linesForFile($start + 1, $end, $file);
     }
 
     private function linesForFile(int $start, int $end, string $filename) : Set<int>
@@ -164,6 +170,7 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
          $tokens = Vector{};
          foreach(token_get_all(file_get_contents($filename)) as $t) {
              if( ! is_array($t) ) {
+                 // non-named tokens are never executable
                  continue;
              }
              if(is_int($t[0]) && is_int($t[2])) {
@@ -182,9 +189,47 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
         {
         case T_COMMENT:
         case T_DOC_COMMENT:
+        case T_WHITESPACE:
             return false;
         default:
             return true;
         }
+    }
+
+    private function listSourceFiles(Set<string> $baseDirs) : Set<string>
+    {
+        if($baseDirs->isEmpty()) {
+             return Set{};
+        }
+
+        $exampleDir = $baseDirs->values()->at(0);
+        $rawFileList = shell_exec('hh_client --retry-if-init true --list-modes ' . escapeshellarg($exampleDir));
+        if(! is_string($rawFileList)) {
+            throw new \RuntimeException('Unable to scan project directory with hh_client.');
+        }
+
+        return (new Set(explode(PHP_EOL, $rawFileList)))
+            ->filter($line ==>
+                // Never cover hhi files
+                substr($line, -4) !== '.hhi' &&
+                // Trailing newline causes an empty line after explode
+                $line !== '' &&
+                // Ensure file is in one of the specified folders
+                $this->pathHasBase($line, $baseDirs)
+            )
+            // git rid of the hack mode portion of the line
+            ->map($line ==> preg_replace('/^(?:php|decl|partial|strict)\s*(.*)/', '$1', $line))
+            ;
+    }
+
+    private function pathHasBase(string $path, Set<string> $baseDirs) : bool
+    {
+        foreach($baseDirs as $dir) {
+            if(strpos($path, $dir) !== false)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -2,13 +2,17 @@
 
 namespace HackPack\HackUnit\Util;
 
+use HackPack\HackUnit\CoverageLevel;
+
 final class Options
 {
     const string VERSION = '0.4-dev';
 
     public Set<string> $includes = Set{};
     public Set<string> $excludes = Set{};
+    public Set<string> $sourceFolders = Set{};
     public bool $colors = true;
+    public CoverageLevel $coverage = CoverageLevel::summary;
 
     public static function fromCli(\kilahm\Clio\Clio $clio) : this
     {
@@ -21,15 +25,28 @@ final class Options
             ->withRequiredValue()
             ;
 
+        $sourceFolders = $clio->option('source')
+            ->aka('s')
+            ->describedAs('Base path for source files to be checked for coverage.  This option may be specified multiple times.')
+            ->withRequiredValue()
+            ;
+
         // Includes will be the cli arguments
         $clio->arg('path')
             ->describedAs('File or directory to include when loading test suites.  Multiple files and/or directories may be specified.');
 
-        foreach($clio->allArguments() as $path) {
+        foreach($clio->allArguments() as $path)
+        {
             $fullPath = realpath($path);
             if($fullPath === false) {
                 $clio->showHelp('Unable to locate path ' . $path);
-                exit(1);
+            }
+        }
+
+        foreach($sourceFolders->allValues() as $path)  {
+            $fullPath = realpath($path);
+            if(is_string($fullPath)) {
+                $options->sourceFolders->add($fullPath);
             }
         }
         $options->includes->addAll($clio->allArguments());

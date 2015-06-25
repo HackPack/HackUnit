@@ -8,7 +8,7 @@ type CoverageReportItem = shape(
     'uncovered lines' => Set<int>,
 );
 
-interface Coverage
+interface Processor
 {
     public function getReport() : Vector<CoverageReportItem>;
 }

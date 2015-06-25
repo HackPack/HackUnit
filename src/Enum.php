@@ -8,3 +8,10 @@ enum FileOutlineType : string
     func = 'function';
     other = 'other';
 }
+
+enum CoverageLevel : int
+{
+    none = 0;
+    summary = 1;
+    full = 2;
+}

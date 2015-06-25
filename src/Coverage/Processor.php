@@ -6,7 +6,7 @@ use HackPack\HackUnit\Contract\Coverage\CoverageReportItem;
 use HackPack\HackUnit\Contract\Coverage\Loader;
 use HackPack\HackUnit\Contract\Coverage\Driver;
 
-class Coverage implements \HackPack\HackUnit\Contract\Coverage\Coverage
+class Processor implements \HackPack\HackUnit\Contract\Coverage\Processor
 {
     public function __construct(
         private Loader $loader,
