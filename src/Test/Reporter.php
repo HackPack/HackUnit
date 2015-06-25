@@ -1,11 +1,12 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Util;
+namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
+use HackPack\HackUnit\Util\Options;
 
 use kilahm\Clio\BackgroundColor;
 use kilahm\Clio\Format\Style;

@@ -10,9 +10,9 @@ final class HackUnit
         $options = Util\Options::fromCli($clio);
 
 
-        $reporter = new Util\Reporter($clio);
+        $testReporter = new Test\Reporter($clio);
         if($options->colors) {
-            $reporter->withColor();
+            $testReporter->withColor();
         }
 
         $suiteBuilder = (\ReflectionClass $c) ==> {
@@ -24,17 +24,17 @@ final class HackUnit
             $options->includes,
             $options->excludes
         );
-        $loader->onMalformedSuite(inst_meth($reporter, 'reportMalformedSuite'));
+        $loader->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
 
         $runner = new Util\Runner(class_meth(Assert::class, 'build'));
 
-        $runner->onFailure(inst_meth($reporter, 'reportFailure'));
-        $runner->onSkip(inst_meth($reporter, 'reportSkip'));
-        $runner->onSuccess(inst_meth($reporter, 'reportSuccess'));
-        $runner->onPass(inst_meth($reporter, 'reportPass'));
+        $runner->onFailure(inst_meth($testReporter, 'reportFailure'));
+        $runner->onSkip(inst_meth($testReporter, 'reportSkip'));
+        $runner->onSuccess(inst_meth($testReporter, 'reportSuccess'));
+        $runner->onPass(inst_meth($testReporter, 'reportPass'));
 
-        $runner->onRunStart(inst_meth($reporter, 'identifyPackage'));
-        $runner->onRunStart(inst_meth($reporter, 'startTiming'));
+        $runner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
+        $runner->onRunStart(inst_meth($testReporter, 'startTiming'));
 
         // This is done here to ensure the coverage report only includes the minimum support code as possible.
         if($options->coverage !== CoverageLevel::none) {
@@ -51,9 +51,9 @@ final class HackUnit
             $runner->onRunEnd(inst_meth($driver, 'stop'));
         }
 
-        $runner->onRunEnd(inst_meth($reporter, 'displaySummary'));
+        $runner->onRunEnd(inst_meth($testReporter, 'displaySummary'));
 
-        $runner->onUncaughtException(inst_meth($reporter, 'reportUntestedException'));
+        $runner->onUncaughtException(inst_meth($testReporter, 'reportUntestedException'));
 
         $runner->run($loader->testSuites());
     }
