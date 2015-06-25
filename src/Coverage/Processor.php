@@ -3,13 +3,13 @@
 namespace HackPack\HackUnit\Coverage;
 
 use HackPack\HackUnit\Contract\Coverage\CoverageReportItem;
-use HackPack\HackUnit\Contract\Coverage\Loader;
+use HackPack\HackUnit\Contract\Coverage\Parser;
 use HackPack\HackUnit\Contract\Coverage\Driver;
 
 class Processor implements \HackPack\HackUnit\Contract\Coverage\Processor
 {
     public function __construct(
-        private Loader $loader,
+        private Parser $parser,
         private Driver $driver,
     )
     {
@@ -22,7 +22,7 @@ class Processor implements \HackPack\HackUnit\Contract\Coverage\Processor
              return Vector{};
         }
 
-        $filesToCover = $this->loader->fileNames();
+        $filesToCover = $this->parser->fileNames();
         return $raw
             ->filterWithKey(($fileName, $lines) ==> $filesToCover->contains($fileName))
             ->mapWithKey(($fileName, $lines) ==> $this->determineCoverage(
@@ -33,7 +33,7 @@ class Processor implements \HackPack\HackUnit\Contract\Coverage\Processor
 
     private function determineCoverage(string $fileName, Set<int> $linesExecuted) : CoverageReportItem
     {
-        $executableLines = $this->loader->executableLinesFor($fileName);
+        $executableLines = $this->parser->executableLinesFor($fileName);
         if($executableLines->isEmpty()) {
             return shape(
                 'file' => $fileName,

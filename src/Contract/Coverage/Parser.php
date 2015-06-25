@@ -2,7 +2,8 @@
 
 namespace HackPack\HackUnit\Contract\Coverage;
 
-interface Loader
+interface Parser
 {
     public function fileNames() : Set<string>;
+    public function executableLinesFor(string $fileName) : Set<int>;
 }

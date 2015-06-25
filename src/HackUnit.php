@@ -40,11 +40,14 @@ final class HackUnit
         if($options->coverage !== CoverageLevel::none) {
             $srcLoader = new Coverage\Loader(
                 $options->sourceFolders,
-                class_meth(self::class, 'fileOutliner')
+            );
+            $parser = new Coverage\Parser(
+                class_meth(self::class, 'fileOutliner'),
+                $srcLoader,
             );
             $driver = new Coverage\Driver\FbCoverageDriver();
             $coverage = new Coverage\Processor(
-                $srcLoader,
+                $parser,
                 $driver,
             );
             $runner->onRunStart(inst_meth($driver, 'start'));
