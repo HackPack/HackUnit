@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Contract\Util;
+namespace HackPack\HackUnit\Contract\Test;
 
 use HackPack\HackUnit\Contract\Test\Suite;
 use HackPack\HackUnit\Event\MalformedSuite;

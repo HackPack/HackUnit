@@ -6,10 +6,36 @@ final class HackUnit
 {
     public static function fromCli(string $projectDir) : void
     {
+        /*
+         * Configuration
+         */
         $clio = \kilahm\Clio\Clio::fromCli();
         $options = Util\Options::fromCli($clio);
 
+        /*
+         * Coverage setup
+         */
+        $srcLoader = new Coverage\Loader(
+            $options->sourceFolders,
+        );
+        $parser = new Coverage\Parser(
+            class_meth(self::class, 'fileOutliner'),
+            $srcLoader,
+        );
+        $driver = new Coverage\Driver\FbCoverageDriver();
+        $processor = new Coverage\Processor(
+            $parser,
+            $driver,
+        );
+        $coverageReporter = new Coverage\Reporter(
+            $options->coverage,
+            $processor,
+            $clio,
+        );
 
+        /*
+         * Test case setup
+         */
         $testReporter = new Test\Reporter($clio);
         if($options->colors) {
             $testReporter->withColor();
@@ -19,46 +45,38 @@ final class HackUnit
             return new Test\Suite($c, class_meth(Test\TestCase::class, 'build'));
         };
 
-        $loader = new Util\Loader(
+        $testLoader = new Test\Loader(
             $suiteBuilder,
             $options->includes,
             $options->excludes
         );
-        $loader->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
+        $testLoader->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
 
-        $runner = new Util\Runner(class_meth(Assert::class, 'build'));
+        /*
+         * Register events with the runner
+         */
+        $testRunner = new Test\Runner(class_meth(Assert::class, 'build'));
 
-        $runner->onFailure(inst_meth($testReporter, 'reportFailure'));
-        $runner->onSkip(inst_meth($testReporter, 'reportSkip'));
-        $runner->onSuccess(inst_meth($testReporter, 'reportSuccess'));
-        $runner->onPass(inst_meth($testReporter, 'reportPass'));
+        $testRunner->onFailure(inst_meth($testReporter, 'reportFailure'));
+        $testRunner->onSkip(inst_meth($testReporter, 'reportSkip'));
+        $testRunner->onSuccess(inst_meth($testReporter, 'reportSuccess'));
+        $testRunner->onPass(inst_meth($testReporter, 'reportPass'));
 
-        $runner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
-        $runner->onRunStart(inst_meth($testReporter, 'startTiming'));
+        $testRunner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
+        $testRunner->onRunStart(inst_meth($testReporter, 'startTiming'));
 
         // This is done here to ensure the coverage report only includes the minimum support code as possible.
         if($options->coverage !== CoverageLevel::none) {
-            $srcLoader = new Coverage\Loader(
-                $options->sourceFolders,
-            );
-            $parser = new Coverage\Parser(
-                class_meth(self::class, 'fileOutliner'),
-                $srcLoader,
-            );
-            $driver = new Coverage\Driver\FbCoverageDriver();
-            $coverage = new Coverage\Processor(
-                $parser,
-                $driver,
-            );
-            $runner->onRunStart(inst_meth($driver, 'start'));
-            $runner->onRunEnd(inst_meth($driver, 'stop'));
+            $testRunner->onRunStart(inst_meth($driver, 'start'));
+            $testRunner->onRunEnd(inst_meth($driver, 'stop'));
+            $testRunner->onRunEnd(inst_meth($coverageReporter, 'showReport'));
         }
 
-        $runner->onRunEnd(inst_meth($testReporter, 'displaySummary'));
+        $testRunner->onRunEnd(inst_meth($testReporter, 'displaySummary'));
 
-        $runner->onUncaughtException(inst_meth($testReporter, 'reportUntestedException'));
+        $testRunner->onUncaughtException(inst_meth($testReporter, 'reportUntestedException'));
 
-        $runner->run($loader->testSuites());
+        $testRunner->run($testLoader->testSuites());
     }
 
     public static function fileOutliner(string $path) : string

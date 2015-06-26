@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Util;
+namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\TestCase;
@@ -16,7 +16,7 @@ use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Event\SuiteEndListener;
 use HackPack\HackUnit\Event\SuiteStartListener;
 
-class Runner implements \HackPack\HackUnit\Contract\Util\Runner
+class Runner implements \HackPack\HackUnit\Contract\Test\Runner
 {
     private Vector<ExceptionListener> $exceptionListeners = Vector{};
     private Vector<FailureListener> $failureListeners = Vector{};

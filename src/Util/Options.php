@@ -27,6 +27,7 @@ final class Options
 
         $sourceFolders = $clio->option('source')
             ->aka('s')
+            ->aka('cover')
             ->describedAs('Base path for source files to be checked for coverage.  This option may be specified multiple times.')
             ->withRequiredValue()
             ;
@@ -49,6 +50,10 @@ final class Options
                 $options->sourceFolders->add($fullPath);
             }
         }
+        if($options->sourceFolders->isEmpty()) {
+            $options->coverage = CoverageLevel::none;
+        }
+
         $options->includes->addAll($clio->allArguments());
         $options->excludes->addAll($excludes->allValues());
 

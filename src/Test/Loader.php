@@ -1,14 +1,15 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Util;
+namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\TestCase;
 use HackPack\HackUnit\Contract\Test\Suite;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\MalformedSuiteListener;
+use HackPack\HackUnit\Util\Trace;
 
-final class Loader
+final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 {
     private int $testCount = 0;
 
