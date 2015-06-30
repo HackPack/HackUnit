@@ -52,5 +52,19 @@ final class Assert implements Contract\Assert
 
     public function skip(string $reason, ?Util\TraceItem $traceItem = null) : void
     {
+        if($traceItem === null) {
+            // Assume the caller was a test method
+            $stack = Util\Trace::generate();
+            $traceItem = shape(
+                'file' => $stack[0]['file'],
+                'line' => $stack[1]['line'],
+                'function' => $stack[1]['function'],
+                'class' => $stack[0]['class'],
+            );
+        }
+        $skip = new Event\Skip($reason, $traceItem);
+        foreach($this->skipListeners as $l) {
+            $l($skip);
+        }
     }
 }
