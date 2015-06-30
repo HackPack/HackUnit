@@ -37,9 +37,6 @@ final class HackUnit
          * Test case setup
          */
         $testReporter = new Test\Reporter($clio);
-        if($options->colors) {
-            $testReporter->withColor();
-        }
 
         $suiteBuilder = (\ReflectionClass $c) ==> {
             return new Test\Suite($c, class_meth(Test\TestCase::class, 'build'));
@@ -51,6 +48,14 @@ final class HackUnit
             $options->excludes
         );
         $testLoader->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
+
+        /*
+         * Colors!
+         */
+        if($options->colors) {
+            $testReporter->enableColors();
+            $coverageReporter->enableColors();
+        }
 
         /*
          * Register events with the runner
@@ -65,14 +70,15 @@ final class HackUnit
         $testRunner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
         $testRunner->onRunStart(inst_meth($testReporter, 'startTiming'));
 
-        // This is done here to ensure the coverage report only includes the minimum support code as possible.
+        // This is done here to ensure the coverage report only includes the
+        // minimum support code possible.
         if($options->coverage !== CoverageLevel::none) {
             $testRunner->onRunStart(inst_meth($driver, 'start'));
             $testRunner->onRunEnd(inst_meth($driver, 'stop'));
-            $testRunner->onRunEnd(inst_meth($coverageReporter, 'showReport'));
         }
 
         $testRunner->onRunEnd(inst_meth($testReporter, 'displaySummary'));
+        $testRunner->onRunEnd(inst_meth($coverageReporter, 'showReport'));
 
         $testRunner->onUncaughtException(inst_meth($testReporter, 'reportUntestedException'));
 
@@ -81,7 +87,7 @@ final class HackUnit
 
     public static function fileOutliner(string $path) : string
     {
-        $outline = shell_exec('hh_client --json --from HackUnit --outline < ' . escapeshellarg($path));
+        $outline = shell_exec('hh_client --json --from hackunit --outline < ' . escapeshellarg($path));
         if(is_string($outline)) {
             return $outline;
         }

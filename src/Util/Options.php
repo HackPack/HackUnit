@@ -32,6 +32,10 @@ final class Options
             ->withRequiredValue()
             ;
 
+        $color = $clio->flag('no-color')
+            ->describedAs('Disable ANSI color codes.')
+            ;
+
         // Includes will be the cli arguments
         $clio->arg('path')
             ->describedAs('File or directory to include when loading test suites.  Multiple files and/or directories may be specified.');
@@ -56,6 +60,9 @@ final class Options
 
         $options->includes->addAll($clio->allArguments());
         $options->excludes->addAll($excludes->allValues());
+        if($color->wasPresent()) {
+             $options->colors = false;
+        }
 
         return $options;
     }

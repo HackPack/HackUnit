@@ -9,12 +9,19 @@ use kilahm\Clio\Clio;
 
 class Reporter
 {
+    private bool $useColor = false;
+
     public function __construct(
         private CoverageLevel $level,
         private Processor $processor,
         private Clio $clio,
     )
     {
+    }
+
+    public function enableColors() : void
+    {
+        $this->useColor = true;
     }
 
     public function showReport() : void
@@ -35,6 +42,13 @@ class Reporter
     private function showSummary() : void
     {
         $this->clio->line('');
+        $msg = 'Building coverage report...';
+        if($this->useColor) {
+            $msg = $this->clio->style($msg)
+                ->with(\kilahm\Clio\Format\Style::info())
+                ;
+        }
+        $this->clio->line($msg);
         $raw = Map::fromItems(
             $this->processor
             ->getReport()

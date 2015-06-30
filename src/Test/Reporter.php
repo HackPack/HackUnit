@@ -48,7 +48,7 @@ class Reporter
         $this->starttime = microtime(true);
     }
 
-    public function withColor() : void
+    public function enableColors() : void
     {
         $this->colors = true;
     }
@@ -159,10 +159,11 @@ class Reporter
             return '';
         }
         return PHP_EOL . $this->clio->style('Skipped tests:')->with(Style::warn()) . PHP_EOL .
-            implode(PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
+            implode(PHP_EOL . PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
                 return implode(PHP_EOL, [
                     ($idx + 1) . ') ' . $this->buildMethodCall($e->testClass(), $e->testMethod()),
                     '  In file ' . $e->testFile(),
+                    $e->message(),
                 ]);
             })) .
             PHP_EOL;
