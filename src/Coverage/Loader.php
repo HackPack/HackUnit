@@ -23,7 +23,7 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
 
         $exampleDir = $this->baseDirs->values()->at(0);
         $this->startHHServer($exampleDir);
-        $rawFileList = shell_exec('hh_client --retry-if-init true --list-modes ' . escapeshellarg($exampleDir));
+        $rawFileList = shell_exec('hh_client --retry-if-init true --retries 10 --from hackunit --list-modes ' . escapeshellarg($exampleDir));
         if(! is_string($rawFileList)) {
             throw new \RuntimeException('Unable to scan project directory with hh_client.');
         }
@@ -65,6 +65,7 @@ class Loader implements \HackPack\HackUnit\Contract\Coverage\Loader
             }
             echo 'Trying to start hh_server... ' . PHP_EOL;
             usleep(self::HH_SERVER_COOLDOWN);
+            $retries++;
         }
         throw new \RuntimeException('Unable to start hh_server');
     }
