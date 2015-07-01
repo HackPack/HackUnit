@@ -102,12 +102,24 @@ class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
             return Set{};
         }
 
+        // Interfaces never have executable code
         if($cMirror->isInterface()) {
             return Set{};
         }
 
+        // Attribute to skip an entire class
+        if($cMirror->getAttribute('nocover') !== null) {
+             return Set{};
+        }
+
         $lines = Set{};
         foreach($cMirror->getMethods() as $method) {
+
+            // Attribute to skip a method
+            if($method->getAttribute('nocover') !== null) {
+                 continue;
+            }
+
             $start = $method->getStartLine();
             $end = $method->getEndLine();
             $file = $method->getFileName();
