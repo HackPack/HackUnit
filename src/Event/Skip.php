@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Event;
 
 use HackPack\HackUnit\Util\TraceItem;
 
+<<nocover>>
 class Skip
 {
     public function __construct(private string $reason, private TraceItem $callSite)

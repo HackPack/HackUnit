@@ -2,6 +2,7 @@
 
 namespace HackPack\HackUnit\Event;
 
+<<nocover>>
 trait SuccessEmitter
 {
     private Vector<SuccessListener> $successListeners = Vector{};
