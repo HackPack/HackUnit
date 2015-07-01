@@ -5,6 +5,7 @@ namespace HackPack\HackUnit\Event;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
+<<IgnoreCoverage>>
 final class MalformedSuite
 {
     public static function badMethod(\ReflectionMethod $methodMirror, string $reason) : this

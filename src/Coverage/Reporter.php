@@ -78,6 +78,10 @@ class Reporter
     private function lineRanges(Set<int> $lines) : Vector<(int,int)>
     {
         $lines = $lines->toVector();
+        if($lines->isEmpty()) {
+            return Vector{};
+        }
+
         sort($lines);
         $ranges = Vector{};
         $start = $end = $lines->at(0);

@@ -5,7 +5,7 @@ namespace HackPack\HackUnit\Event;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
-<<nocover>>
+<<IgnoreCoverage>>
 class Failure
 {
     public function __construct(

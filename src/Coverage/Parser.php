@@ -108,7 +108,7 @@ class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
         }
 
         // Attribute to skip an entire class
-        if($cMirror->getAttribute('nocover') !== null) {
+        if($cMirror->getAttribute('IgnoreCoverage') !== null) {
              return Set{};
         }
 
@@ -116,7 +116,7 @@ class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
         foreach($cMirror->getMethods() as $method) {
 
             // Attribute to skip a method
-            if($method->getAttribute('nocover') !== null) {
+            if($method->getAttribute('IgnoreCoverage') !== null) {
                  continue;
             }
 
