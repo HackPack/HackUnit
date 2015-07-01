@@ -64,11 +64,12 @@ final class Assert implements Contract\Assert
         if($traceItem === null) {
             // Assume the caller was a test method
             $stack = Util\Trace::generate();
+            /* IgnoreCoverage */
             $traceItem = shape(
                 'file' => $stack[0]['file'],
-                'line' => $stack[1]['line'],
+                'line' => $stack[0]['line'],
                 'function' => $stack[1]['function'],
-                'class' => $stack[0]['class'],
+                'class' => $stack[1]['class'],
             );
         }
         $skip = new Event\Skip($reason, $traceItem);
