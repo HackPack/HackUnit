@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Contract\Assertion;
 
 interface MixedAssertion extends Assertion
 {
+    public function not() : this;
     public function isNull() : void;
     public function isBool() : void;
     public function isInt() : void;
