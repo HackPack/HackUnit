@@ -13,6 +13,7 @@ newtype FileOutlineItem = shape(
 newtype Token = shape(
     'code' => int,
     'line' => int,
+    'raw' => string,
 );
 
 class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
@@ -163,16 +164,24 @@ class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
             $this->tokenCache->set($filename, $tokens);
         }
         $lines = Set{};
+        $skipped = Set{};
         $desiredTokens = $tokens->filter($t ==> $t['line'] >= $start && $t['line'] <= $end);
         foreach($desiredTokens as $token) {
-            if($lines->contains($token['line'])) {
+            if(
+                $lines->contains($token['line']) ||
+                $skipped->contains($token['line'])
+            ) {
+                continue;
+            }
+            if($this->isInlineSkip($token)) {
+                $skipped->add($token['line'] + 1);
                 continue;
             }
             if($this->isExecutable($token)) {
                 $lines->add($token['line']);
             }
         }
-        return $lines;
+        return $lines->removeAll($skipped);
     }
 
     private function tokenize(string $filename) : Vector<Token>
@@ -183,9 +192,10 @@ class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
                  // non-named tokens are never executable
                  continue;
              }
-             if(is_int($t[0]) && is_int($t[2])) {
+             if(is_int($t[0]) && is_string($t[1]) && is_int($t[2])) {
                  $tokens->add(shape(
                      'code' => $t[0],
+                     'raw' => $t[1],
                      'line' => $t[2],
                  ));
              }
@@ -200,10 +210,17 @@ class Parser implements \HackPack\HackUnit\Contract\Coverage\Parser
         case T_COMMENT:
         case T_DOC_COMMENT:
         case T_WHITESPACE:
+        case T_VARIABLE:
             return false;
         default:
             return true;
         }
     }
 
+    private function isInlineSkip(Token $token) : bool
+    {
+        return
+            ($token['code'] === T_COMMENT || $token['code'] === T_DOC_COMMENT) &&
+            strpos($token['raw'], 'IgnoreCoverage') !== false;
+    }
 }
