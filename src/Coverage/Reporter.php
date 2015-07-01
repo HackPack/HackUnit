@@ -63,6 +63,37 @@ class Reporter
                 continue;
             }
             $this->clio->line(sprintf('%3d%% %s', $item['fraction covered'], $item['file']));
+            $this->clio->line(implode(', ',
+                $this->lineRanges($item['uncovered lines'])
+                ->map($range ==> {
+                    if($range[0] === $range[1]) {
+                        return sprintf('%d', $range[0]);
+                    }
+                    return sprintf('%d - %d', $range[0], $range[1]);
+                })
+            ));
         }
+    }
+
+    private function lineRanges(Set<int> $lines) : Vector<(int,int)>
+    {
+        $lines = $lines->toVector();
+        sort($lines);
+        $ranges = Vector{};
+        $start = $end = $lines->at(0);
+        foreach($lines as $line) {
+            if($line <= $end + 1) {
+                // Looking for a gap
+                $end = $line;
+                continue;
+            }
+
+            // Found a gap.  Start a new range.
+            $ranges->add(tuple($start, $end));
+            $start = $end = $line;
+        }
+        // Last one always end a range
+        $ranges->add(tuple($start, $end));
+        return $ranges;
     }
 }
