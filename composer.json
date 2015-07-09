@@ -18,8 +18,8 @@
     ],
     "minimum-stability" : "dev",
     "require": {
-        "kilahm/clio": "dev-master",
-        "hackpack/hack-class-scanner": "dev-master"
+        "kilahm/clio": "*",
+        "hackpack/hack-class-scanner": "*"
     },
     "autoload": {
         "psr-4": {
