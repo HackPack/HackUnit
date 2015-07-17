@@ -31,7 +31,6 @@ Some command line options exist to alter the behavior of HackUnit:
 
 * --exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files. 
 * --no-color : Disable the use of ANSI color escape codes in the report
-* --cover="path/for/coverage" *EXPERIMENTAL* Generate a coverage report for files in the path given.
 
 Test Suites
 -----------
@@ -44,7 +43,9 @@ For HackUnit to recognize a class definition as a test suite, you must annotate 
 You may inspect HackUnit’s test files for concrete examples.
 
 ###Setup###
-To mark a method as a setup, annotate the method with a `<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
+You may have HackUnit run some methods before each individual test method is run and/or before any test method is
+run for the suite.  To do so, mark the appropriate method with the
+`<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 Multiple setup methods may be declared, but the execution order is not guaranteed.
 
 Each setup method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as setup and it requires a parameter, it will not be executed.
@@ -76,10 +77,12 @@ class MySuite
 
 Suite setup methods are run once, before any of the test methods in the class are run.
 
-Test setup methods are run just before each test method is run.
+Test setup methods are run just before each test method is run (and thus are potentially run multiple times).
 
 ###Teardown###
-To mark a method as teardown, annotate the method with a `<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
+You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
+run for the suite.  To do so, mark the appropriate method with the
+`<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 Multiple teardown methods may be declared, but the execution order is not guaranteed.
 
 Each teardown method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as teardown and it requires a parameter, it will not be executed.
@@ -108,9 +111,14 @@ class MySuite
 }
 ```
 
+Suite tear down methods are run once, after all of the test methods in the class are run.
+
+Test tear down methods are run just after each test method is run (and thus are potentially run multiple times).
+
 ###Tests###
 
-Individual test methods are defined using the `<<Test>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
+Individual test methods are defined using the 
+`<<Test>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 Execution order of the tests is not guaranteed.
 
 Each test method MUST accept exactly 1 parameter, with the type hint of `HackPack\HackUnit\Contract\Assert`.
@@ -119,7 +127,7 @@ If you mark a method as a test and the signature does not match, the test will n
 ```php
 namespace My\Namespace\Test;
 
-use \HackPack\HackUnit\Assert;
+use HackPack\HackUnit\Contract\Assert;
 
 <<TestSuite>>
 class MySuite
@@ -204,10 +212,10 @@ Skipping Tests
 There are two ways to skip execution of a particular test method:
 
 1. Add the attribute `<<Skip>>` to the test method or the test suite.  If the `<<Skip>>` attribute is added to the suite, all tests in that class will be skipped.
-1. Invoke the `skip()` method of the `AssertionBuilder` object passed to your test method.
+1. Invoke the `skip()` method of the `Assert` object passed to your test method.
 
 ```php
-use HackPack\HackUnit\Assertion\AssertionBuilder;
+use \HackPack\HackUnit\Contract\Assert;
 
 <<TestSuite, Skip>>
 class SkippedSuite
@@ -219,13 +227,13 @@ class SkippedSuite
 class MySuite
 {
     <<Test, Skip>>
-    public function skippedTest(AssertionBuilder $assert) : void
+    public function skippedTest(Assertion $assert) : void
     {
         // This will not be run and the test will be marked skip in the report.
     }
 
     <<Test>>
-    public function skippFromMiddleOfTest(AssertionBuilder $assert) : void
+    public function skippFromMiddleOfTest(Assert $assert) : void
     {
         // This will be run
         $assert->skip();
@@ -233,6 +241,11 @@ class MySuite
     }
 }
 ```
+
+Future Plans
+------------
+
+I would like to implement collection type assertions.  These may take the form of `$assert->map($myMap)->hasSameKeysAs($expectedMap);` or similar.  If you have suggestions for the types of assertions that could be made on collections, please open a ticket!
 
 Notes
 -----
