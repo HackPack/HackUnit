@@ -13,27 +13,6 @@ final class HackUnit
         $options = Util\Options::fromCli($clio);
 
         /*
-         * Coverage setup
-         */
-        $srcLoader = new Coverage\Loader(
-            $options->sourceFolders,
-        );
-        $parser = new Coverage\Parser(
-            class_meth(self::class, 'fileOutliner'),
-            $srcLoader,
-        );
-        $driver = new Coverage\Driver\FbCoverageDriver();
-        $processor = new Coverage\Processor(
-            $parser,
-            $driver,
-        );
-        $coverageReporter = new Coverage\Reporter(
-            $options->coverage,
-            $processor,
-            $clio,
-        );
-
-        /*
          * Test case setup
          */
         $testReporter = new Test\Reporter($clio);
@@ -54,7 +33,6 @@ final class HackUnit
          */
         if($options->colors) {
             $testReporter->enableColors();
-            $coverageReporter->enableColors();
         }
 
         /*
@@ -70,27 +48,10 @@ final class HackUnit
         $testRunner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
         $testRunner->onRunStart(inst_meth($testReporter, 'startTiming'));
 
-        // This is done here to ensure the coverage report only includes the
-        // minimum support code possible.
-        if($options->coverage !== CoverageLevel::none) {
-            $testRunner->onRunStart(inst_meth($driver, 'start'));
-            $testRunner->onRunEnd(inst_meth($driver, 'stop'));
-        }
-
         $testRunner->onRunEnd(inst_meth($testReporter, 'displaySummary'));
-        $testRunner->onRunEnd(inst_meth($coverageReporter, 'showReport'));
 
         $testRunner->onUncaughtException(inst_meth($testReporter, 'reportUntestedException'));
 
         $testRunner->run($testLoader->testSuites());
-    }
-
-    public static function fileOutliner(string $path) : string
-    {
-        $outline = shell_exec('hh_client --json --from hackunit --outline < ' . escapeshellarg($path));
-        if(is_string($outline)) {
-            return $outline;
-        }
-        return '';
     }
 }
