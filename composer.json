@@ -35,5 +35,8 @@
             "HackPack\\HackUnit\\Tests\\Fixtures\\": "test/Fixtures"
         }
     },
-    "bin": ["bin/hackunit"]
+    "bin": ["bin/hackunit"],
+    "require-dev": {
+        "91carriage/phpunit-hhi": "^4.0@dev"
+    }
 }
