@@ -4,11 +4,12 @@ namespace HackPack\HackUnit\Tests\Assertion;
 
 use HackPack\HackUnit\Assertion\MixedAssertion;
 use HackPack\HackUnit\Contract\Assert;
-use HackPack\HackUnit\Event\Failure;
 
 <<TestSuite>>
 class MixedAssertionTest
 {
+    use AssertionTest;
+
     private static Vector<mixed> $truish = Vector{
         '1',
         '-1',
@@ -41,22 +42,12 @@ class MixedAssertionTest
         Vector{},
     };
 
-    private Vector<Failure> $failEvents = Vector{};
-    private int $successCount = 0;
-
-    <<Setup>>
-    public function clearCounts() : void
-    {
-        $this->failEvents->clear();
-        $this->successCount = 0;
-    }
-
     private function buildAssertion(mixed $context) : MixedAssertion
     {
         return new MixedAssertion(
             $context,
-            Vector{$e ==> {$this->failEvents->add($e);}},
-            Vector{() ==> {$this->successCount++;}},
+            $this->failListeners(),
+            $this->successListeners(),
         );
     }
 
