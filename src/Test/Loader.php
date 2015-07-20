@@ -8,6 +8,8 @@ use HackPack\HackUnit\Contract\Test\Suite;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\MalformedSuiteListener;
 use HackPack\HackUnit\Util\Trace;
+use HackPack\Scanner\ClassScanner;
+use HackPack\Scanner\NameType;
 
 final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 {
@@ -42,14 +44,14 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 
     public function testSuites() : Vector<Suite>
     {
-        $scanner = new \HackPack\Scanner\ClassScanner(
+        $scanner = new ClassScanner(
             $this->includes,
             $this->excludes
         );
 
         $suites = Vector{};
 
-        foreach($scanner->mapClassToFile() as $className => $fileName) {
+        foreach($scanner->getNameToFileMap(NameType::CLASS_DEF) as $className => $fileName) {
             $this->load($fileName);
             try {
                 $classMirror = new \ReflectionClass($className);
