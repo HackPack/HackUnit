@@ -162,4 +162,28 @@ class MixedAssertionTest
         $assert->int($this->failEvents->count())->eq(self::$allTypes->count() - 1);
         $assert->int($this->successCount)->eq(1);
     }
+
+    <<Test>>
+    public function isTypeOf(Assert $assert) : void
+    {
+        $this->buildAssertion(Vector{})->isTypeOf(Vector::class);
+        $assert->int($this->successCount)->eq(1);
+        $assert->int($this->failEvents->count())->eq(0);
+    }
+
+    <<Test>>
+    public function isNotTypeOf(Assert $assert) : void
+    {
+        $this->buildAssertion(Vector{})->isTypeOf(Map::class);
+        $assert->int($this->successCount)->eq(0);
+        $assert->int($this->failEvents->count())->eq(1);
+    }
+
+    <<Test>>
+    public function isSubTypeOf(Assert $assert) : void
+    {
+        $this->buildAssertion(Vector{})->isTypeOf(\ConstVector::class);
+        $assert->int($this->successCount)->eq(1);
+        $assert->int($this->failEvents->count())->eq(0);
+    }
 }
