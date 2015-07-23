@@ -51,7 +51,7 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 
         $suites = Vector{};
 
-        foreach($scanner->getNameToFileMap(NameType::CLASS_DEF) as $className => $fileName) {
+        foreach($scanner->getNameToFileMap(NameType::className) as $className => $fileName) {
             $this->load($fileName);
             try {
                 $classMirror = new \ReflectionClass($className);
