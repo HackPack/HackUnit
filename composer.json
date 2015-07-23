@@ -20,7 +20,7 @@
     "require": {
         "hhvm": "*",
         "kilahm/clio": "*",
-        "hackpack/hack-class-scanner": "*"
+        "hackpack/hack-class-scanner": "dev-master"
     },
     "autoload": {
         "psr-4": {
