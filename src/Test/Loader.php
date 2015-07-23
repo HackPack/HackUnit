@@ -286,7 +286,7 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
         if($params->count() !== 1) {
             $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
-                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assert',
+                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Contract\Assert',
             ));
             return false;
         }
@@ -294,7 +294,7 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
         if($params->at(0)->getTypeText() !== Assert::class) {
             $this->emitMalformedSuite(MalformedSuite::badMethod(
                 $methodMirror,
-                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Assert',
+                'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Contract\Assert',
             ));
             return false;
         }
