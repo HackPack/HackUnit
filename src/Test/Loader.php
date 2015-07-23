@@ -102,16 +102,17 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
         }
 
         $this->testCount = 0;
-        $methods = (new Vector($classMirror->getMethods()))->filter($m ==> {
-            $attrs = new Map($m->getAttributes());
-            if($attrs->containsKey('Test')) {
-                $this->testCount += 1;
-            }
-            return
-                $attrs->containsKey('Test') ||
-                $attrs->containsKey('Setup') ||
-                $attrs->containsKey('TearDown');
-        });
+        $methods = (new Vector($classMirror->getMethods()))
+            ->filter($m ==> {
+                $attrs = new Map($m->getAttributes());
+                if($attrs->containsKey('Test')) {
+                    $this->testCount += 1;
+                }
+                return
+                    $attrs->containsKey('Test') ||
+                    $attrs->containsKey('Setup') ||
+                    $attrs->containsKey('TearDown');
+            });
 
         if($this->testCount === 0) {
             $traceItem = Trace::buildItem([
