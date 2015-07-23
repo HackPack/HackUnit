@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\ValidSuite\IgnoreMe;
 
-use HackPack\HackUnit\Assert;
+use HackPack\HackUnit\Contract\Assert;
 
 /**
  * Loader should have no problems with this suite

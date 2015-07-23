@@ -19,6 +19,7 @@ class ValidLoaderTest
     {
         $this->suiteBuilder = $mirror ==> new Suite($mirror);
         $this->loader = new Loader($this->suiteBuilder);
+        $this->loader->onMalformedSuite($e ==> {$this->malformedEvents->add($e);});
         $this->fixturesPath = dirname(__DIR__) . '/Fixtures';
     }
 
@@ -36,6 +37,7 @@ class ValidLoaderTest
     public function resetLoader() : void
     {
         $this->loader = new Loader($this->suiteBuilder);
+        $this->loader->onMalformedSuite($e ==> {$this->malformedEvents->add($e);});
         $this->malformedEvents->clear();
     }
 
