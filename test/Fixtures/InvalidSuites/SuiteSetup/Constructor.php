@@ -11,7 +11,7 @@ class Constructor
     }
 
     <<Test>>
-    public function test(\HackPack\HackUnit\Assert $assert) : void
+    public function test(\HackPack\HackUnit\Contract\Assert $assert) : void
     {
     }
 }

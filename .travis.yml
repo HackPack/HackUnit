@@ -9,4 +9,4 @@ before_script:
     - composer install --prefer-source
 
 script:
-    - hhvm -v Eval.Jit=false bin/hackunit --exclude test/Fixtures test
+    - hhvm -v Eval.Jit=false bin/hackunit test/ --exclude test/Fixtures/ --exclude test/Mocks/

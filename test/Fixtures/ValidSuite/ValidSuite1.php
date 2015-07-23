@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Tests\Fixtures;
+namespace HackPack\HackUnit\Tests\Fixtures\ValidSuite;
 
 use HackPack\HackUnit\Assert;
 
@@ -8,7 +8,7 @@ use HackPack\HackUnit\Assert;
  * Loader should have no problems with this suite
  */
 <<TestSuite>>
-class ValidSuite
+class ValidSuite1
 {
     public function __construct(string $notRequired = '')
     {
