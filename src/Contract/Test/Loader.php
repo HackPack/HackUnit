@@ -3,11 +3,11 @@
 namespace HackPack\HackUnit\Contract\Test;
 
 use HackPack\HackUnit\Contract\Test\Suite;
-use HackPack\HackUnit\Event\MalformedSuite;
+use HackPack\HackUnit\Event\MalformedSuiteListener;
 
 interface Loader
 {
-    public function onMalformedSuite((function(MalformedSuite):void) $listener) : this;
+    public function onMalformedSuite(MalformedSuiteListener $listener) : this;
     public function including(string $path) : this;
     public function excluding(string $path) : this;
     public function testSuites() : Vector<Suite>;

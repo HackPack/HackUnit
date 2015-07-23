@@ -24,7 +24,7 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
     {
     }
 
-    public function onMalformedSuite((function(MalformedSuite):void) $listener) : this
+    public function onMalformedSuite(MalformedSuiteListener $listener) : this
     {
         $this->malformedListeners->add($listener);
         return $this;
