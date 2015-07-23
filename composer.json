@@ -18,6 +18,7 @@
     ],
     "minimum-stability" : "dev",
     "require": {
+        "hhvm": "*",
         "kilahm/clio": "*",
         "hackpack/hack-class-scanner": "*"
     },
