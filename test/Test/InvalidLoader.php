@@ -132,4 +132,62 @@ class InvalidLoaderTest
     {
         $this->testFailurePoints('SuiteTeardown', $assert);
     }
+
+    <<Test>>
+    public function testSuiteConstructorParams(Assert $assert) : void
+    {
+        $this->loader->including($this->suitePath('ConstructorParams.php'));
+        $suites = $this->loader->testSuites();
+
+        $assert->int($suites->count())->eq(0);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $event = $this->malformedEvents->at(0);
+        $line = $event->line();
+        $method = $event->method();
+        $class = $event->className();
+        $file = $event->fileName();
+
+        $assert->mixed($line)->isInt();
+        invariant(is_int($line), '');
+        $assert->mixed($method)->isString();
+        invariant(is_string($method), '');
+        $assert->mixed($class)->isString();
+        invariant(is_string($class), '');
+        $assert->mixed($file)->isString();
+        invariant(is_string($file), '');
+
+        $assert->int($line)->eq(8);
+        $assert->string($method)->is('__construct');
+        $assert->string($class)->is($this->suiteName('ConstructorParams'));
+        $assert->string($file)->is($this->suitePath('ConstructorParams.php'));
+    }
+
+    <<Test>>
+    public function emptySuite(Assert $assert) : void
+    {
+        $this->loader->including($this->suitePath('MissingTestAnnotation.php'));
+        $suites = $this->loader->testSuites();
+
+        $assert->int($suites->count())->eq(0);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $event = $this->malformedEvents->at(0);
+        $line = $event->line();
+        $method = $event->method();
+        $class = $event->className();
+        $file = $event->fileName();
+
+        $assert->mixed($line)->isInt();
+        invariant(is_int($line), '');
+        $assert->mixed($method)->isNull();
+        $assert->mixed($class)->isString();
+        invariant(is_string($class), '');
+        $assert->mixed($file)->isString();
+        invariant(is_string($file), '');
+
+        $assert->int($line)->eq(7);
+        $assert->string($class)->is($this->suiteName('MissingTestAnnotation'));
+        $assert->string($file)->is($this->suitePath('MissingTestAnnotation.php'));
+    }
 }
