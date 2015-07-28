@@ -175,10 +175,105 @@ class InvalidLoaderTest
     <<Test>>
     public function testAsConstructor(Assert $assert) : void
     {
-         $this->loader->including($this->suitePath('Test/Constructor.php'));
-         $suites = $this->loader->testSuites();
+        $this->loader->including($this->suitePath('Test/Constructor.php'));
+        $suites = $this->loader->testSuites();
 
-         $assert->int($suites->count())->eq(0);
-         $assert->int($this->malformedEvents->count())->eq(1);
+        $assert->int($suites->count())->eq(0);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $this->checkTrace(
+            $this->malformedEvents->at(0)->traceItem(),
+            shape(
+                'line' => 11,
+                'function' => '__construct',
+                'class' => $this->suiteName('Test\Constructor'),
+                'file' => $this->suitePath('Test/Constructor.php')
+            ),
+            $assert,
+        );
+    }
+
+    <<Test>>
+    public function testAsDestructor(Assert $assert) : void
+    {
+        $this->loader->including($this->suitePath('Test/Destructor.php'));
+        $suites = $this->loader->testSuites();
+
+        $assert->int($suites->count())->eq(0);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $this->checkTrace(
+            $this->malformedEvents->at(0)->traceItem(),
+            shape(
+                'line' => 9,
+                'function' => '__destruct',
+                'class' => $this->suiteName('Test\Destructor'),
+                'file' => $this->suitePath('Test/Destructor.php')
+            ),
+            $assert,
+        );
+    }
+
+    <<Test>>
+    public function testAsStatic(Assert $assert) : void
+    {
+        $this->loader->including($this->suitePath('Test/StaticMethods.php'));
+        $suites = $this->loader->testSuites();
+
+        $assert->int($suites->count())->eq(0);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $this->checkTrace(
+            $this->malformedEvents->at(0)->traceItem(),
+            shape(
+                'line' => 9,
+                'function' => 'setItUp',
+                'class' => $this->suiteName('Test\StaticMethods'),
+                'file' => $this->suitePath('Test/StaticMethods.php')
+            ),
+            $assert,
+        );
+    }
+
+    <<Test>>
+    public function tooFewParamsForTest(Assert $assert) : void
+    {
+        $this->loader->including($this->suitePath('Test/TooFewParams.php'));
+        $suites = $this->loader->testSuites();
+
+        $assert->int($suites->count())->eq(1);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $this->checkTrace(
+            $this->malformedEvents->at(0)->traceItem(),
+            shape(
+                'line' => 11,
+                'function' => 'test',
+                'class' => $this->suiteName('Test\TooFewParams'),
+                'file' => $this->suitePath('Test/TooFewParams.php')
+            ),
+            $assert,
+        );
+    }
+
+    <<Test>>
+    public function tooManyParamsForTest(Assert $assert) : void
+    {
+        $this->loader->including($this->suitePath('Test/TooManyParams.php'));
+        $suites = $this->loader->testSuites();
+
+        $assert->int($suites->count())->eq(1);
+        $assert->int($this->malformedEvents->count())->eq(1);
+
+        $this->checkTrace(
+            $this->malformedEvents->at(0)->traceItem(),
+            shape(
+                'line' => 9,
+                'function' => 'test',
+                'class' => $this->suiteName('Test\TooManyParams'),
+                'file' => $this->suitePath('Test/TooManyParams.php')
+            ),
+            $assert,
+        );
     }
 }
