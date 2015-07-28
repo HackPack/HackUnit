@@ -1,6 +1,6 @@
 <?hh // strict
 
-namespace HackPack\HackUnit\Tests\Fixtures\Util;
+namespace HackPack\HackUnit\Tests\Mocks\Util;
 
 class Assertion implements \HackPack\HackUnit\Contract\Assertion\Assertion
 {
