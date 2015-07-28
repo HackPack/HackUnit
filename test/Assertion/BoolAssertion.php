@@ -4,11 +4,13 @@ namespace HackPack\HackUnit\Tests\Assertion;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Assertion\BoolAssertion;
+use HackPack\HackUnit\Tests\TraceItemTest;
 
 <<TestSuite>>
 class BoolAssertionTest
 {
     use AssertionTest;
+    use TraceItemTest;
 
     private function makeAssertion(bool $context) : BoolAssertion
     {
@@ -43,9 +45,15 @@ class BoolAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
         $e = $this->failEvents->at(0);
-        $assert->int((int)$e->assertionLine())->eq($line);
-        $assert->string((string)$e->testMethod())->is(__FUNCTION__);
-        $assert->string((string)$e->testClass())->is(__CLASS__);
-        $assert->string((string)$e->testFile())->is(__FILE__);
+        $this->checkTrace(
+            $e->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
+            $assert,
+        );
     }
 }

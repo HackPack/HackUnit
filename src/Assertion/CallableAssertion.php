@@ -130,13 +130,12 @@ class CallableAssertion implements \HackPack\HackUnit\Contract\Assertion\Callabl
             $c = $this->context;
             $c();
         } catch(\Exception $e) {
-            $this->emitFailure(new Failure(
+            $this->emitFailure(Failure::fromCallStack(
                 implode(PHP_EOL, [
                     'Unexpected exception thrown.',
                     get_class($e),
                     $e->getMessage(),
                 ]),
-                Trace::findAssertionCall(),
             ));
             return;
         }
@@ -145,43 +144,39 @@ class CallableAssertion implements \HackPack\HackUnit\Contract\Assertion\Callabl
 
     private function missingException() : void
     {
-        $this->emitFailure(new Failure(
+        $this->emitFailure(Failure::fromCallStack(
             'Expected exception to be thrown.',
-            Trace::findAssertionCall(),
         ));
     }
 
     private function wrongClass(string $expected, string $actual) : void
     {
-        $this->emitFailure(new Failure(
+        $this->emitFailure(Failure::fromCallStack(
             'Expected exception of type ' . $expected . ' but ' . $actual . ' was thrown.',
-            Trace::findAssertionCall(),
         ));
     }
 
     private function wrongMessage(string $expected, string $actual) : void
     {
-        $this->emitFailure(new Failure(
+        $this->emitFailure(Failure::fromCallStack(
             implode(PHP_EOL, [
                 'Expected exception message:',
                 $expected,
                 'Actual message:',
                 $actual,
             ]),
-            Trace::findAssertionCall(),
         ));
     }
 
     private function messageDoesNotContain(string $expected, string $actual) : void
     {
-        $this->emitFailure(new Failure(
+        $this->emitFailure(Failure::fromCallStack(
             implode(PHP_EOL, [
                 'Expected exception message to contain:',
                 $expected,
                 'Actual message:',
                 $actual,
             ]),
-            Trace::findAssertionCall(),
         ));
     }
 }

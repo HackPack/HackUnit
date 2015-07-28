@@ -5,34 +5,34 @@ namespace HackPack\HackUnit\Event;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
-<<IgnoreCoverage>>
+<<__ConsistentConstruct>>
 class Failure
 {
+    public static function fromCallStack(string $message) : this
+    {
+        return new static(
+            $message,
+            Trace::findAssertionCall(),
+            Trace::findTestMethod(),
+        );
+    }
+
     public function __construct(
         private string $message,
-        private TraceItem $callSite,
+        private TraceItem $assertionCallSite,
+        private TraceItem $testCallSite,
     )
     {
     }
 
-    public function testMethod() : ?string
+    public function assertionTraceItem() : TraceItem
     {
-        return $this->callSite['function'];
+        return $this->assertionCallSite;
     }
 
-    public function testClass() : ?string
+    public function testMethodTraceItem() : TraceItem
     {
-        return $this->callSite['class'];
-    }
-
-    public function assertionLine() : ?int
-    {
-        return $this->callSite['line'];
-    }
-
-    public function testFile() : ?string
-    {
-        return $this->callSite['file'];
+        return $this->testCallSite;
     }
 
     public function getMessage() : string

@@ -6,6 +6,8 @@ use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Test\Loader;
 use HackPack\HackUnit\Tests\Mocks\Test\Suite;
+use HackPack\HackUnit\Tests\TraceItemTest;
+use HackPack\HackUnit\Util\TraceItem;
 
 newtype UpDownFailure = shape(
     'line' => int,
@@ -17,6 +19,8 @@ newtype UpDownFailure = shape(
 <<TestSuite>>
 class InvalidLoaderTest
 {
+    use TraceItemTest;
+
     private Vector<MalformedSuite> $malformedEvents = Vector{};
     private (function(\ReflectionClass):Suite) $suiteBuilder;
     private Loader $loader;
@@ -77,7 +81,6 @@ class InvalidLoaderTest
 
     private function testFailurePoints(string $name, Assert $assert) : void
     {
-        $fullName = $this->suiteName($name);
         $fullPath = rtrim($this->suitePath($name), '/');
 
         $this->loader->including($fullPath);
@@ -88,24 +91,16 @@ class InvalidLoaderTest
 
         foreach($this->failurePoints as $index => $failure) {
             $event = $this->malformedEvents->at($index);
-            $line = $event->line();
-            $method = $event->method();
-            $class = $event->className();
-            $file = $event->fileName();
-
-            $assert->mixed($line)->isInt();
-            invariant(is_int($line), '');
-            $assert->mixed($method)->isString();
-            invariant(is_string($method), '');
-            $assert->mixed($class)->isString();
-            invariant(is_string($class), '');
-            $assert->mixed($file)->isString();
-            invariant(is_string($file), '');
-
-            $assert->int($line)->eq($failure['line']);
-            $assert->string($method)->is($failure['method']);
-            $assert->string($class)->is($this->suiteName($name) . '\\' . $failure['class']);
-            $assert->string($file)->is($fullPath . '/' . $failure['file']);
+            $this->checkTrace(
+                $event->traceItem(),
+                shape(
+                    'line' => $failure['line'],
+                    'function' => $failure['method'],
+                    'class' => $this->suiteName($name) . '\\' . $failure['class'],
+                    'file' => $fullPath . '/' . $failure['file'],
+                ),
+                $assert,
+            );
         }
     }
 
@@ -143,24 +138,16 @@ class InvalidLoaderTest
         $assert->int($this->malformedEvents->count())->eq(1);
 
         $event = $this->malformedEvents->at(0);
-        $line = $event->line();
-        $method = $event->method();
-        $class = $event->className();
-        $file = $event->fileName();
-
-        $assert->mixed($line)->isInt();
-        invariant(is_int($line), '');
-        $assert->mixed($method)->isString();
-        invariant(is_string($method), '');
-        $assert->mixed($class)->isString();
-        invariant(is_string($class), '');
-        $assert->mixed($file)->isString();
-        invariant(is_string($file), '');
-
-        $assert->int($line)->eq(8);
-        $assert->string($method)->is('__construct');
-        $assert->string($class)->is($this->suiteName('ConstructorParams'));
-        $assert->string($file)->is($this->suitePath('ConstructorParams.php'));
+        $this->checkTrace(
+            $event->traceItem(),
+            shape(
+                'line' => 8,
+                'function' => '__construct',
+                'class' => $this->suiteName('ConstructorParams'),
+                'file' => $this->suitePath('ConstructorParams.php'),
+            ),
+            $assert,
+        );
     }
 
     <<Test>>
@@ -173,21 +160,25 @@ class InvalidLoaderTest
         $assert->int($this->malformedEvents->count())->eq(1);
 
         $event = $this->malformedEvents->at(0);
-        $line = $event->line();
-        $method = $event->method();
-        $class = $event->className();
-        $file = $event->fileName();
+        $this->checkTrace(
+            $event->traceItem(),
+            shape(
+                'line' => 7,
+                'function' => null,
+                'class' => $this->suiteName('MissingTestAnnotation'),
+                'file' => $this->suitePath('MissingTestAnnotation.php'),
+            ),
+            $assert,
+        );
+    }
 
-        $assert->mixed($line)->isInt();
-        invariant(is_int($line), '');
-        $assert->mixed($method)->isNull();
-        $assert->mixed($class)->isString();
-        invariant(is_string($class), '');
-        $assert->mixed($file)->isString();
-        invariant(is_string($file), '');
+    <<Test>>
+    public function testAsConstructor(Assert $assert) : void
+    {
+         $this->loader->including($this->suitePath('Test/Constructor.php'));
+         $suites = $this->loader->testSuites();
 
-        $assert->int($line)->eq(7);
-        $assert->string($class)->is($this->suiteName('MissingTestAnnotation'));
-        $assert->string($file)->is($this->suitePath('MissingTestAnnotation.php'));
+         $assert->int($suites->count())->eq(0);
+         $assert->int($this->malformedEvents->count())->eq(1);
     }
 }

@@ -164,9 +164,6 @@ class MixedAssertion implements \HackPack\HackUnit\Contract\Assertion\MixedAsser
 
     private function fail(string $message) : void
     {
-        $this->emitFailure(new Failure(
-            $message,
-            Trace::findAssertionCall(),
-        ));
+        $this->emitFailure(Failure::fromCallStack($message));
     }
 }

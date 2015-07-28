@@ -70,9 +70,47 @@ class Trace
         return self::emptyTraceItem();
     }
 
+    public static function findTestMethodFromStack(Vector<TraceItem> $trace) : TraceItem
+    {
+        foreach($trace as $idx => $item) {
+            // Make sure we know the class and method names
+            if($item['class'] === null || $item['function'] === null) {
+                continue;
+            }
+            try{
+                $class = new \ReflectionClass($item['class']);
+                $method = $class->getMethod((string)$item['function']);
+            } catch (\ReflectionException $e) {
+                // Either class or function were not defined
+                continue;
+            }
+
+            // See if the class is a suite and the method is a test
+            $classAttributes = new Map($class->getAttributes());
+            $methodAttributes = new Map($method->getAttributes());
+
+            if($classAttributes->get('TestSuite') !== null && $methodAttributes->get('Test') !== null) {
+                 // Found the marked test method
+                return shape(
+                        'line' => $trace->at($idx - 1)['line'],
+                        'function' => $trace->at($idx)['function'],
+                        'class' => $trace->at($idx)['class'],
+                        'file' => $trace->at($idx - 1)['file'],
+                );
+            }
+        }
+
+        return self::emptyTraceItem();
+    }
+
     public static function findAssertionCall() : TraceItem
     {
         return self::findAssertionCallFromStack(self::generate());
+    }
+
+    public static function findTestMethod() : TraceItem
+    {
+         return self::findTestMethodFromStack(self::generate());
     }
 
     private static function emptyTraceItem() : TraceItem

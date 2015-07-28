@@ -177,11 +177,8 @@ class StringAssertion implements \HackPack\HackUnit\Contract\Assertion\StringAss
 
     private function fail(Vector<string> $lines) : void
     {
-        $this->emitFailure(
-            new Failure(
-                implode(PHP_EOL, $lines),
-                Trace::findAssertionCall(),
-            )
-        );
+        $this->emitFailure(Failure::fromCallStack(
+            implode(PHP_EOL, $lines),
+        ));
     }
 }

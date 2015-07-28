@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Tests\Util;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Util\Trace;
+use HackPack\HackUnit\Util\TraceItem;
 
 <<TestSuite>>
 class TraceTest
@@ -130,6 +131,33 @@ class TraceTest
 
         $assert->int($items->count())->eq(1);
         $item = $items->at(0);
+
+        $assert->mixed($item['line'])->isInt();
+        $assert->mixed($item['function'])->isString();
+        $assert->mixed($item['class'])->isString();
+        $assert->mixed($item['file'])->isString();
+
+        $assert->int((int)$item['line'])->eq($line);
+        $assert->string((string)$item['function'])->is(__FUNCTION__);
+        $assert->string((string)$item['class'])->is(__CLASS__);
+        $assert->string((string)$item['file'])->is(__FILE__);
+    }
+
+    private function levelOne() : TraceItem
+    {
+         return $this->levelTwo();
+    }
+
+    private function levelTwo() : TraceItem
+    {
+        return Trace::findTestMethod();
+    }
+
+    <<Test>>
+    public function findTestMethod(Assert $assert) : void
+    {
+        $line = __LINE__ + 1;
+        $item = $this->levelOne();
 
         $assert->mixed($item['line'])->isInt();
         $assert->mixed($item['function'])->isString();

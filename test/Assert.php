@@ -9,6 +9,8 @@ use HackPack\HackUnit\Event\Skip;
 <<TestSuite>>
 class AssertTest
 {
+    use TraceItemTest;
+
     private Vector<Skip> $skips = Vector{};
 
     <<Setup>>
@@ -32,27 +34,18 @@ class AssertTest
 
         $assert->int($this->skips->count())->eq(1);
         $skip = $this->skips->at(0);
-        $skipLine = $skip->assertionLine();
-        $function = $skip->testMethod();
-        $class = $skip->testClass();
-        $file = $skip->testFile();
+
+        $this->checkTrace(
+            $skip->callSite(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
+            $assert,
+        );
 
         $assert->string($skip->message())->is('testing');
-
-        $assert->mixed($skipLine)->not()->isNull();
-        invariant($skipLine !== null, '');
-        $assert->int($skipLine)->eq($line);
-
-        $assert->mixed($function)->not()->isNull();
-        invariant($function !== null, '');
-        $assert->string($function)->is(__FUNCTION__);
-
-        $assert->mixed($class)->not()->isNull();
-        invariant($class !== null, '');
-        $assert->string($class)->is(__CLASS__);
-
-        $assert->mixed($file)->not()->isNull();
-        invariant($file !== null, '');
-        $assert->string($file)->is(__FILE__);
     }
 }

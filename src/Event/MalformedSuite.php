@@ -28,28 +28,13 @@ final class MalformedSuite
     {
     }
 
-    public function line() : ?int
-    {
-        return $this->item['line'];
-    }
-
-    public function method() : ?string
-    {
-        return $this->item['function'];
-    }
-
-    public function className() : ?string
-    {
-        return $this->item['class'];
-    }
-
-    public function fileName() : ?string
-    {
-        return $this->item['file'];
-    }
-
     public function message() : string
     {
         return $this->reason;
+    }
+
+    public function traceItem() : TraceItem
+    {
+         return $this->item;
     }
 }

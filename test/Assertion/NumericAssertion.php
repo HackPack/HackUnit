@@ -4,13 +4,13 @@ namespace HackPack\HackUnit\Tests\Assertion;
 
 use HackPack\HackUnit\Assertion\NumericAssertion;
 use HackPack\HackUnit\Contract\Assert;
-use HackPack\HackUnit\Tests\Event\FailureEventTraceAssertions;
+use HackPack\HackUnit\Tests\TraceItemTest;
 
 <<TestSuite>>
 class NumericAssertionTest
 {
     use AssertionTest;
-    use FailureEventTraceAssertions;
+    use TraceItemTest;
 
     private function makeAssertion(int $context) : NumericAssertion<int>
     {
@@ -41,13 +41,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -61,13 +63,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -81,13 +85,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -111,13 +117,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -151,13 +159,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -171,13 +181,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -191,13 +203,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 
@@ -231,13 +245,15 @@ class NumericAssertionTest
         $assert->int($this->successCount)->eq(0);
         $assert->int($this->failEvents->count())->eq(1);
 
-        $this->testFailureEvent(
+        $this->checkTrace(
+            $this->failEvents->at(0)->assertionTraceItem(),
+            shape(
+                'line' => $line,
+                'function' => __FUNCTION__,
+                'class' => __CLASS__,
+                'file' => __FILE__,
+            ),
             $assert,
-            $this->failEvents->at(0),
-            $line,
-            __FUNCTION__,
-            __CLASS__,
-            __FILE__,
         );
     }
 

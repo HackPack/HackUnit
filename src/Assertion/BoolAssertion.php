@@ -30,9 +30,8 @@ class BoolAssertion implements \HackPack\HackUnit\Contract\Assertion\BoolAsserti
             $this->emitSuccess();
             return;
         }
-        $this->emitFailure(new Failure(
+        $this->emitFailure(Failure::fromCallStack(
             'Expected ' . ($expected ? 'true' : 'false') . ', value was ' . ($expected ? 'false' : 'true') . '.',
-            Trace::findAssertionCall(),
         ));
     }
 }

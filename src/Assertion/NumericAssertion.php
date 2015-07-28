@@ -99,14 +99,13 @@ class NumericAssertion<Tcontext> implements \HackPack\HackUnit\Contract\Assertio
 
     private function fail(string $comparison, Tcontext $expected) : void
     {
-        $this->emitFailure(new Failure(
+        $this->emitFailure(Failure::fromCallStack(
             sprintf(
                 'Numeric assertaion failed.  Expected %d %s %d',
                 $this->context,
                 $comparison,
                 $expected,
             ),
-            Trace::findAssertionCall(),
         ));
     }
 }

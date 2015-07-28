@@ -7,6 +7,7 @@ use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
 use HackPack\HackUnit\Util\Options;
+use HackPack\HackUnit\Util\TraceItem;
 
 use kilahm\Clio\BackgroundColor;
 use kilahm\Clio\Format\Style;
@@ -161,14 +162,15 @@ class Reporter
         return PHP_EOL . $this->clio->style('Skipped tests:')->with(Style::warn()) . PHP_EOL .
             implode(PHP_EOL . PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
                 return implode(PHP_EOL, [
-                    ($idx + 1) . ') ' . $this->buildMethodCall($e->testClass(), $e->testMethod()),
-                    '  In file ' . $e->testFile(),
+                    ($idx + 1) . ') ' . $this->buildMethodCall($e->callSite()),
+                    '  In file ' . $e->callSite()['file'],
                     $e->message(),
                 ]);
             })) .
             PHP_EOL;
 
     }
+
     public function errorReport() : string
     {
         if($this->failEvents->isEmpty()) {
@@ -176,12 +178,19 @@ class Reporter
         }
         $report = '';
         foreach($this->failEvents as $idx => $e) {
-            $methodName = $this->buildMethodCall($e->testClass(), $e->testMethod());
+            $assertionTraceItem = $e->assertionTraceItem();
+            $testTraceItem = $e->testMethodTraceItem();
+            $assertionCall= $this->buildMethodCall($assertionTraceItem);
+            $testMethod = $this->buildMethodCall($testTraceItem);
             $report .= implode(PHP_EOL,[
                 '',
-                $this->clio->style(($idx + 1) . ') Test failed in ' . $methodName)->with(Style::error()),
-                'On line ' . $e->assertionLine() . ' of ' . $e->testFile(),
-                $e->getMessage()
+                $this->clio
+                    ->style(($idx + 1) . ') Test failure - ' . $testMethod)
+                    ->with(Style::error())
+                ,
+                'Assertion failed in ' . $assertionCall,
+                'On line ' . $assertionTraceItem['line'] . ' of ' . $assertionTraceItem['file'],
+                $e->getMessage(),
             ]) . PHP_EOL;
         }
         return $report . PHP_EOL;
@@ -216,8 +225,8 @@ class Reporter
         foreach($this->malformedEvents as $idx => $event) {
             $report .= implode(PHP_EOL,[
                 PHP_EOL,
-                ($idx + 1) . ') ' . $this->buildMethodCall($event->className(), $event->method()),
-                $this->buildLineReference($event->line(), $event->fileName()),
+                ($idx + 1) . ') ' . $this->buildMethodCall($event->traceItem()),
+                $this->buildLineReference($event->traceItem()),
                 $event->message(),
             ]);
         }
@@ -225,15 +234,19 @@ class Reporter
         return $report . PHP_EOL;
     }
 
-    private function buildLineReference(?int $lineNumber, ?string $fileName) : string
+    private function buildLineReference(TraceItem $item) : string
     {
+        $lineNumber = $item['line'];
+        $fileName = $item['file'];
         $lineNumber = $lineNumber === null ? '??' : (string)$lineNumber;
         $fileName = $fileName === null ? 'Unknown file' : (string)$fileName;
         return 'On line ' . $lineNumber . ' in file ' . $fileName;
     }
 
-    private function buildMethodCall(?string $className, ?string $methodName, ?StyleGroup $style = null) : string
+    private function buildMethodCall(TraceItem $item, ?StyleGroup $style = null) : string
     {
+        $className = $item['class'];
+        $methodName = $item['function'];
         if($className === null) {
             $className = 'Unknown class';
         }
