@@ -6,7 +6,7 @@ namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\TestTeardown;
 class StaticMethods
 {
     <<TearDown>>
-    public static function tearItDown() : void
+    public static function noStatics() : void
     {
     }
 

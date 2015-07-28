@@ -6,7 +6,7 @@ namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\SuiteSetup;
 class Params
 {
     <<Setup('suite')>>
-    public function setup(string $required) : void
+    public function params(string $required) : void
     {
     }
 

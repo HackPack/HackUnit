@@ -6,7 +6,7 @@ namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\TestTeardown;
 class Params
 {
     <<TearDown>>
-    public function setup(string $required) : void
+    public function params(string $required) : void
     {
     }
 

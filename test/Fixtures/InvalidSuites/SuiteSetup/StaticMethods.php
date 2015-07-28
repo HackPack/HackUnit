@@ -6,7 +6,7 @@ namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\SuiteSetup;
 class StaticMethods
 {
     <<Setup('suite')>>
-    public static function setItUp() : void
+    public static function noStatics() : void
     {
     }
 
