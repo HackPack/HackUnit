@@ -20,7 +20,7 @@
     "require": {
         "hhvm": "*",
         "kilahm/clio": "*",
-        "hackpack/hack-class-scanner": "dev-master"
+        "hackpack/hack-class-scanner": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -35,8 +35,5 @@
             "HackPack\\HackUnit\\Tests\\": "test"
         }
     },
-    "bin": ["bin/hackunit"],
-    "require-dev": {
-        "91carriage/phpunit-hhi": "^4.0@dev"
-    }
+    "bin": ["bin/hackunit"]
 }
