@@ -20,7 +20,7 @@
     "require": {
         "hhvm": "*",
         "kilahm/clio": "*",
-        "hackpack/hack-class-scanner": "^2.0"
+        "fredemmott/definition-finder": "^0.3.5"
     },
     "autoload": {
         "psr-4": {

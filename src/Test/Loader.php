@@ -8,8 +8,8 @@ use HackPack\HackUnit\Contract\Test\Suite;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\MalformedSuiteListener;
 use HackPack\HackUnit\Util\Trace;
-use HackPack\Scanner\ClassScanner;
-use HackPack\Scanner\NameType;
+use FredEmmott\DefinitionFinder\TreeParser;
+use FredEmmott\DefinitionFinder\FileParser;
 
 final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 {
@@ -32,38 +32,64 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 
     public function including(string $path) : this
     {
-        $this->includes->add($path);
+        if (false !== ($fullPath = realpath($path))) {
+            $this->includes->add($fullPath);
+        }
         return $this;
     }
 
     public function excluding(string $path) : this
     {
-        $this->excludes->add($path);
+        if (false !== ($fullPath = realpath($path))) {
+            $this->excludes->add($fullPath);
+        }
         return $this;
     }
 
     public function testSuites() : Vector<Suite>
     {
-        $scanner = new ClassScanner(
-            $this->includes,
-            $this->excludes
-        );
-
         $suites = Vector{};
 
-        foreach($scanner->getNameToFileMap(NameType::className) as $className => $fileName) {
-            $this->load($fileName);
-            try {
-                $classMirror = new \ReflectionClass($className);
-            } catch (\ReflectionException $e) {
-                // Unable to load the file, or the map was wrong?
-                // Should we warn the user?
-                continue;
+        foreach ($this->includes as $path) {
+            if (is_file($path)) {
+                $scanner = FileParser::FromFile($path);
+            } else {
+                $scanner = TreeParser::FromPath($path);
             }
+            $classes = $scanner->getClasses();
 
-            $suite = $this->buildSuite($classMirror);
-            if($suite !== null) {
-                $suites->add($suite);
+            foreach ($classes as $scannedClass) {
+                // Check if ingoring
+                $classFilename = $scannedClass->getFileName();
+                $excludes = $this->excludes->filter($excludePath ==> {
+                    if ($excludePath === $classFilename) {
+                        return true;
+                    } else {
+                        return $excludePath . '/' === substr($classFilename, 0, strlen($excludePath) + 1);
+                    }
+                });
+                if (!$excludes->isEmpty()) {
+                    continue;
+                }
+
+                if ($scannedClass->getAttributes()->contains('TestSuite')) {
+                    $this->load($classFilename);
+
+                    try {
+                        $classMirror = new \ReflectionClass($scannedClass->getName());
+                    } catch (\ReflectionException $e) {
+                        // Unable to load the file, or the map was wrong?
+                        // Should we warn the user?
+                        continue;
+                    }
+
+                    $suite = $this->buildSuite($classMirror);
+
+                    if($suite !== null) {
+                        $suites->add($suite);
+                    }
+
+                }
             }
         }
 
@@ -77,11 +103,6 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
 
     private function buildSuite(\ReflectionClass $classMirror) : ?Suite
     {
-        // Must have <<TestSuite>> attribute
-        if($classMirror->getAttribute('TestSuite') === null) {
-            return null;
-        }
-
         $className = $classMirror->getName();
         $classFile = $classMirror->getFileName();
         if( ! is_string($className) || ! is_string($classFile)) {
