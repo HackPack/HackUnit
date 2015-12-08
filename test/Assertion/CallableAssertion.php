@@ -6,7 +6,6 @@ use HackPack\HackUnit\Assertion\CallableAssertion;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Tests\Fixtures\TestException;
 
-<<TestSuite>>
 class CallableAssertionTest
 {
     use AssertionTest;

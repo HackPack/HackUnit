@@ -4,7 +4,6 @@ namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\Test;
 
 use HackPack\HackUnit\Contract\Assert;
 
-<<TestSuite>>
 class TooFewParams
 {
     <<Test>>

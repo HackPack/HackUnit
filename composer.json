@@ -18,8 +18,7 @@
     ],
     "minimum-stability" : "dev",
     "require": {
-        "hhvm": "*",
-        "kilahm/clio": "*",
+        "hhvm": ">=3.10.0",
         "fredemmott/definition-finder": "^0.3.5"
     },
     "autoload": {

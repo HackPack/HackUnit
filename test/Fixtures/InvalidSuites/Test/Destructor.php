@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\Test;
 
-<<TestSuite>>
 class Destructor
 {
     <<Test>>

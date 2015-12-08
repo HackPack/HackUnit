@@ -5,7 +5,6 @@ namespace HackPack\HackUnit\Tests\Assertion;
 use HackPack\HackUnit\Assertion\MixedAssertion;
 use HackPack\HackUnit\Contract\Assert;
 
-<<TestSuite>>
 class MixedAssertionTest
 {
     use AssertionTest;

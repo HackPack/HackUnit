@@ -6,7 +6,6 @@ use HackPack\HackUnit\Contract\Assert as iAssert;
 use HackPack\HackUnit\Assert;
 use HackPack\HackUnit\Event\Skip;
 
-<<TestSuite>>
 class AssertTest
 {
     use TraceItemTest;

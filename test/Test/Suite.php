@@ -8,7 +8,6 @@ use HackPack\HackUnit\Tests\Mocks\Test\TestCase;
 use HackPack\HackUnit\Tests\Fixtures\SpySuite;
 use HackPack\HackUnit\Tests\Fixtures\RunCounts;
 
-<<TestSuite>>
 class SuiteTest
 {
     private Suite $suite;

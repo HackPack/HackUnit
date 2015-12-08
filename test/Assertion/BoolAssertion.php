@@ -6,7 +6,6 @@ use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Assertion\BoolAssertion;
 use HackPack\HackUnit\Tests\TraceItemTest;
 
-<<TestSuite>>
 class BoolAssertionTest
 {
     use AssertionTest;

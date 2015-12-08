@@ -9,15 +9,8 @@ use HackPack\HackUnit\Event\Success;
 use HackPack\HackUnit\Util\Options;
 use HackPack\HackUnit\Util\TraceItem;
 
-use kilahm\Clio\BackgroundColor;
-use kilahm\Clio\Format\Style;
-use kilahm\Clio\Format\StyleGroup;
-use kilahm\Clio\TextColor;
-use kilahm\Clio\TextEffect;
-
 class Reporter
 {
-    private bool $colors = false;
     private ?float $starttime = null;
 
     private Vector<Failure> $failEvents = Vector{};
@@ -29,29 +22,20 @@ class Reporter
     private int $passCount = 0;
     private int $testCount = 0;
 
-    public function __construct(private \kilahm\Clio\Clio $clio)
+    public function __construct()
     {
     }
 
     public function identifyPackage() : void
     {
-        $message = 'HackUnit by HackPack version ' . Options::VERSION;
-        if($this->colors) {
-            $message = $this->clio->style($message)->fg(TextColor::blue)->render();
-        }
-        $this->clio->line('');
-        $this->clio->line($message);
-        $this->clio->line('');
+        $this->line('');
+        $this->line('HackUnit by HackPack version ' . Options::VERSION);
+        $this->line('');
     }
 
     public function startTiming() : void
     {
         $this->starttime = microtime(true);
-    }
-
-    public function enableColors() : void
-    {
-        $this->colors = true;
     }
 
     public function reportFailure(Failure $event) : void
@@ -60,10 +44,7 @@ class Reporter
         $this->testCount++;
         $this->assertCount++;
         $message = 'F';
-        if($this->colors) {
-            $message = $this->clio->style($message)->with(Style::error());
-        }
-        $this->clio->show($message);
+        $this->show($message);
     }
 
     public function reportSkip(Skip $event) : void
@@ -71,10 +52,7 @@ class Reporter
         $this->skipEvents->add($event);
         $this->testCount++;
         $message = 'S';
-        if($this->colors) {
-            $message = $this->clio->style($message)->with(Style::warn());
-        }
-        $this->clio->show($message);
+        $this->show($message);
     }
 
     public function reportSuccess() : void
@@ -86,10 +64,7 @@ class Reporter
     public function reportPass() : void
     {
         $message = '.';
-        if($this->colors) {
-            $message = $this->clio->style($message)->with(Style::success());
-        }
-        $this->clio->show($message);
+        $this->show($message);
         $this->testCount++;
         $this->passCount++;
     }
@@ -97,16 +72,13 @@ class Reporter
     public function reportUntestedException(\Exception $e) : void
     {
         $message = 'Fatal exception thrown in ' . $e->getFile() . ' on line ' . $e->getLine() . '.';
-        if($this->colors) {
-            $message = $this->clio->style($message)->with(Style::error());
-        }
 
-        $this->clio->line(PHP_EOL);
-        $this->clio->line($message);
-        $this->clio->line('Exception message:');
-        $this->clio->line($e->getMessage());
-        $this->clio->line('Trace:');
-        $this->clio->line($e->getTraceAsString());
+        $this->line(PHP_EOL);
+        $this->line($message);
+        $this->line('Exception message:');
+        $this->line($e->getMessage());
+        $this->line('Trace:');
+        $this->line($e->getTraceAsString());
     }
 
     public function reportMalformedSuite(MalformedSuite $event) : void
@@ -117,12 +89,12 @@ class Reporter
     public function displaySummary() : void
     {
         // Blank line between the dots and the summary
-        $this->clio->line(PHP_EOL);
-        $this->clio->line($this->timeReport());
-        $this->clio->line($this->testSummary());
-        $this->clio->show($this->malformedReport());
-        $this->clio->show($this->skipReport());
-        $this->clio->show($this->errorReport());
+        $this->line(PHP_EOL);
+        $this->line($this->timeReport());
+        $this->line($this->testSummary());
+        $this->show($this->malformedReport());
+        $this->show($this->skipReport());
+        $this->show($this->errorReport());
     }
 
     public function testSummary() : string
@@ -131,17 +103,6 @@ class Reporter
         $passCount = (string)$this->passCount;
         $failedCount = (string)$this->failEvents->count();
         $skipCount = (string)$this->skipEvents->count();
-
-        if($this->colors) {
-            $successCount = $this->clio->style($successCount)->with(Style::success());
-            $passCount = $this->clio->style($passCount)->with(Style::success());
-
-            $failedStyle = $failedCount === '0' ? Style::success() : Style::error();
-            $skipStyle = $skipCount === '0' ? Style::success() : Style::warn();
-
-            $failedCount = $this->clio->style($failedCount)->with($failedStyle);
-            $skipCount = $this->clio->style($skipCount)->with($skipStyle);
-        }
 
         return sprintf(
             'Assertions: %s/%d Tests: %s/%d Failed: %s Skipped %s',
@@ -159,7 +120,7 @@ class Reporter
         if($this->skipEvents->isEmpty()) {
             return '';
         }
-        return PHP_EOL . $this->clio->style('Skipped tests:')->with(Style::warn()) . PHP_EOL .
+        return PHP_EOL . 'Skipped tests:' . PHP_EOL .
             implode(PHP_EOL . PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
                 return implode(PHP_EOL, [
                     ($idx + 1) . ') ' . $this->buildMethodCall($e->callSite()),
@@ -184,10 +145,7 @@ class Reporter
             $testMethod = $this->buildMethodCall($testTraceItem);
             $report .= implode(PHP_EOL,[
                 '',
-                $this->clio
-                    ->style(($idx + 1) . ') Test failure - ' . $testMethod)
-                    ->with(Style::error())
-                ,
+                ($idx + 1) . ' Test failure - ' . $testMethod,
                 'Assertion failed in ' . $assertionCall,
                 'On line ' . $assertionTraceItem['line'] . ' of ' . $assertionTraceItem['file'],
                 $e->getMessage(),
@@ -205,9 +163,6 @@ class Reporter
             $message = 'Finished testing.';
         }
 
-        if($this->colors) {
-            return $this->clio->style($message)->fg(TextColor::blue)->render();
-        }
         return $message;
     }
 
@@ -218,9 +173,6 @@ class Reporter
         }
 
         $report = 'Some test suites were malformed:';
-        if($this->colors) {
-            $report = $this->clio->style($report)->with(Style::warn());
-        }
 
         foreach($this->malformedEvents as $idx => $event) {
             $report .= implode(PHP_EOL,[
@@ -243,7 +195,7 @@ class Reporter
         return 'On line ' . $lineNumber . ' in file ' . $fileName;
     }
 
-    private function buildMethodCall(TraceItem $item, ?StyleGroup $style = null) : string
+    private function buildMethodCall(TraceItem $item) : string
     {
         $className = $item['class'];
         $methodName = $item['function'];
@@ -254,9 +206,6 @@ class Reporter
             $methodName = 'Unknown method';
         }
         $out = $className . '->' . $methodName . '()';
-        if($style !== null && $this->colors) {
-            return $this->clio->style($out)->with($style);
-        }
         return $out;
     }
 
@@ -275,5 +224,15 @@ class Reporter
             return PHP_EOL . $trimmed;
         }
         return $trimmed;
+    }
+
+    private function line(string $message) : void
+    {
+         echo $message . PHP_EOL;
+    }
+
+    private function show(string $message) : void
+    {
+         echo $message;
     }
 }

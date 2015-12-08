@@ -6,18 +6,13 @@ final class HackUnit
 {
     private static bool $failures = false;
 
-    public static function fromCli(string $projectDir) : void
+    public static function run(Util\Options $options) : void
     {
-        /*
-         * Configuration
-         */
-        $clio = \kilahm\Clio\Clio::fromCli();
-        $options = Util\Options::fromCli($clio);
 
         /*
          * Test case setup
          */
-        $testReporter = new Test\Reporter($clio);
+        $testReporter = new Test\Reporter();
 
         $suiteBuilder = (\ReflectionClass $c) ==> {
             return new Test\Suite($c, class_meth(Test\TestCase::class, 'build'));
@@ -25,17 +20,10 @@ final class HackUnit
 
         $testLoader = new Test\Loader(
             $suiteBuilder,
-            $options->includes,
-            $options->excludes
+            $options->includes->toSet(),
+            $options->excludes->toSet(),
         );
         $testLoader->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
-
-        /*
-         * Colors!
-         */
-        if($options->colors) {
-            $testReporter->enableColors();
-        }
 
         /*
          * Register events with the runner

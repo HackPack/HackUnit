@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\TestTeardown;
 
-<<TestSuite>>
 class StaticMethods
 {
     <<TearDown>>

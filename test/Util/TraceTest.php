@@ -6,7 +6,6 @@ use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
-<<TestSuite>>
 class TraceTest
 {
     private function nonStrings() : Vector<mixed>

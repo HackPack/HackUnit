@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\SuiteTeardown;
 
-<<TestSuite>>
 class Constructor
 {
     <<TearDown('suite')>>

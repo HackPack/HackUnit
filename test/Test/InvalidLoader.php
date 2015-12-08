@@ -16,7 +16,6 @@ newtype UpDownFailure = shape(
     'file' => string,
 );
 
-<<TestSuite>>
 class InvalidLoaderTest
 {
     use TraceItemTest;

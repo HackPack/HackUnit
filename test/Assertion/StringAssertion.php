@@ -5,7 +5,6 @@ namespace HackPack\HackUnit\Tests\Assertion;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Assertion\StringAssertion;
 
-<<TestSuite>>
 class StringAssertionTest
 {
     use AssertionTest;

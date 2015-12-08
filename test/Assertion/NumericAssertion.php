@@ -6,7 +6,6 @@ use HackPack\HackUnit\Assertion\NumericAssertion;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Tests\TraceItemTest;
 
-<<TestSuite>>
 class NumericAssertionTest
 {
     use AssertionTest;

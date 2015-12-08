@@ -7,7 +7,6 @@ use HackPack\HackUnit\Contract\Assert;
 /**
  * Loader should have no problems with this suite
  */
-<<TestSuite>>
 class ValidSuite2
 {
     public function __construct(string $notRequired = '')

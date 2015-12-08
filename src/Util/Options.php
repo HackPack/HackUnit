@@ -6,44 +6,72 @@ final class Options
 {
     const string VERSION = '0.4-dev';
 
-    public Set<string> $includes = Set{};
-    public Set<string> $excludes = Set{};
-    public Set<string> $sourceFolders = Set{};
-    public bool $colors = true;
-
-    public static function fromCli(\kilahm\Clio\Clio $clio) : this
+    public function __construct(
+        public ImmSet<string> $includes,
+        public ImmSet<string> $excludes,
+    )
     {
-        $options = new static();
+    }
 
-        $excludes = $clio->option('exclude')
-            ->aka('ignore')
-            ->aka('e')
-            ->describedAs('File or directory to exclude when loading test suites.  This option may be specified multiple times.')
-            ->withRequiredValue()
-            ;
+    public static function fromCli(Traversable<string> $args) : Options
+    {
+        $includes = [];
+        $excludes = [];
 
-        $color = $clio->flag('no-color')
-            ->describedAs('Disable ANSI color codes.')
-            ;
+        $arglist = new Vector($args);
+        $arglist->reverse();
 
-        // Includes will be the cli arguments
-        $clio->arg('path')
-            ->describedAs('File or directory to include when loading test suites.  Multiple files and/or directories may be specified.');
-
-        foreach($clio->allArguments() as $path)
-        {
-            $fullPath = realpath($path);
-            if($fullPath === false) {
-                $clio->showHelp('Unable to locate path ' . $path);
+        while($arglist) {
+            $arg = $arglist->pop();
+            if(substr($arg, 0, 2) === '--') {
+                $path = self::handleLongOption(substr($arg, 2), $arglist);
+                if($path !== '') {
+                    $excludes[] = $path;
+                }
+                continue;
             }
+            if(substr($arg, 0, 1) === '-') {
+                $path = self::handleShortOption(substr($arg, 1), $arglist);
+                if($path !== '') {
+                     $excludes[] = $path;
+                }
+                continue;
+            }
+            $includes[] = $arg;
         }
 
-        $options->includes->addAll($clio->allArguments());
-        $options->excludes->addAll($excludes->allValues());
-        if($color->wasPresent()) {
-             $options->colors = false;
-        }
+        return new Options(new ImmSet($includes), new ImmSet($excludes));
+    }
 
-        return $options;
+    private static function handleLongOption(string $arg, Vector<string> $args) : string
+    {
+        $parts = new Vector(explode('=', $arg, 2));
+        if($parts->at(0) !== 'exclude') {
+            return '';
+        }
+        $value = $parts->get(0);
+        if($value === null) {
+            $value = self::tryNext($args);
+        }
+        return $value;
+    }
+
+    private static function handleShortOption(string $arg, Vector<string> $args) : string
+    {
+        if(substr($arg, 0, 1) !== 'e') {
+            return '';
+        }
+        $value = substr($arg, 1);
+        if($value === false) {
+            $value = self::tryNext($args);
+        }
+        return $value;
+    }
+    private static function tryNext(Vector<string> $args) : string
+    {
+        if($args->isEmpty() || substr($args->at(0), 0, 1) === '-') {
+            return '';
+        }
+        return $args->pop();
     }
 }

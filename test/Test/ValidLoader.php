@@ -7,7 +7,6 @@ use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Test\Loader;
 use HackPack\HackUnit\Tests\Mocks\Test\Suite;
 
-<<TestSuite>>
 class ValidLoaderTest
 {
     private Vector<MalformedSuite> $malformedEvents = Vector{};

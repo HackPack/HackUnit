@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\SuiteSetup;
 
-<<TestSuite>>
 class Constructor
 {
     <<Setup('suite')>>

@@ -72,24 +72,24 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
                     continue;
                 }
 
-                if ($scannedClass->getAttributes()->contains('TestSuite')) {
+                if (!class_exists($scannedClass->getName())) {
                     $this->load($classFilename);
-
-                    try {
-                        $classMirror = new \ReflectionClass($scannedClass->getName());
-                    } catch (\ReflectionException $e) {
-                        // Unable to load the file, or the map was wrong?
-                        // Should we warn the user?
-                        continue;
-                    }
-
-                    $suite = $this->buildSuite($classMirror);
-
-                    if($suite !== null) {
-                        $suites->add($suite);
-                    }
-
                 }
+
+                try {
+                    $classMirror = new \ReflectionClass($scannedClass->getName());
+                } catch (\ReflectionException $e) {
+                    // Unable to load the file, or the map was wrong?
+                    // Should we warn the user?
+                    continue;
+                }
+
+                $suite = $this->buildSuite($classMirror);
+
+                if($suite !== null) {
+                    $suites->add($suite);
+                }
+
             }
         }
 

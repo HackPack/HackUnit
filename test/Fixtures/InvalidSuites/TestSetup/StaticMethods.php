@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures\InvalidSuites\TestSetup;
 
-<<TestSuite>>
 class StaticMethods
 {
     <<Setup>>
