@@ -1,12 +1,7 @@
 HackUnit
 ========
 
-[![Build Status](https://travis-ci.org/HackPack/HackUnit.png)](https://travis-ci.org/HackPack/HackUnit)
-[![HHVM Status](http://hhvm.h4cc.de/badge/HackPack/HackUnit.svg)](http://hhvm.h4cc.de/package/HackPack/HackUnit)
-
-> xUnit written in Hack, for Hack
-
-xUnit testing framework written in Facebook's language, [Hack](http://hacklang.org)
+xUnit testing framework written in and for Facebook's language, [Hack](http://hacklang.org)
 
 Install
 -------
