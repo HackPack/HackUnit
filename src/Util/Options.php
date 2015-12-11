@@ -21,23 +21,31 @@ final class Options
         $arglist = new Vector($args);
         $arglist->reverse();
 
+        $addPathToArray = ($path, $array) ==> {
+            $realpath = realpath($path);
+            if(is_string($realpath)) {
+                $array[] = $realpath;
+            }
+            return $array;
+        };
+
         while($arglist) {
             $arg = $arglist->pop();
             if(substr($arg, 0, 2) === '--') {
                 $path = self::handleLongOption(substr($arg, 2), $arglist);
                 if($path !== '') {
-                    $excludes[] = $path;
+                    $excludes = $addPathToArray($path, $excludes);
                 }
                 continue;
             }
             if(substr($arg, 0, 1) === '-') {
                 $path = self::handleShortOption(substr($arg, 1), $arglist);
                 if($path !== '') {
-                     $excludes[] = $path;
+                    $excludes = $addPathToArray($path, $excludes);
                 }
                 continue;
             }
-            $includes[] = $arg;
+            $includes = $addPathToArray($arg, $includes);
         }
 
         return new Options(new ImmSet($includes), new ImmSet($excludes));
@@ -49,7 +57,7 @@ final class Options
         if($parts->at(0) !== 'exclude') {
             return '';
         }
-        $value = $parts->get(0);
+        $value = $parts->get(1);
         if($value === null) {
             $value = self::tryNext($args);
         }

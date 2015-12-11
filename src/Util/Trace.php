@@ -89,7 +89,7 @@ class Trace
             $classAttributes = new Map($class->getAttributes());
             $methodAttributes = new Map($method->getAttributes());
 
-            if($classAttributes->get('TestSuite') !== null && $methodAttributes->get('Test') !== null) {
+            if($methodAttributes->get('Test') !== null) {
                  // Found the marked test method
                 return shape(
                         'line' => $trace->at($idx - 1)['line'],

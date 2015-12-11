@@ -30,25 +30,25 @@ class InvalidLoaderTest
             'file' => 'Constructor.php',
             'class' => 'Constructor',
             'method' => '__construct',
-            'line' => 9,
+            'line' => 8,
         ),
         shape(
             'file' => 'Destructor.php',
             'class' => 'Destructor',
             'method' => '__destruct',
-            'line' => 9,
+            'line' => 8,
         ),
         shape(
             'file' => 'Params.php',
             'class' => 'Params',
             'method' => 'params',
-            'line' => 9,
+            'line' => 8,
         ),
         shape(
             'file' => 'StaticMethods.php',
             'class' => 'StaticMethods',
             'method' => 'noStatics',
-            'line' => 9,
+            'line' => 8,
         ),
     };
 
@@ -140,32 +140,10 @@ class InvalidLoaderTest
         $this->checkTrace(
             $event->traceItem(),
             shape(
-                'line' => 8,
+                'line' => 7,
                 'function' => '__construct',
                 'class' => $this->suiteName('ConstructorParams'),
                 'file' => $this->suitePath('ConstructorParams.php'),
-            ),
-            $assert,
-        );
-    }
-
-    <<Test>>
-    public function emptySuite(Assert $assert) : void
-    {
-        $this->loader->including($this->suitePath('MissingTestAnnotation.php'));
-        $suites = $this->loader->testSuites();
-
-        $assert->int($suites->count())->eq(0);
-        $assert->int($this->malformedEvents->count())->eq(1);
-
-        $event = $this->malformedEvents->at(0);
-        $this->checkTrace(
-            $event->traceItem(),
-            shape(
-                'line' => 7,
-                'function' => null,
-                'class' => $this->suiteName('MissingTestAnnotation'),
-                'file' => $this->suitePath('MissingTestAnnotation.php'),
             ),
             $assert,
         );
@@ -183,7 +161,7 @@ class InvalidLoaderTest
         $this->checkTrace(
             $this->malformedEvents->at(0)->traceItem(),
             shape(
-                'line' => 11,
+                'line' => 10,
                 'function' => '__construct',
                 'class' => $this->suiteName('Test\Constructor'),
                 'file' => $this->suitePath('Test/Constructor.php')
@@ -204,7 +182,7 @@ class InvalidLoaderTest
         $this->checkTrace(
             $this->malformedEvents->at(0)->traceItem(),
             shape(
-                'line' => 9,
+                'line' => 8,
                 'function' => '__destruct',
                 'class' => $this->suiteName('Test\Destructor'),
                 'file' => $this->suitePath('Test/Destructor.php')
@@ -225,7 +203,7 @@ class InvalidLoaderTest
         $this->checkTrace(
             $this->malformedEvents->at(0)->traceItem(),
             shape(
-                'line' => 9,
+                'line' => 8,
                 'function' => 'setItUp',
                 'class' => $this->suiteName('Test\StaticMethods'),
                 'file' => $this->suitePath('Test/StaticMethods.php')
@@ -246,7 +224,7 @@ class InvalidLoaderTest
         $this->checkTrace(
             $this->malformedEvents->at(0)->traceItem(),
             shape(
-                'line' => 11,
+                'line' => 10,
                 'function' => 'test',
                 'class' => $this->suiteName('Test\TooFewParams'),
                 'file' => $this->suitePath('Test/TooFewParams.php')
@@ -267,7 +245,7 @@ class InvalidLoaderTest
         $this->checkTrace(
             $this->malformedEvents->at(0)->traceItem(),
             shape(
-                'line' => 9,
+                'line' => 8,
                 'function' => 'test',
                 'class' => $this->suiteName('Test\TooManyParams'),
                 'file' => $this->suitePath('Test/TooManyParams.php')

@@ -269,5 +269,5 @@ Running HackUnit's tests
 From the project directory run:
 
 ```
-bin/hackunit --exclude Tests/Fixtures/ Tests/
+bin/hackunit test --exclude test/Fixtures/ --exclude test/Mocks/
 ```

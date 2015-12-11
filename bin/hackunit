@@ -19,4 +19,4 @@ do {
     }
 } while(true);
 
-HackPack\HackUnit\HackUnit::run(HackPack\HackUnit\Util\Options::fromCli($argv));
+HackPack\HackUnit\HackUnit::run(HackPack\HackUnit\Util\Options::fromCli($_SERVER['argv']));

@@ -136,16 +136,7 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
             });
 
         if($this->testCount === 0) {
-            $traceItem = Trace::buildItem([
-                'file' => $classMirror->getFileName(),
-                'class' => $classMirror->name,
-                'line' => $classMirror->getStartLine(),
-            ]);
-            $reason = 'No test methods were found.  Did you forget to mark them with <<Test>>?';
-            $this->emitMalformedSuite(new MalformedSuite(
-                $traceItem,
-                $reason,
-            ));
+            // No test cases found so don't build a suite
             return null;
         }
 
