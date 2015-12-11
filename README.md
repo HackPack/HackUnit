@@ -30,15 +30,11 @@ where `path1`, `path2`, etc... are each base paths/files to scan for test suites
 Some command line options exist to alter the behavior of HackUnit:
 
 * --exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files. 
-* --no-color : Disable the use of ANSI color escape codes in the report
 
 Test Suites
 -----------
-To define a test suite, create a class and [annotate](http://docs.hhvm.com/manual/en/hack.attributes.php) the class and the appropriate methods.
+To define a test suite, create a class and [annotate](http://docs.hhvm.com/manual/en/hack.attributes.php) the appropriate methods.
 All methods annotated as described below must be instance methods (non-static), and may not be the constructor, nor the destructor.
-
-For HackUnit to recognize a class definition as a test suite, you must annotate the class with a `<<TestSuite>>`
-[attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 
 You may inspect HackUnit’s test files for concrete examples.
 
@@ -51,7 +47,6 @@ Multiple setup methods may be declared, but the execution order is not guarantee
 Each setup method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as setup and it requires a parameter, it will not be executed.
 
 ```php
-<<TestSuite>>
 class MySuite
 {
     <<Setup(‘suite’)>>
@@ -88,7 +83,6 @@ Multiple teardown methods may be declared, but the execution order is not guaran
 Each teardown method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as teardown and it requires a parameter, it will not be executed.
 
 ```php
-<<TestSuite>>
 class MySuite
 {
     <<TearDown(‘suite’)>>
@@ -129,7 +123,6 @@ namespace My\Namespace\Test;
 
 use HackPack\HackUnit\Contract\Assert;
 
-<<TestSuite>>
 class MySuite
 {
     <<Test>>
@@ -217,13 +210,12 @@ There are two ways to skip execution of a particular test method:
 ```php
 use \HackPack\HackUnit\Contract\Assert;
 
-<<TestSuite, Skip>>
+<<Skip>>
 class SkippedSuite
 {
     // All methods here would be skipped
 }
 
-<<TestSuite>>
 class MySuite
 {
     <<Test, Skip>>
