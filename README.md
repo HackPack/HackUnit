@@ -3,6 +3,20 @@ HackUnit
 
 xUnit testing framework written in and for Facebook's language, [Hack](http://hacklang.org)
 
+###But Why?!###
+There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat](http://behat.org).  Why should you use this one?
+
+*Because you like Hack's strict mode!*
+
+The goal of HackUnit is to write a testing framework using Hack's strict mode. HackUnit itself is tested with HackUnit.
+
+Top level code must use a hack mode of `// partial`, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
+The loader class must dynamically include test suite files.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
+of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
+one line.
+
+These requirements may change as Hack evolves.
+
 Install
 -------
 
@@ -234,19 +248,8 @@ Future Plans
 
 I would like to implement collection type assertions.  These may take the form of `$assert->map($myMap)->hasSameKeysAs($expectedMap);` or similar.  If you have suggestions for the types of assertions that could be made on collections, please open a ticket!
 
-Notes
------
-###Project Goal###
-The goal of HackUnit is to write a testing framework using Hack's strict mode. HackUnit itself is tested with HackUnit.
-
-Top level code must use a hack mode of `// partial`, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
-The loader class must dynamically include test suite files.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
-of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
-one line.
-
-These requirements may change as Hack evolves.
-
-###How HackUnit loads tests###
+How HackUnit loads tests
+------------------------
 All files inside the base path(s) specified from the command line will be scanned for class definitions using HackPack’s
 [Class Scanner](https://github.com/HackPack/HackClassScanner) library.  Those files will then be loaded and reflection is used to determine
 which classes are test suites, and which methods perform each task in the suite.
