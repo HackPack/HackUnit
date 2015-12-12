@@ -45,6 +45,8 @@ Test Suites
 To define a test suite, create a class and [annotate](http://docs.hhvm.com/manual/en/hack.attributes.php) the appropriate methods.
 All methods annotated as described below must be instance methods (non-static), and may not be the constructor, nor the destructor.
 
+For now, the constructor of a test suite MUST accept exactly 0 parameters.
+
 You may inspect HackUnit’s test files for concrete examples.
 
 ###Setup###
