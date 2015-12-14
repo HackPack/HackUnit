@@ -7,7 +7,7 @@ use HackPack\HackUnit\Contract\Assert;
 final class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
 {
     public static function build(
-        (function(Assert):void) $test,
+        (function(Assert):Awaitable<void>) $test,
         Vector<(function():void)> $setup,
         Vector<(function():void)> $teardown,
     ) : this
@@ -16,7 +16,7 @@ final class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
     }
 
     public function __construct(
-        private (function(Assert):void) $test,
+        private (function(Assert):Awaitable<void>) $test,
         private Vector<(function():void)> $setup,
         private Vector<(function():void)> $teardown,
     )
@@ -37,9 +37,9 @@ final class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
         }
     }
 
-    public function run(Assert $assert) : void
+    public async function run(Assert $assert) : Awaitable<void>
     {
         $f = $this->test;
-        $f($assert);
+        await $f($assert);
     }
 }

@@ -8,5 +8,5 @@ interface TestCase
 {
     public function setup() : void;
     public function teardown() : void;
-    public function run(Assert $assert) : void;
+    public function run(Assert $assert) : Awaitable<void>;
 }

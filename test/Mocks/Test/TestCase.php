@@ -11,7 +11,7 @@ class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
     public Vector<(function():void)> $setup = Vector{};
     public Vector<(function():void)> $teardown = Vector{};
 
-    public function run(Assert $assert) : void
+    public async function run(Assert $assert) : Awaitable<void>
     {
         $this->assert = $assert;
     }

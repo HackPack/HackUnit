@@ -105,30 +105,32 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
         });
         $this->emitRunStart();
 
-        try{
-            foreach($suites as $s) {
+        $awaitable = \HH\Asio\v($suites->map(async ($s) ==> {
+
+            try{
                 $s->setup();
                 $this->emitSuiteStart();
-                $this->runSuite($s);
+                await $this->runSuite($s);
                 $this->emitSuiteEnd();
                 $s->teardown();
+            } catch (\Exception $e) {
+                $this->emitException($e);
             }
-        } catch (\Exception $e) {
-            foreach($this->exceptionListeners as $l) {
-                $l($e);
-            }
-        }
+
+        }));
+
+        \HH\Asio\join($awaitable);
 
         $this->emitRunEnd();
     }
 
-    private function runSuite(Suite $s) : void
+    private async function runSuite(Suite $s) : Awaitable<void>
     {
         $builder = $this->assertBuilder;
-        foreach($s->testCases() as $case) {
+        await \HH\Asio\v($s->testCases()->map(async ($case) ==> {
             $case->setup();
             try{
-                $case->run($builder(
+                await $case->run($builder(
                     $this->failureListeners,
                     $this->skipListeners,
                     $this->successListeners,
@@ -138,7 +140,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
             }
             $case->teardown();
             $this->emitPass();
-        }
+        }));
     }
 
     private function emitSuiteEnd() : void
@@ -173,6 +175,13 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
     {
         foreach($this->passListeners as $l) {
             $l();
+        }
+    }
+
+    private function emitException(\Exception $e) : void
+    {
+        foreach($this->exceptionListeners as $l) {
+            $l($e);
         }
     }
 }

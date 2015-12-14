@@ -19,7 +19,7 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
     public function __construct(
         \ReflectionClass $mirror,
         private (function(
-            (function(Assert):void),
+            (function(Assert):Awaitable<void>),
             Vector<(function():void)>,
             Vector<(function():void)>,
         ) : TestCase) $caseBuilder,
@@ -76,8 +76,12 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
             } elseif($m->getAttribute('Skip') !== null) {
                 $test = $this->buildSkipTest($m, 'Test marked skip.');
             } else {
-                $test = (Assert $a) ==> {
-                    $m->invoke($this->instance, $a);
+                $test = async (Assert $a) ==> {
+                    if($m->isAsync()) {
+                        await $m->invoke($this->instance, $a);
+                    } else {
+                        $m->invoke($this->instance, $a);
+                    }
                 };
             }
             $builder = $this->caseBuilder;
@@ -85,9 +89,9 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
         });
     }
 
-    private function buildSkipTest(\ReflectionMethod $m, string $reason) : (function(Assert):void)
+    private function buildSkipTest(\ReflectionMethod $m, string $reason) : (function(Assert):Awaitable<void>)
     {
-        return (Assert $assert) ==> {
+        return async (Assert $assert) ==> {
             $assert->skip(
                 $reason,
                 Trace::buildItem([

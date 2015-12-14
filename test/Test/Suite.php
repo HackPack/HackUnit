@@ -29,7 +29,7 @@ class SuiteTest
     }
 
     public function testCaseBuilder(
-        (function(Assert):void) $test,
+        (function(Assert):Awaitable<void>) $test,
         Vector<(function():void)> $setup,
         Vector<(function():void)> $teardown,
     ) : TestCase

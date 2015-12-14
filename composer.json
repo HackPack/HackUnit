@@ -18,8 +18,9 @@
     ],
     "minimum-stability" : "dev",
     "require": {
-        "hhvm": ">=3.10.0",
-        "fredemmott/definition-finder": "dev-master as 0.3.6"
+        "hhvm": "^3.10.0",
+        "fredemmott/definition-finder": "dev-master as 0.3.6",
+        "hhvm/asio-utilities": "^2.0"
     },
     "autoload": {
         "psr-4": {

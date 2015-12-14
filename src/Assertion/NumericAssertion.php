@@ -99,9 +99,20 @@ class NumericAssertion<Tcontext> implements \HackPack\HackUnit\Contract\Assertio
 
     private function fail(string $comparison, Tcontext $expected) : void
     {
+        if(is_int($this->context)) {
+            $this->emitFailure(Failure::fromCallStack(
+                sprintf(
+                    'Integer assertion failed.  Expected %d %s %d',
+                    $this->context,
+                    $comparison,
+                    $expected,
+                ),
+            ));
+            return;
+        }
         $this->emitFailure(Failure::fromCallStack(
             sprintf(
-                'Numeric assertaion failed.  Expected %d %s %d',
+                'Float assertion failed. Expected %f %s %f',
                 $this->context,
                 $comparison,
                 $expected,
