@@ -6,16 +6,11 @@ xUnit testing framework written in and for Facebook's language, [Hack](http://ha
 ###But Why?!###
 There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat](http://behat.org).  Why should you use this one?
 
-*Because you like Hack's strict mode!*
+*Because you like Hack specific features!*
 
-The goal of HackUnit is to write a testing framework using Hack's strict mode. HackUnit itself is tested with HackUnit.
+With HackUnit, you can easily run your tests using cooperative async using the built in `async` keyword.
 
-Top level code must use a hack mode of `// partial`, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
-The loader class must dynamically include test suite files.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
-of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
-one line.
-
-These requirements may change as Hack evolves.
+The original goal of HackUnit was to write a testing framework using Hack's strict mode. The project will stay consistent with this goal as more features are added.
 
 Install
 -------
@@ -122,7 +117,7 @@ Test tear down methods are run just after each test method is run (and thus are 
 
 ###Tests###
 
-Individual test methods are defined using the 
+Individual test methods are defined using the
 `<<Test>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 Execution order of the tests is not guaranteed.
 
@@ -148,6 +143,34 @@ class MySuite
     }
 }
 ```
+
+###Async###
+
+Running your tests async is as easy as adding the async keyword to your test method.
+
+```php
+namespace My\Namespace\Test;
+
+use HackPack\HackUnit\Contract\Assert;
+
+class MyAsyncSuite
+{
+    <<Test>>
+    public async function testSomething(Assert $assert) : Awaitable<void>
+    {
+        // Make some async DB calls here as part of your test!
+        $user = await get_user();
+
+        // Or maybe an async curl call
+        $result = await get_external_user($user->id, 'api password');
+
+        $assert->string($result['user_name'])->is('expected username');
+    }
+}
+```
+
+All such `async` tests are run in "parallel" (see the [async documentation](http://docs.hhvm.com/hack/async/introduction)), allowing your entire test suite to run faster, especially
+if your tests perform real I/O operations (DB calls, curl calls, etc...)
 
 Assertions
 ----------
@@ -255,6 +278,16 @@ How HackUnit loads tests
 All files inside the base path(s) specified from the command line will be scanned for class definitions using HackPack’s
 [Class Scanner](https://github.com/HackPack/HackClassScanner) library.  Those files will then be loaded and reflection is used to determine
 which classes are test suites, and which methods perform each task in the suite.
+
+Strict mode all of the files!
+-----------------------------
+
+Well... not quite.
+
+Top level code must use `// partial` mode, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
+The loader class must dynamically include test suite files.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
+of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
+one line.
 
 Running HackUnit's tests
 ------------------------
