@@ -30,8 +30,8 @@ class SuiteTest
 
     public function testCaseBuilder(
         (function(Assert):Awaitable<void>) $test,
-        Vector<(function():void)> $setup,
-        Vector<(function():void)> $teardown,
+        Vector<(function():Awaitable<void>)> $setup,
+        Vector<(function():Awaitable<void>)> $teardown,
     ) : TestCase
     {
         $case = new TestCase();
@@ -140,7 +140,7 @@ class SuiteTest
         $setup1 = $case1->setup->at(0);
         $setup2 = $case1->setup->at(1);
 
-        $setup1();
+        \HH\Asio\join($setup1());
         $expectedCounts = shape(
             'test up' => 1,
             'test down' => 0,
@@ -154,7 +154,7 @@ class SuiteTest
             $assert,
         );
 
-        $setup2();
+        \HH\Asio\join($setup2());
         $expectedCounts['test up'] = 2;
         TestRunCounter::verifyRunCounts(
             SpySuite::$counts,
@@ -194,7 +194,7 @@ class SuiteTest
         $teardown1 = $case1->teardown->at(0);
         $teardown2 = $case1->teardown->at(1);
 
-        $teardown1();
+        \HH\Asio\join($teardown1());
         $expectedCounts = shape(
             'test up' => 0,
             'test down' => 1,
@@ -208,7 +208,7 @@ class SuiteTest
             $assert,
         );
 
-        $teardown2();
+        \HH\Asio\join($teardown2());
         $expectedCounts['test down'] = 2;
         TestRunCounter::verifyRunCounts(
             SpySuite::$counts,

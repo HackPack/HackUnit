@@ -10,8 +10,8 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
 {
     private Vector<(function():void)> $suiteup = Vector{};
     private Vector<(function():void)> $suitedown = Vector{};
-    private Vector<(function():void)> $testup = Vector{};
-    private Vector<(function():void)> $testdown = Vector{};
+    private Vector<(function():Awaitable<void>)> $testup = Vector{};
+    private Vector<(function():Awaitable<void>)> $testdown = Vector{};
     private Vector<\ReflectionMethod> $testMethods = Vector{};
     private bool $skip;
     private mixed $instance;
@@ -20,8 +20,8 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
         \ReflectionClass $mirror,
         private (function(
             (function(Assert):Awaitable<void>),
-            Vector<(function():void)>,
-            Vector<(function():void)>,
+            Vector<(function():Awaitable<void>)>,
+            Vector<(function():Awaitable<void>)>,
         ) : TestCase) $caseBuilder,
     )
     {
@@ -41,12 +41,22 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
 
     public function registerTestSetup(\ReflectionMethod $method) : void
     {
-        $this->testup->add(() ==> {$method->invoke($this->instance);});
+        $this->testup->add(async () ==> {
+            $result = $method->invoke($this->instance);
+            if($method->isAsync()) {
+                 await $result;
+            }
+        });
     }
 
     public function registerTestTeardown(\ReflectionMethod $method) : void
     {
-        $this->testdown->add(() ==> {$method->invoke($this->instance);});
+        $this->testdown->add(async () ==> {
+            $result = $method->invoke($this->instance);
+            if($method->isAsync()) {
+                 await $result;
+            }
+        });
     }
 
     public function registerTestMethod(\ReflectionMethod $testMethod) : void

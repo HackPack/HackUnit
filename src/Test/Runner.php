@@ -128,7 +128,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
     {
         $builder = $this->assertBuilder;
         await \HH\Asio\v($s->testCases()->map(async ($case) ==> {
-            $case->setup();
+            await $case->setup();
             try{
                 await $case->run($builder(
                     $this->failureListeners,
@@ -138,7 +138,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
             } catch (Interruption $e) {
                 // Nothing to do anymore
             }
-            $case->teardown();
+            await $case->teardown();
             $this->emitPass();
         }));
     }

@@ -8,25 +8,21 @@ use HackPack\HackUnit\Contract\Assert;
 class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
 {
     public ?Assert $assert = null;
-    public Vector<(function():void)> $setup = Vector{};
-    public Vector<(function():void)> $teardown = Vector{};
+    public Vector<(function():Awaitable<void>)> $setup = Vector{};
+    public Vector<(function():Awaitable<void>)> $teardown = Vector{};
 
     public async function run(Assert $assert) : Awaitable<void>
     {
         $this->assert = $assert;
     }
 
-    public function setup() : void
+    public async function setup() : Awaitable<void>
     {
-        foreach($this->setup as $f) {
-            $f();
-        }
+        await \HH\Asio\v($this->setup->map($f ==> $f()));
     }
 
-    public function teardown() : void
+    public async function teardown() : Awaitable<void>
     {
-        foreach($this->teardown as $f) {
-            $f();
-        }
+        await \HH\Asio\v($this->teardown->map($f ==> $f()));
     }
 }

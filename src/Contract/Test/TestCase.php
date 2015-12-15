@@ -6,7 +6,7 @@ use HackPack\HackUnit\Contract\Assert;
 
 interface TestCase
 {
-    public function setup() : void;
-    public function teardown() : void;
+    public function setup() : Awaitable<void>;
+    public function teardown() : Awaitable<void>;
     public function run(Assert $assert) : Awaitable<void>;
 }

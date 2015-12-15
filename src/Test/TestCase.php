@@ -8,8 +8,8 @@ final class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
 {
     public static function build(
         (function(Assert):Awaitable<void>) $test,
-        Vector<(function():void)> $setup,
-        Vector<(function():void)> $teardown,
+        Vector<(function():Awaitable<void>)> $setup,
+        Vector<(function():Awaitable<void>)> $teardown,
     ) : this
     {
         return new static($test, $setup, $teardown);
@@ -17,24 +17,20 @@ final class TestCase implements \HackPack\HackUnit\Contract\Test\TestCase
 
     public function __construct(
         private (function(Assert):Awaitable<void>) $test,
-        private Vector<(function():void)> $setup,
-        private Vector<(function():void)> $teardown,
+        private Vector<(function():Awaitable<void>)> $setup,
+        private Vector<(function():Awaitable<void>)> $teardown,
     )
     {
     }
 
-    public function setup() : void
+    public async function setup() : Awaitable<void>
     {
-        foreach($this->setup as $f) {
-            $f();
-        }
+        await \HH\Asio\v($this->setup->map($f ==> $f()));
     }
 
-    public function teardown() : void
+    public async function teardown() : Awaitable<void>
     {
-        foreach($this->teardown as $f) {
-            $f();
-        }
+        await \HH\Asio\v($this->teardown->map($f ==> $f()));
     }
 
     public async function run(Assert $assert) : Awaitable<void>
