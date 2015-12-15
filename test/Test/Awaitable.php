@@ -5,7 +5,6 @@ namespace HackPack\HackUnit\Tests\Test;
 use HackPack\HackUnit\Assert as AssertImpl;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Test;
-use HackPack\HackUnit\Tests\Fixtures\AsyncSuite;
 
 class AsyncTest
 {
@@ -13,7 +12,7 @@ class AsyncTest
     private static bool $started2 = false;
 
     <<Test>>
-    public async function asyncTest1(Assert $assert) : Awaitable<void>
+    public async function awaitableTest1(Assert $assert) : Awaitable<void>
     {
         self::$started1 = true;
         await \HH\Asio\later();
@@ -21,7 +20,7 @@ class AsyncTest
     }
 
     <<Test>>
-    public async function asyncTest2(Assert $assert) : Awaitable<void>
+    public async function awaitableTest2(Assert $assert) : Awaitable<void>
     {
         self::$started2 = true;
         await \HH\Asio\later();
@@ -29,7 +28,7 @@ class AsyncTest
     }
 
     <<Test>>
-    public function asyncTestTiming(Assert $assert) : void
+    public function awaitableTestTiming(Assert $assert) : void
     {
         $mirror = new \ReflectionClass(self::class);
         $suite = new Test\Suite($mirror, class_meth(Test\TestCase::class, 'build'));
