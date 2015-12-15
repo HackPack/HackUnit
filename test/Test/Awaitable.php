@@ -79,6 +79,28 @@ class AsyncTest
         $assert->float($runTime)->lt(3 * $expectedTime);
     }
 
+    <<Test>>
+    public function awaitableSuiteSetUpAndTearDown(Assert $assert) : void
+    {
+        $mirror = new \ReflectionClass(self::class);
+        $suite = new Test\Suite($mirror, class_meth(Test\TestCase::class, 'build'));
+        $runner = new Test\Runner(class_meth(AssertImpl::class, 'build'));
+
+        // One test with a suite setup and teardown
+        $suite->registerSuiteSetup($mirror->getMethod('sleeperUpDown'));
+        $suite->registerTestMethod($mirror->getMethod('sleeper'));
+        $suite->registerSuiteTeardown($mirror->getMethod('sleeperUpDown'));
+
+        $expectedTime = 0.006;
+
+        $start = microtime(true);
+        $runner->run(Vector{$suite, $suite});
+        $runTime = microtime(true) - $start;
+
+        $assert->float($runTime)->gt($expectedTime);
+        $assert->float($runTime)->lt(2 * $expectedTime);
+    }
+
     public async function sleeper(Assert $assert) : Awaitable<void>
     {
         await \HH\Asio\usleep(2000);

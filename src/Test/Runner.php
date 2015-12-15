@@ -108,11 +108,11 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
         $awaitable = \HH\Asio\v($suites->map(async ($s) ==> {
 
             try{
-                $s->setup();
+                await $s->setup();
                 $this->emitSuiteStart();
                 await $this->runSuite($s);
                 $this->emitSuiteEnd();
-                $s->teardown();
+                await $s->teardown();
             } catch (\Exception $e) {
                 $this->emitException($e);
             }

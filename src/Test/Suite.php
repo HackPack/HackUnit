@@ -8,8 +8,8 @@ use HackPack\HackUnit\Util\Trace;
 
 class Suite implements \HackPack\HackUnit\Contract\Test\Suite
 {
-    private Vector<(function():void)> $suiteup = Vector{};
-    private Vector<(function():void)> $suitedown = Vector{};
+    private Vector<(function():Awaitable<void>)> $suiteup = Vector{};
+    private Vector<(function():Awaitable<void>)> $suitedown = Vector{};
     private Vector<(function():Awaitable<void>)> $testup = Vector{};
     private Vector<(function():Awaitable<void>)> $testdown = Vector{};
     private Vector<\ReflectionMethod> $testMethods = Vector{};
@@ -31,12 +31,22 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
 
     public function registerSuiteSetup(\ReflectionMethod $method) : void
     {
-        $this->suiteup->add(() ==> {$method->invoke($this->instance);});
+        $this->suiteup->add(async () ==> {
+            $result = $method->invoke($this->instance);
+            if($method->isAsync()) {
+                 await $result;
+            }
+        });
     }
 
     public function registerSuiteTeardown(\ReflectionMethod $method) : void
     {
-        $this->suitedown->add(() ==> {$method->invoke($this->instance);});
+        $this->suitedown->add(async () ==> {
+            $result = $method->invoke($this->instance);
+            if($method->isAsync()) {
+                 await $result;
+            }
+        });
     }
 
     public function registerTestSetup(\ReflectionMethod $method) : void
@@ -64,18 +74,14 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
         $this->testMethods->add($testMethod);
     }
 
-    public function setup() : void
+    public async function setup() : Awaitable<void>
     {
-        foreach($this->suiteup as $f) {
-            $f();
-        }
+        await \HH\Asio\v($this->suiteup->map($f ==> $f()));
     }
 
-    public function teardown() : void
+    public async function teardown() : Awaitable<void>
     {
-        foreach($this->suitedown as $f) {
-            $f();
-        }
+        await \HH\Asio\v($this->suitedown->map($f ==> $f()));
     }
 
     public function testCases() : Vector<TestCase>

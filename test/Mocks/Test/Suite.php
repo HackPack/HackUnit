@@ -18,9 +18,9 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
     {}
     public function registerTestTeardown(\ReflectionMethod $methodMirror) : void
     {}
-    public function setup() : void
+    public async function setup() : Awaitable<void>
     {}
-    public function teardown() : void
+    public async function teardown() : Awaitable<void>
     {}
     public function testCases() : Vector<TestCase>
     {return Vector{};}

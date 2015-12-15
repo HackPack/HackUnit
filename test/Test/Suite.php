@@ -224,7 +224,7 @@ class SuiteTest
         $cases = $this->suite->testCases();
         $assert->int($cases->count())->eq(0);
 
-        $this->suite->setup();
+        \HH\Asio\join($this->suite->setup());
         $expectedCounts = shape(
             'test up' => 0,
             'test down' => 0,
@@ -246,7 +246,7 @@ class SuiteTest
         $cases = $this->suite->testCases();
         $assert->int($cases->count())->eq(0);
 
-        $this->suite->teardown();
+        \HH\Asio\join($this->suite->teardown());
         $expectedCounts = shape(
             'test up' => 0,
             'test down' => 0,

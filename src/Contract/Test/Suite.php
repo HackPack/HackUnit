@@ -12,7 +12,7 @@ interface Suite
     public function registerTestMethod(\ReflectionMethod $testMethod) : void;
     public function registerTestSetup(\ReflectionMethod $methodMirror) : void;
     public function registerTestTeardown(\ReflectionMethod $methodMirror) : void;
-    public function setup() : void;
-    public function teardown() : void;
+    public function setup() : Awaitable<void>;
+    public function teardown() : Awaitable<void>;
     public function testCases() : Vector<TestCase>;
 }
