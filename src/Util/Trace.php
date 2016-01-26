@@ -13,6 +13,16 @@ type TraceItem = shape(
 
 class Trace
 {
+    public static function fromReflectionMethod(\ReflectionMethod $methodMirror) : TraceItem
+    {
+        return self::buildItem([
+            'line' => $methodMirror->getStartLine(),
+            'function' => $methodMirror->name,
+            'class' => $methodMirror->class,
+            'file' => $methodMirror->getFileName(),
+        ]);
+    }
+
     public static function generate() : Vector<TraceItem>
     {
         return self::convert(
