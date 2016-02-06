@@ -7,7 +7,7 @@ use HackPack\HackUnit\Test\Loader;
 
 class LoaderTest
 {
-    private string $validSuiteDir;
+    private string $fileDir;
 
     private Vector<string> $fileNames = Vector{};
 
@@ -15,7 +15,7 @@ class LoaderTest
 
     public function __construct()
     {
-        $this->validSuiteDir = dirname(__DIR__) . '/Fixtures/ValidSuite';
+        $this->fileDir = dirname(__DIR__) . '/Fixtures/LoadingFiles';
         $this->loader = new Loader(
             $filename ==> {
                 $this->fileNames->add($filename);
@@ -29,15 +29,15 @@ class LoaderTest
     {
         $this
             ->loader
-            ->including($this->validSuiteDir)
-            ->excluding($this->validSuiteDir . '/IgnoreMe/ValidSuite.php')
-            ->excluding($this->validSuiteDir . '/IgnoreMe/ValidSuite1.php')
+            ->including($this->fileDir)
+            ->excluding($this->fileDir . '/IgnoreMe/file1')
+            ->excluding($this->fileDir . '/IgnoreMe/file2')
         ;
         $this->assertExpectedFiles($assert, Vector{
-            $this->validSuiteDir . '/ValidSuite.php',
-            $this->validSuiteDir . '/ValidSuite1.php',
-            $this->validSuiteDir . '/ValidSuite2.php',
-            $this->validSuiteDir . '/IgnoreMe/ValidSuite2.php',
+            $this->fileDir . '/file1',
+            $this->fileDir . '/file2',
+            $this->fileDir . '/file3',
+            $this->fileDir . '/IgnoreMe/file3',
         });
     }
 
@@ -46,15 +46,15 @@ class LoaderTest
     {
         $this
             ->loader
-            ->including($this->validSuiteDir)
-            ->excluding($this->validSuiteDir . '/IgnoreMe/ValidSuite.php')
+            ->including($this->fileDir)
+            ->excluding($this->fileDir . '/IgnoreMe/file1')
         ;
         $this->assertExpectedFiles($assert, Vector{
-            $this->validSuiteDir . '/ValidSuite.php',
-            $this->validSuiteDir . '/ValidSuite1.php',
-            $this->validSuiteDir . '/ValidSuite2.php',
-            $this->validSuiteDir . '/IgnoreMe/ValidSuite1.php',
-            $this->validSuiteDir . '/IgnoreMe/ValidSuite2.php',
+            $this->fileDir . '/file1',
+            $this->fileDir . '/file2',
+            $this->fileDir . '/file3',
+            $this->fileDir . '/IgnoreMe/file2',
+            $this->fileDir . '/IgnoreMe/file3',
         });
     }
 
@@ -63,36 +63,36 @@ class LoaderTest
     {
         $this
             ->loader
-            ->including($this->validSuiteDir)
-            ->excluding($this->validSuiteDir . '/IgnoreMe')
+            ->including($this->fileDir)
+            ->excluding($this->fileDir . '/IgnoreMe')
         ;
         $this->assertExpectedFiles($assert, Vector{
-            $this->validSuiteDir . '/ValidSuite.php',
-            $this->validSuiteDir . '/ValidSuite1.php',
-            $this->validSuiteDir . '/ValidSuite2.php',
+            $this->fileDir . '/file1',
+            $this->fileDir . '/file2',
+            $this->fileDir . '/file3',
         });
     }
 
     <<Test>>
     public function loadsAllFiles(Assert $assert) : void
     {
-        $this->loader->including($this->validSuiteDir);
+        $this->loader->including($this->fileDir);
         $this->assertExpectedFiles($assert, Vector{
-            $this->validSuiteDir . '/ValidSuite.php',
-            $this->validSuiteDir . '/ValidSuite1.php',
-            $this->validSuiteDir . '/ValidSuite2.php',
-            $this->validSuiteDir . '/IgnoreMe/ValidSuite.php',
-            $this->validSuiteDir . '/IgnoreMe/ValidSuite1.php',
-            $this->validSuiteDir . '/IgnoreMe/ValidSuite2.php',
+            $this->fileDir . '/file1',
+            $this->fileDir . '/file2',
+            $this->fileDir . '/file3',
+            $this->fileDir . '/IgnoreMe/file1',
+            $this->fileDir . '/IgnoreMe/file2',
+            $this->fileDir . '/IgnoreMe/file3',
         });
     }
 
     <<Test>>
     public function loadsSingleFile(Assert $assert) : void
     {
-        $this->loader->including($this->validSuiteDir . '/ValidSuite.php');
+        $this->loader->including($this->fileDir . '/file1');
         $this->assertExpectedFiles($assert, Vector{
-            $this->validSuiteDir . '/ValidSuite.php',
+            $this->fileDir . '/file1',
         });
     }
 
@@ -100,12 +100,12 @@ class LoaderTest
     public function loadsMultipleFiles(Assert $assert) : void
     {
         $this->loader
-            ->including($this->validSuiteDir . '/ValidSuite.php')
-            ->including($this->validSuiteDir . '/ValidSuite1.php')
+            ->including($this->fileDir . '/file1')
+            ->including($this->fileDir . '/file2')
         ;
         $this->assertExpectedFiles($assert, Vector{
-            $this->validSuiteDir . '/ValidSuite.php',
-            $this->validSuiteDir . '/ValidSuite1.php',
+            $this->fileDir . '/file1',
+            $this->fileDir . '/file2',
         });
     }
 

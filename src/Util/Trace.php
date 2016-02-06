@@ -18,7 +18,7 @@ class Trace
     public static function fromScannedMethod(ScannedBasicClass $class, ScannedMethod $method) : TraceItem
     {
         return self::buildItem([
-            'line' => $method->getPosition()['line'],
+            'line' => Shapes::idx($method->getPosition(), 'line'),
             'class' => $class->getName(),
             'file' => $method->getFileName(),
             'function' => $method->getName(),

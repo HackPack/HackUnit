@@ -126,7 +126,12 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
             ->map(fun('\HH\Asio\wrap'))
         );
 
-        $results = Asio\join($awaitable);
+        foreach(Asio\join($awaitable) as $result)
+        {
+            if($result->isFailed()) {
+                $this->emitException($result->getException());
+            }
+        }
 
         $this->emitRunEnd();
     }

@@ -16,6 +16,7 @@ class Reporter
     private Vector<Failure> $failEvents = Vector{};
     private Vector<Skip> $skipEvents = Vector{};
     private Vector<MalformedSuite> $malformedEvents = Vector{};
+    private Vector<\Exception> $untestedExceptions = Vector{};
 
     private int $assertCount = 0;
     private int $successCount = 0;
@@ -71,14 +72,26 @@ class Reporter
 
     public function reportUntestedException(\Exception $e) : void
     {
-        $message = 'Fatal exception thrown in ' . $e->getFile() . ' on line ' . $e->getLine() . '.';
+        $this->untestedExceptions->add($e);
+    }
 
-        $this->line(PHP_EOL);
-        $this->line($message);
-        $this->line('Exception message:');
-        $this->line($e->getMessage());
-        $this->line('Trace:');
-        $this->line($e->getTraceAsString());
+    public function untestedExceptionReport() : string
+    {
+        $entries = Vector{};
+        foreach($this->untestedExceptions as $e) {
+
+            $message = 'Fatal exception thrown in ' . $e->getFile() . ' on line ' . $e->getLine() . '.';
+
+            $entries->add(implode(PHP_EOL, [
+                $message,
+                'Exception message:',
+                $e->getMessage(),
+                'Trace:',
+                $e->getTraceAsString(),
+            ]));
+        }
+
+        return PHP_EOL . implode(PHP_EOL, $entries) . PHP_EOL;
     }
 
     public function reportMalformedSuite(MalformedSuite $event) : void
@@ -95,6 +108,7 @@ class Reporter
         $this->show($this->malformedReport());
         $this->show($this->skipReport());
         $this->show($this->errorReport());
+        $this->show($this->untestedExceptionReport());
     }
 
     public function testSummary() : string
