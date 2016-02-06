@@ -121,7 +121,7 @@ class TraceTest
     <<Test>>
     public function assertionCallSearchSucceedsWhenSearchingWithAssertion(Assert $assert) : void
     {
-        $mockAssert = new \HackPack\HackUnit\Tests\Mocks\Util\Assertion();
+        $mockAssert = new \HackPack\HackUnit\Tests\Doubles\Util\Assertion();
         $items = Vector{};
         $line = __LINE__ + 3;
         $mockAssert->run(() ==> {

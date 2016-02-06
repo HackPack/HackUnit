@@ -15,6 +15,7 @@ use HackPack\HackUnit\Event\SkipListener;
 use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Event\SuiteEndListener;
 use HackPack\HackUnit\Event\SuiteStartListener;
+use HH\Asio;
 
 class Runner implements \HackPack\HackUnit\Contract\Test\Runner
 {
@@ -107,10 +108,8 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
 
         $builder = $this->assertBuilder;
 
-        $awaitable = \HH\Asio\v($suites->map(async ($s) ==> {
-
-            try{
-
+        $awaitable = Asio\v(
+            $suites->map(async ($s) ==> {
                 $this->emitSuiteStart();
                 await $s->up();
 
@@ -123,12 +122,11 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
 
                 await $s->down();
                 $this->emitSuiteEnd();
+            })
+            ->map(fun('\HH\Asio\wrap'))
+        );
 
-            } catch (\Exception $e) {
-                $this->emitException($e);
-            }
-
-        }));
+        $results = Asio\join($awaitable);
 
         $this->emitRunEnd();
     }

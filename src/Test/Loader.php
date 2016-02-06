@@ -3,7 +3,6 @@
 namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Contract\Test\Suite;
-use FredEmmott\DefinitionFinder\FileParser;
 use SplFileInfo;
 use FilesystemIterator;
 
@@ -12,7 +11,7 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
     private int $testCount = 0;
 
     public function __construct(
-        private (function(\ReflectionClass):?Suite) $suiteBuilder,
+        private (function(string):Traversable<Suite>) $suiteBuilder,
         private Set<string> $includes = Set{},
         private Set<string> $excludes = Set{},
     )
@@ -40,27 +39,9 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
         $builder = $this->suiteBuilder;
 
         foreach ($this->pathsToScan() as $path) {
-            $classes = FileParser::FromFile($path)->getClasses();
-
-            foreach ($classes as $scannedClass) {
-
-                if (!class_exists($scannedClass->getName())) {
-                    $this->load($path);
-                }
-
-                try {
-                    $classMirror = new \ReflectionClass($scannedClass->getName());
-                } catch (\ReflectionException $e) {
-                    // Unable to load the file, or the map was wrong?
-                    // Should we warn the user?
-                    continue;
-                }
-
-                $suite = $builder($classMirror);
-                if($suite !== null) {
-                    $suites->add($suite);
-                }
-
+            $suite = $builder($path);
+            if($suite !== null) {
+                $suites->addAll($suite);
             }
         }
 
@@ -113,13 +94,4 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader
         }
         return true;
     }
-
-
-    private function load(string $fileName) : void
-    {
-        // Is there a better way of dynamically including files?
-        /* HH_FIXME[1002] */
-        require_once($fileName);
-    }
-
 }

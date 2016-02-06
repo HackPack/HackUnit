@@ -2,58 +2,56 @@
 
 namespace HackPack\HackUnit\Test;
 
+use FredEmmott\DefinitionFinder\ScannedBasicClass;
+use FredEmmott\DefinitionFinder\ScannedMethod;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Util\Trace;
-use ReflectionClass;
-use ReflectionMethod;
 
 class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
 {
     private Vector<MalformedSuite> $errors = Vector{};
-    private Map<string, (function():Awaitable<mixed>)> $factories = Map{};
-    private Vector<ReflectionMethod> $suiteUp = Vector{};
-    private Vector<ReflectionMethod> $suiteDown = Vector{};
-    private Vector<ReflectionMethod> $testUp = Vector{};
-    private Vector<ReflectionMethod> $testDown = Vector{};
+    private Map<string, string> $factories = Map{};
+    private Vector<string> $suiteUp = Vector{};
+    private Vector<string> $suiteDown = Vector{};
+    private Vector<string> $testUp = Vector{};
+    private Vector<string> $testDown = Vector{};
     private Vector<
         shape(
             'factory name' => string,
-            'method' => ReflectionMethod,
+            'method' => string,
             'skip' => bool,
         )
     > $tests = Vector{};
 
-    public function __construct(private ReflectionClass $classMirror)
+    public function __construct(private ScannedBasicClass $class)
     {
-        $this->checkConstructor();
-
-        foreach($classMirror->getMethods() as $method) {
+        foreach($class->getMethods() as $method) {
             $this->categorize($method);
         }
     }
 
-    public function factories() : \ConstMap<string, (function():mixed)>
+    public function factories() : \ConstMap<string, string>
     {
         return $this->factories;
     }
 
-    public function suiteUp() : \ConstVector<ReflectionMethod>
+    public function suiteUp() : \ConstVector<string>
     {
         return $this->suiteUp;
     }
 
-    public function suiteDown() : \ConstVector<ReflectionMethod>
+    public function suiteDown() : \ConstVector<string>
     {
         return $this->suiteDown;
     }
 
-    public function testUp() : \ConstVector<ReflectionMethod>
+    public function testUp() : \ConstVector<string>
     {
         return $this->testUp;
     }
 
-    public function testDown() : \ConstVector<ReflectionMethod>
+    public function testDown() : \ConstVector<string>
     {
         return $this->testDown;
     }
@@ -61,7 +59,7 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
     public function tests() : \ConstVector<
         shape(
             'factory name' => string,
-            'method' => ReflectionMethod,
+            'method' => string,
             'skip' => bool,
         )
     >
@@ -74,43 +72,28 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
          return $this->errors;
     }
 
-    private function checkConstructor() : void
+    private function categorize(ScannedMethod $method) : void
     {
-        $constructor = $this->classMirror->getConstructor();
-        if(
-            ($constructor instanceof ReflectionMethod) &&
-            $constructor->getNumberOfRequiredParameters() === 0
-        ) {
-            $this->factories->set('', () ==> $this->classMirror->newInstance());
+        if($method->getName() === '__construct') {
+            $this->checkConstructor($method);
             return;
         }
 
-        if($constructor === null) {
-            $this->factories->set('', () ==> $this->classMirror->newInstanceWithoutConstructor());
-        }
-    }
-
-    private function categorize(ReflectionMethod $method) : void
-    {
-        $attrs = new Map($method->getAttributes());
+        $attrs = $method->getAttributes();
         if(
             !$attrs->containsKey('Test') &&
             !$attrs->containsKey('Setup') &&
             !$attrs->containsKey('TearDown') &&
-            !$attrs->containsKey('Provides')
+            !$attrs->containsKey('SuiteProvider')
         ) {
             // This method can't be categorized
             return;
         }
 
-        if(
-            $method->isAbstract() ||
-            $method->isConstructor() ||
-            $method->isDestructor()
-        ) {
+        if($method->getName() === '__destruct') {
             // Must be normal instance method
             $this->errors->add(new MalformedSuite(
-                Trace::fromReflectionMethod($method),
+                Trace::fromScannedMethod($this->class, $method),
                 'Setup, TearDown, and Test methods must be instance methods and must not be the constructor, the destructor, nor be abstract.',
             ));
             return;
@@ -122,17 +105,18 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
         $this->checkFactory($method);
     }
 
-    private function checkUpDown(string $type, ReflectionMethod $method) : void
+    private function checkUpDown(string $type, ScannedMethod $method) : void
     {
-        $attr = $method->getAttribute($type);
-        if(! is_array($attr)) {
+        $attr = $method->getAttributes()->get($type);
+        if($attr === null) {
             return;
         }
 
         // No parameters
-        if($method->getNumberOfRequiredParameters() !== 0) {
+        $requiredParams = $method->getParameters()->filter($p ==> !$p->isOptional());
+        if($requiredParams->count() !== 0) {
             $this->errors->add(new MalformedSuite(
-                Trace::fromReflectionMethod($method),
+                Trace::fromScannedMethod($this->class, $method),
                 $type . ' methods must not require parameters.',
             ));
             return;
@@ -145,78 +129,79 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
             // Suite setup/teardown must be static
             if(!$method->isStatic()) {
                 $this->errors->add(new MalformedSuite(
-                    Trace::fromReflectionMethod($method),
+                    Trace::fromScannedMethod($this->class, $method),
                     'Suite ' . $type . ' methods must be declared static.',
                 ));
                 return;
             }
 
             if($type === 'Setup') {
-                $this->suiteUp->add($method);
+                $this->suiteUp->add($method->getName());
                 return;
             }
             if($type === 'TearDown') {
-                $this->suiteDown->add($method);
+                $this->suiteDown->add($method->getName());
             }
         }
 
         if($attr->isEmpty() || $attr->contains('test')) {
             if($type === 'Setup') {
-                $this->testUp->add($method);
+                $this->testUp->add($method->getName());
                 return;
             }
             if($type === 'TearDown') {
-                $this->testDown->add($method);
+                $this->testDown->add($method->getName());
             }
         }
     }
 
-    private function checkTest(ReflectionMethod $method) : void
+    private function checkTest(ScannedMethod $method) : void
     {
         // Look for <<Test>> attribute
-        $attr = $method->getAttribute('Test');
-        if(!is_array($attr)) {
+        $attr = $method->getAttributes()->get('Test');
+        if($attr === null) {
             return;
         }
 
+        // If no value, this will be null cast to a string
+        // and the empty string is the alias for the default factory
+        $factory = (string)$attr->get(0);
+
         // Ensure method takes an Assert as the only parameter
-        $params = new Vector($method->getParameters());
+        $params = $method->getParameters();
 
         if(
             $params->count() !== 1 ||
-            $params->at(0)->getTypeText() !== Assert::class
+            $params->at(0)->getTypehint()?->getTypeName() !== Assert::class
         ) {
+            var_dump($params->at(0)->getTypehint()?->getTypeName());
             $this->errors->add(new MalformedSuite(
-                Trace::fromReflectionMethod($method),
+                Trace::fromScannedMethod($this->class, $method),
                 'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Contract\Assert',
             ));
             return;
         }
 
-        $factory = '';
-        if(count($attr) > 0 && is_string($attr[0])) {
-            $factory = $attr[0];
-        }
-
         $this->tests->add(
             shape(
                 'factory name' => $factory,
-                'method' => $method,
-                'skip' => is_array($method->getAttribute('Skip')),
+                'method' => $method->getName(),
+                'skip' => $method->getAttributes()->containsKey('Skip'),
             )
         );
     }
 
-    private function checkFactory(ReflectionMethod $method) : void
+    private function checkFactory(ScannedMethod $method) : void
     {
-        $attr = $method->getAttribute('SuiteProvider');
-        if(!is_array($attr)) {
+        $attr = $method->getAttributes()->get('SuiteProvider');
+        if($attr === null) {
             return;
         }
 
-        if(count($attr) != 1 || ! is_string($attr[0])) {
+        $alias = $attr->count() > 0 ? $attr->at(0) : '';
+        if(!is_string($alias)) {
             $this->errors->add(new MalformedSuite(
-                Trace::fromReflectionMethod($method),
+                Trace::fromScannedMethod($this->class, $method),
                 'The <<SuiteProvider(\'name\')>> annotation must have exactly one string parameter',
             ));
             return;
@@ -224,23 +209,25 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
 
         if(! $method->isStatic()) {
             $this->errors->add(new MalformedSuite(
-                Trace::fromReflectionMethod($method),
+                Trace::fromScannedMethod($this->class, $method),
                 'Suite factories annotated with <<SuiteProvider>> must be declared static',
             ));
             return;
         }
 
-        $name = count($attr) === 0 ? '' : (string)$attr[0];
+        $this->factories->set($alias, $method->getName());
+    }
 
-        $this->factories->set(
-            $name,
-            async () ==> {
-                $result = $method->invoke(null);
-                if($method->isAsync()) {
-                    $result = await $result;
-                }
-                return $result;
-            }
-        );
+    private function checkConstructor(ScannedMethod $method) : void
+    {
+        // Don't overwrite the default factory
+        if($this->factories->containsKey('')) {
+            return;
+        }
+
+        $requiredParams = $method->getParameters()->filter($p ==> !$p->isOptional());
+        if($requiredParams->isEmpty()) {
+            $this->factories->set('', $method->getName());
+        }
     }
 }
