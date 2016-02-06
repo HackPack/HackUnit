@@ -72,26 +72,42 @@ class SuiteParserTest
     <<Test>>
     public function setupParsing(Assert $assert) : void
     {
-        $parser = $this->parserFromSuiteName('Setup', $assert);
+        $this->updownParsing('Setup', $assert);
+    }
+
+    <<Test>>
+    public function teardownParsing(Assert $assert) : void
+    {
+        $this->updownParsing('TearDown', $assert);
+    }
+
+    private function updownParsing(string $type, Assert $assert) : void
+    {
+        $parser = $this->parserFromSuiteName($type, $assert);
 
         $expectedSuiteUp = Vector{
             'suiteOnly',
             'both',
         };
-        $suiteUp = $parser->suiteUp();
+
+        $suiteUp = $type === 'Setup' ?
+            $parser->suiteUp() :
+            $parser->suiteDown();
 
         $extraSuiteUp = array_diff($suiteUp, $expectedSuiteUp);
         $missingSuiteUp = array_diff($expectedSuiteUp, $suiteUp);
 
-        //$assert->int(count($extraSuiteUp))->eq(0);
-        //$assert->int(count($missingSuiteUp))->eq(0);
+        $assert->int(count($extraSuiteUp))->eq(0);
+        $assert->int(count($missingSuiteUp))->eq(0);
 
         $expectedTestUp = Vector{
             'both',
             'testOnlyExplicit',
             'testOnlyImplicit'
         };
-        $testUp = $parser->testUp();
+        $testUp = $type === 'Setup' ?
+            $parser->testUp() :
+            $parser->testDown();
 
         $extraTestUp = array_diff($testUp, $expectedTestUp);
         $missingTestUp = array_diff($expectedTestUp, $testUp);
