@@ -4,71 +4,99 @@ namespace HackPack\HackUnit\Tests\Test;
 
 use HackPack\HackUnit\Contract\Assert;;
 use HackPack\HackUnit\Test\SuiteParser;
-use FredEmmott\DefinitionFinder\FileParser;
+use FredEmmott\DefinitionFinder\TreeParser;
 
 class SuiteParserTest
 {
-    private string $suiteDir;
-    private string $suiteNamespace;
+    private static string $suiteNamespace = 'HackPack\HackUnit\Tests\Fixtures\ValidSuites\\';
 
-    public function __construct()
-    {
-        $this->suiteDir = dirname(__DIR__) . '/Fixtures/ValidSuites';
-        $this->suiteNamespace = 'HackPack\HackUnit\Tests\Fixtures\ValidSuites';
-    }
+    private static Map<string, SuiteParser> $validParsersBySuiteName = Map{};
 
-    private function buildParsers(string $path) : Map<string, SuiteParser>
+    <<Setup('suite')>>
+    private static function buildParsers() : void
     {
-        $parsers = Map{};
-        $parsers->addAll(
-            FileParser::FromFile($path)
+        self::$validParsersBySuiteName->addAll(
+            TreeParser::FromPath(dirname(__DIR__) . '/Fixtures/ValidSuites/')
             ->getClasses()
             ->map($class ==> Pair{$class->getName(), new SuiteParser($class)})
         );
-        return $parsers;
     }
 
-    private function fixtureFile(string $name) : string
+    private function parserFromSuiteName(string $name, Assert $assert) : SuiteParser
     {
-        return $this->suiteDir . '/' . ltrim($name, '/');
+        $fullName = self::$suiteNamespace . $name;
+        $assert->bool(self::$validParsersBySuiteName->containsKey($fullName))->is(true);
+        return self::$validParsersBySuiteName->at($fullName);
     }
 
-    private function suiteName(string $name) : string
+    <<Test>>
+    public function validSuitesParseWithoutError(Assert $assert) : void
     {
-         return $this->suiteNamespace . '\\' . $name;
+        foreach(self::$validParsersBySuiteName as $parser) {
+            $assert->bool($parser->errors()->isEmpty())->is(true);
+        }
     }
 
     <<Test>>
     public function factoryParsing(Assert $assert) : void
     {
-        $factoryListsByClassName = $this
-            ->buildParsers($this->fixtureFile('Factories.php'))
-            ->map($p ==> $p->factories())
+        $factoryList = $this
+            ->parserFromSuiteName('ConstructorIsDefaultWithNoParams', $assert)
+            ->factories()
         ;
 
-        $factoryList = $factoryListsByClassName->at(
-            $this->suiteName('ConstructorIsDefaultWithNoParams')
-        );
+        $assert->bool($factoryList->containsKey(''))->is(true);
+        $assert->bool($factoryList->containsKey('named'))->is(true);
+        $assert->string($factoryList->at(''))->is('__construct');
+        $assert->string($factoryList->at('named'))->is('factory');
+
+        $factoryList = $this
+            ->parserFromSuiteName('ConstructorIsDefaultWithParams', $assert)
+            ->factories()
+        ;
 
         $assert->bool($factoryList->containsKey(''))->is(true);
         $assert->bool($factoryList->containsKey('named'))->is(true);
         $assert->string($factoryList->at(''))->is('__construct');
         $assert->string($factoryList->at('named'))->is('factory');
 
-        $factoryList = $factoryListsByClassName->at(
-            $this->suiteName('ConstructorIsDefaultWithParams')
-        );
-
-        $assert->bool($factoryList->containsKey(''))->is(true);
-        $assert->bool($factoryList->containsKey('named'))->is(true);
-        $assert->string($factoryList->at(''))->is('__construct');
-        $assert->string($factoryList->at('named'))->is('factory');
-
-        $factoryList = $factoryListsByClassName->at(
-            $this->suiteName('ConstructorIsNotDefault')
-        );
+        $factoryList = $this
+            ->parserFromSuiteName('ConstructorIsNotDefault', $assert)
+            ->factories()
+        ;
 
         $assert->bool($factoryList->containsKey(''))->is(true);
         $assert->string($factoryList->at(''))->is('factory');
+    }
+
+    <<Test>>
+    public function setupParsing(Assert $assert) : void
+    {
+        $parser = $this->parserFromSuiteName('Setup', $assert);
+
+        $expectedSuiteUp = Vector{
+            'suiteOnly',
+            'both',
+        };
+        $suiteUp = $parser->suiteUp();
+
+        $extraSuiteUp = array_diff($suiteUp, $expectedSuiteUp);
+        $missingSuiteUp = array_diff($expectedSuiteUp, $suiteUp);
+
+        //$assert->int(count($extraSuiteUp))->eq(0);
+        //$assert->int(count($missingSuiteUp))->eq(0);
+
+        $expectedTestUp = Vector{
+            'both',
+            'testOnlyExplicit',
+            'testOnlyImplicit'
+        };
+        $testUp = $parser->testUp();
+
+        $extraTestUp = array_diff($testUp, $expectedTestUp);
+        $missingTestUp = array_diff($expectedTestUp, $testUp);
+
+        $assert->int(count($extraTestUp))->eq(0);
+        $assert->int(count($missingTestUp))->eq(0);
     }
 }

@@ -137,17 +137,16 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
 
             if($type === 'Setup') {
                 $this->suiteUp->add($method->getName());
-                return;
             }
             if($type === 'TearDown') {
                 $this->suiteDown->add($method->getName());
             }
         }
 
+        // Look for <<$type('test')>> and <<$type>>
         if($attr->isEmpty() || $attr->contains('test')) {
             if($type === 'Setup') {
                 $this->testUp->add($method->getName());
-                return;
             }
             if($type === 'TearDown') {
                 $this->testDown->add($method->getName());
