@@ -137,7 +137,8 @@ class Reporter
         return PHP_EOL . 'Skipped tests:' . PHP_EOL .
             implode(PHP_EOL . PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
                 return implode(PHP_EOL, [
-                    ($idx + 1) . ') ' . $this->buildMethodCall($e->callSite()),
+                    '-*-*-*- Test Skip ' . ($idx + 1) . ' -*-*-*-',
+                    $this->buildMethodCall($e->callSite()),
                     '  In file ' . $e->callSite()['file'],
                     $e->message(),
                 ]);
@@ -159,7 +160,8 @@ class Reporter
             $testMethod = $this->buildMethodCall($testTraceItem);
             $report .= implode(PHP_EOL,[
                 '',
-                ($idx + 1) . ' Test failure - ' . $testMethod,
+                '-*-*-*- Test Failure ' . ($idx + 1) . ' -*-*-*-',
+                'Test failure - ' . $testMethod,
                 'Assertion failed in ' . $assertionCall,
                 'On line ' . $assertionTraceItem['line'] . ' of ' . $assertionTraceItem['file'],
                 $e->getMessage(),
@@ -191,7 +193,8 @@ class Reporter
         foreach($this->malformedEvents as $idx => $event) {
             $report .= implode(PHP_EOL,[
                 PHP_EOL,
-                ($idx + 1) . ') ' . $this->buildMethodCall($event->traceItem()),
+                '-*-*-*- Malformed Error ' . ($idx + 1) . ' -*-*-*-',
+                $this->buildMethodCall($event->traceItem()),
                 $this->buildLineReference($event->traceItem()),
                 $event->message(),
             ]);
