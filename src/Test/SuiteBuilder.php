@@ -222,7 +222,7 @@ final class SuiteBuilder<Tparser as SuiteParser>
         } catch (\ReflectionException $e) {
             // Unable to load the file, or the map was wrong?
             // Should we warn the user?
-            echo PHP_EOL . 'Unable to reflect class ' . $scannedClass->getName() . PHP_EOL;
+            //echo PHP_EOL . 'Unable to reflect class ' . $scannedClass->getName() . PHP_EOL;
             return null;
         }
     }
