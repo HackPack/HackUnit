@@ -142,9 +142,14 @@ class RunnerTest
             $this->testsPassed++;
         });
 
-        // The spy suite always runs the success callback from the runner
-        $this->runner->run(Vector{new SpySuite()});
+        $suite = new SpySuite();
+        $this->runner->run(Vector{$suite});
 
+        $assert->int($suite->passCallbacks->count())->eq(1);
+        $passCallback = $suite->passCallbacks->at(0);
+
+        $assert->int($this->testsPassed)->eq(0);
+        $passCallback();
         $assert->int($this->testsPassed)->eq(1);
     }
 }

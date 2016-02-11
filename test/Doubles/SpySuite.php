@@ -20,7 +20,7 @@ class SpySuite implements Suite
     );
 
     public Vector<Assert> $asserts = Vector{};
-
+    public Vector<(function():void)> $passCallbacks = Vector{};
 
     public async function up() : Awaitable<void>
     {
@@ -35,8 +35,8 @@ class SpySuite implements Suite
     public async function run(Assert $assert, (function():void) $testPassed) : Awaitable<void>
     {
         $this->asserts->add($assert);
+        $this->passCallbacks->add($testPassed);
         $this->counts['run']++;
-        $testPassed();
     }
 
 }
