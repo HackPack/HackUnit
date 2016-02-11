@@ -29,7 +29,7 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
     {
     }
 
-    public async function run(Assert $assert) : Awaitable<void>
+    public async function run(Assert $assert, (function():void) $testPassed) : Awaitable<void>
     {
         await Asio\v($this->tests->map(async ($test) ==> {
 
@@ -46,6 +46,8 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
             } catch (Interruption $e) {
                 // any listeners should have been notified by now
             }
+
+            $testPassed();
 
             await Asio\v($this->testdown->map($posttest ==> $posttest($instance, [])));
         }));

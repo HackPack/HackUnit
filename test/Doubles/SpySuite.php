@@ -32,10 +32,11 @@ class SpySuite implements Suite
         $this->counts['down']++;
     }
 
-    public async function run(Assert $assert) : Awaitable<void>
+    public async function run(Assert $assert, (function():void) $testPassed) : Awaitable<void>
     {
         $this->asserts->add($assert);
         $this->counts['run']++;
+        $testPassed();
     }
 
 }

@@ -12,13 +12,6 @@ trait AssertionTest
     private int $successCount = 0;
     private Vector<Failure> $failEvents = Vector{};
 
-    <<Setup>>
-    public function clearCounts() : void
-    {
-        $this->successCount = 0;
-        $this->failEvents->clear();
-    }
-
     private function successListeners() : Vector<SuccessListener>
     {
         return Vector{() ==> {$this->successCount++;}};

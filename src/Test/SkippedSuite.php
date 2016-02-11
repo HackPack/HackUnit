@@ -22,7 +22,7 @@ class SkippedSuite implements \HackPack\HackUnit\Contract\Test\Suite
     {
     }
 
-    public async function run(Assert $assert) : Awaitable<void>
+    public async function run(Assert $assert, (function():void) $testPassed) : Awaitable<void>
     {
         $assert->skip('Class ' . $this->name . ' marked "Skipped"', $this->trace);
     }

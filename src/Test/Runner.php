@@ -113,12 +113,14 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
                 $this->emitSuiteStart();
                 await $s->up();
 
-                await $s->run($builder(
-                    $this->failureListeners,
-                    $this->skipListeners,
-                    $this->successListeners,
-                ));
-                $this->emitPass();
+                await $s->run(
+                    $builder(
+                        $this->failureListeners,
+                        $this->skipListeners,
+                        $this->successListeners,
+                    ),
+                    () ==> {$this->emitPass();},
+                );
 
                 await $s->down();
                 $this->emitSuiteEnd();

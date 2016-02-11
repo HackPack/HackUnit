@@ -12,7 +12,7 @@ class AsyncSuite implements Suite
     public async function up() : Awaitable<void> { }
     public async function down() : Awaitable<void> { }
 
-    public async function run(Assert $assert) : Awaitable<void>
+    public async function run(Assert $assert, (function():void) $testPassed) : Awaitable<void>
     {
         await \HH\Asio\usleep($this->sleepTime);
     }
