@@ -43,11 +43,10 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite
 
             try{
                 await $test['method']($instance, [$assert]);
+                $testPassed();
             } catch (Interruption $e) {
                 // any listeners should have been notified by now
             }
-
-            $testPassed();
 
             await Asio\v($this->testdown->map($posttest ==> $posttest($instance, [])));
         }));

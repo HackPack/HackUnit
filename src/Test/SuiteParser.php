@@ -173,7 +173,6 @@ class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
             $params->count() !== 1 ||
             $params->at(0)->getTypehint()?->getTypeName() !== Assert::class
         ) {
-            var_dump($params->at(0)->getTypehint()?->getTypeName());
             $this->errors->add(new MalformedSuite(
                 Trace::fromScannedMethod($this->class, $method),
                 'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Contract\Assert',
