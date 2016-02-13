@@ -8,7 +8,7 @@ use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Util\Trace;
 
-class SuiteParser implements \HackPack\HackUnit\Contract\Test\SuiteParser
+class Parser implements \HackPack\HackUnit\Contract\Test\SuiteParser
 {
     private Vector<MalformedSuite> $errors = Vector{};
     private Map<string, string> $factories = Map{};

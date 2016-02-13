@@ -14,7 +14,7 @@ final class HackUnit
          */
         $testReporter = new Test\Reporter();
 
-        $suiteBuilder = new Test\SuiteBuilder($scannedClass ==> new Test\SuiteParser($scannedClass));
+        $suiteBuilder = new Test\SuiteBuilder($scannedClass ==> new Test\Parser($scannedClass));
         $suiteBuilder->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
 
         $testLoader = new Test\Loader(

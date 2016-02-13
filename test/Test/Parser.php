@@ -3,14 +3,14 @@
 namespace HackPack\HackUnit\Tests\Test;
 
 use HackPack\HackUnit\Contract\Assert;
-use HackPack\HackUnit\Test\SuiteParser;
+use HackPack\HackUnit\Test\Parser;
 use FredEmmott\DefinitionFinder\TreeParser;
 
 class SuiteParserTest
 {
     private static string $suiteNamespace = 'HackPack\HackUnit\Tests\Fixtures\ValidSuites\\';
 
-    private static Map<string, SuiteParser> $validParsersBySuiteName = Map{};
+    private static Map<string, Parser> $validParsersBySuiteName = Map{};
 
     <<Setup('suite')>>
         private static function buildParsers() : void
@@ -18,11 +18,11 @@ class SuiteParserTest
             self::$validParsersBySuiteName->addAll(
                 TreeParser::FromPath(dirname(__DIR__) . '/Fixtures/ValidSuites/')
                 ->getClasses()
-                ->map($class ==> Pair{$class->getName(), new SuiteParser($class)})
+                ->map($class ==> Pair{$class->getName(), new Parser($class)})
             );
         }
 
-    private function parserFromSuiteName(string $name, Assert $assert) : SuiteParser
+    private function parserFromSuiteName(string $name, Assert $assert) : Parser
     {
         $fullName = self::$suiteNamespace . $name;
         $assert->bool(self::$validParsersBySuiteName->containsKey($fullName))->is(true);
