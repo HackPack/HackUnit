@@ -4,7 +4,7 @@ namespace HackPack\HackUnit\Test;
 
 use FredEmmott\DefinitionFinder\FileParser;
 use FredEmmott\DefinitionFinder\ScannedBasicClass;
-use HackPack\HackUnit\Contract\Test\SuiteParser;
+use HackPack\HackUnit\Contract\Test\Parser;
 use HackPack\HackUnit\Contract\Test\Suite as SuiteInterface;
 use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\MalformedSuiteListener;
@@ -14,10 +14,10 @@ use ReflectionClass;
 
 type InvokerWithParams = (function(mixed,array<mixed>):Awaitable<void>);
 
-final class SuiteBuilder<Tparser as SuiteParser>
+final class SuiteBuilder
 {
     public function __construct(
-        private (function(ScannedBasicClass):SuiteParser) $parserBuilder,
+        private (function(string,string):Parser) $parserBuilder,
         private Vector<MalformedSuiteListener> $malformedListeners = Vector{},
     )
     {
@@ -58,7 +58,7 @@ final class SuiteBuilder<Tparser as SuiteParser>
                  continue;
             }
 
-            $suite = $this->buildSuite($mirror, $parserBuilder($scannedClass));
+            $suite = $this->buildSuite($mirror, $parserBuilder($scannedClass->getName(), $scannedClass->getFileName()));
             if($suite !== null) {
                  $suites->add($suite);
             }
@@ -97,7 +97,7 @@ final class SuiteBuilder<Tparser as SuiteParser>
         };
     }
 
-    private function buildSuite(ReflectionClass $classMirror, SuiteParser $parser) : ?SuiteInterface
+    private function buildSuite(ReflectionClass $classMirror, Parser $parser) : ?SuiteInterface
     {
         $tests = Vector{};
         $errors = $parser->errors()->toVector();

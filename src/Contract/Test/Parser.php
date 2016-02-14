@@ -4,7 +4,7 @@ namespace HackPack\HackUnit\Contract\Test;
 
 use HackPack\HackUnit\Event\MalformedSuite;
 
-interface SuiteParser
+interface Parser
 {
     /**
      * Return a mapping of factory aliases to public static methods
