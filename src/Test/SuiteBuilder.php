@@ -49,16 +49,17 @@ final class SuiteBuilder
                 continue;
             }
 
-            if(!$this->hasTests($scannedClass)) {
-                continue;
-            }
-
             $mirror = $this->reflectClass($scannedClass);
             if($mirror === null) {
                  continue;
             }
 
-            $suite = $this->buildSuite($mirror, $parserBuilder($scannedClass->getName(), $scannedClass->getFileName()));
+            $parser = $parserBuilder($scannedClass->getName(), $scannedClass->getFileName());
+            if($parser->tests()->isEmpty()) {
+                continue;
+            }
+
+            $suite = $this->buildSuite($mirror, $parser);
             if($suite !== null) {
                  $suites->add($suite);
             }
@@ -70,16 +71,6 @@ final class SuiteBuilder
     private function markedAsSkipped(ScannedBasicClass $class) : bool
     {
         return $class->getAttributes()->containsKey('Skip');
-    }
-
-    private function hasTests(ScannedBasicClass $class) : bool
-    {
-        foreach($class->getMethods() as $method) {
-            if($method->getAttributes()->containsKey('Test')) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private function buildInvoker(ReflectionMethod $method) : InvokerWithParams
@@ -105,7 +96,6 @@ final class SuiteBuilder
         // Convert method names to ReflectionMethods
         $getMethod = inst_meth($classMirror, 'getMethod');
         $nameToInvoker = $name ==> $this->buildInvoker($getMethod($name));
-
 
         $factories = $parser->factories()->map($methodName ==> {
             return async () ==> {

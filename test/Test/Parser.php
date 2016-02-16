@@ -112,7 +112,8 @@ class SuiteParserTest
 
         $expectedSuiteUp = Vector{
             'suiteOnly',
-                'both',
+            'both',
+            'nonRequiredParam'
         };
 
         $suiteUp = $type === 'Setup' ?

@@ -7,6 +7,9 @@ class TearDown
     <<TearDown('suite')>>
     public static function suiteOnly() : void {  }
 
+    <<TearDown('suite')>>
+    public static function nonRequiredParam(int $param = 0) : void { }
+
     <<TearDown('test', 'suite')>>
     public static function both() : void { }
 

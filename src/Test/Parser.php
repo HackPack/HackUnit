@@ -83,9 +83,8 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser
 
     private function categorize(ReflectionMethod $method) : void
     {
-        if($method->getName() === '__construct') {
+        if($method->isConstructor()) {
             $this->checkConstructor($method);
-            return;
         }
 
         $attrs = new Map($method->getAttributes());
@@ -99,7 +98,7 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser
             return;
         }
 
-        if($method->getName() === '__destruct') {
+        if($method->isConstructor() || $method->isDestructor()) {
             // Must be normal instance method
             $this->errors->add(new MalformedSuite(
                 Trace::fromReflectionMethod($method),
