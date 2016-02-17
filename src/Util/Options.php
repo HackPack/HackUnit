@@ -4,7 +4,7 @@ namespace HackPack\HackUnit\Util;
 
 final class Options
 {
-    const string VERSION = '0.5-dev';
+    const string VERSION = '0.5';
 
     public function __construct(
         public ImmSet<string> $includes,
