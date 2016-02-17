@@ -19,7 +19,7 @@
     "minimum-stability" : "dev",
     "require": {
         "hhvm": "^3.10.0",
-        "fredemmott/definition-finder": "^0.3.6",
+        "fredemmott/definition-finder": "^1.0",
         "hhvm/asio-utilities": "^2.0"
     },
     "autoload": {
