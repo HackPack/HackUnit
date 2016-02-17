@@ -32,11 +32,22 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser
 
         $this->class = new ReflectionClass($className);
 
+        // Check the constructor last to allow declared default factory
+        $constructor = null;
+
         // Only look for tests if the class is instantiable
         if( ! $this->class->isAbstract()) {
             foreach($this->class->getMethods() as $method) {
+                if($method->isConstructor()) {
+                    $constructor = $method;
+                    continue;
+                }
                 $this->categorize($method);
             }
+        }
+
+        if($constructor !== null) {
+            $this->categorize($constructor);
         }
     }
 
@@ -121,8 +132,7 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser
         }
 
         // No parameters
-        $requiredParams = (new Vector($method->getParameters()))->filter($p ==> !$p->isOptional());
-        if($requiredParams->count() !== 0) {
+        if($method->getNumberOfRequiredParameters() > 0) {
             $this->errors->add(new MalformedSuite(
                 Trace::fromReflectionMethod($method),
                 $type . ' methods must not require parameters.',
@@ -215,6 +225,14 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser
             return;
         }
 
+        if($this->factories->containsKey($alias)) {
+            $this->errors->add(new MalformedSuite(
+                Trace::fromReflectionMethod($method),
+                'The <<SuiteProvider(\'name\')>> annotation must have a unique name',
+            ));
+            return;
+        }
+
         if(! $method->isStatic()) {
             $this->errors->add(new MalformedSuite(
                 Trace::fromReflectionMethod($method),
@@ -223,11 +241,54 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser
             return;
         }
 
+        if($method->getNumberOfRequiredParameters() > 0) {
+            $this->errors->add(new MalformedSuite(
+                Trace::fromReflectionMethod($method),
+                'Suite factories annotated with <<SuiteProvider>> not require any input parameters',
+            ));
+            return;
+        }
+
+        $returnType = (string)$method->getReturnType();
+        if( ! $this->producesSuiteInstance($method) ) {
+            $this->errors->add(new MalformedSuite(
+                Trace::fromReflectionMethod($method),
+                'Suite factories annotated with <<SuiteProvider>> must return an instance of the suite class',
+            ));
+            return;
+        }
+
         $this->factories->set($alias, $method->getName());
+    }
+
+    private function producesSuiteInstance(ReflectionMethod $method) : bool
+    {
+        $returnType = $method->getReturnType();
+
+        if(
+            $returnType === null ||
+            $returnType->isBuiltin() ||
+            $returnType->allowsNull()
+        ) {
+            return false;
+        }
+
+        $returnString = (string)$returnType;
+
+        return
+            $returnString === 'HH\this' ||
+            $this->class->getName() === $returnString
+        ;
+
     }
 
     private function checkConstructor(ReflectionMethod $method) : void
     {
+        if($method === null) {
+            // No constructor, oh well. :)
+            return;
+        }
+
         // Don't overwrite the default factory
         if($this->factories->containsKey('')) {
             return;

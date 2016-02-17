@@ -40,3 +40,15 @@ final class ConstructorIsNotDefault
         return new static();
     }
 }
+
+<<__ConsistentConstruct>>
+abstract class AbstractFactory
+{
+    <<SuiteProvider>>
+    public static function factory() : DerivedFactory
+    {
+        return new DerivedFactory();
+    }
+}
+
+class DerivedFactory extends AbstractFactory { }

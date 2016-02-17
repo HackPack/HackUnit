@@ -8,13 +8,13 @@ use FredEmmott\DefinitionFinder\TreeParser;
 
 class SuiteParserTest
 {
-    private static string $suiteNamespace = 'HackPack\HackUnit\Tests\Fixtures\ValidSuites\\';
+    private static string $suiteNamespace = 'HackPack\HackUnit\Tests\Fixtures\\';
 
     private static Map<string, Parser> $validParsersBySuiteName = Map{};
     private static Map<string, Parser> $invalidParsersBySuiteName = Map{};
 
     <<Setup('suite')>>
-    private static function buildParsers() : void
+    public static function buildParsers() : void
     {
         self::$validParsersBySuiteName->addAll(
             TreeParser::FromPath(dirname(__DIR__) . '/Fixtures/ValidSuites/')
@@ -31,17 +31,18 @@ class SuiteParserTest
 
     private function parserFromSuiteName(string $name, Assert $assert) : Parser
     {
-        $fullName = self::$suiteNamespace . $name;
+        $validFullName = self::$suiteNamespace . 'ValidSuites\\' . $name;
+        $invalidFullName = self::$suiteNamespace . 'InvalidSuites\\' . $name;
 
-        if(self::$validParsersBySuiteName->containsKey($fullName)) {
-            return self::$validParsersBySuiteName->at($fullName);
+        if(self::$validParsersBySuiteName->containsKey($validFullName)) {
+            return self::$validParsersBySuiteName->at($validFullName);
         }
 
-        if(self::$invalidParsersBySuiteName->containsKey($fullName)) {
-            return self::$invalidParsersBySuiteName->at($fullName);
+        if(self::$invalidParsersBySuiteName->containsKey($invalidFullName)) {
+            return self::$invalidParsersBySuiteName->at($invalidFullName);
         }
 
-        throw new \RuntimeException('Unable to locate suite ' . $fullName);
+        throw new \RuntimeException('Unable to locate suite ' . $name);
     }
 
     <<Test>>
@@ -53,20 +54,12 @@ class SuiteParserTest
     }
 
     <<Test>>
-    public function invalidSuitesParseWithError(Assert $assert) : void
-    {
-        foreach(self::$invalidParsersBySuiteName as $parser) {
-            $assert->bool($parser->errors()->isEmpty())->is(false);
-        }
-    }
-
-    <<Test>>
     public function factoryParsing(Assert $assert) : void
     {
         $factoryList = $this
             ->parserFromSuiteName('ConstructorIsDefaultWithNoParams', $assert)
             ->factories()
-            ;
+        ;
 
         $assert->int($factoryList->count())->eq(2);
         $assert->bool($factoryList->containsKey(''))->is(true);
@@ -77,7 +70,7 @@ class SuiteParserTest
         $factoryList = $this
             ->parserFromSuiteName('ConstructorIsDefaultWithParams', $assert)
             ->factories()
-            ;
+        ;
 
         $assert->int($factoryList->count())->eq(2);
         $assert->bool($factoryList->containsKey(''))->is(true);
@@ -88,10 +81,22 @@ class SuiteParserTest
         $factoryList = $this
             ->parserFromSuiteName('ConstructorIsNotDefault', $assert)
             ->factories()
-            ;
-
+        ;
         $assert->bool($factoryList->containsKey(''))->is(true);
         $assert->string($factoryList->at(''))->is('factory');
+
+        $factoryList = $this
+            ->parserFromSuiteName('DerivedFactory', $assert)
+            ->factories()
+        ;
+        $assert->bool($factoryList->containsKey(''))->is(true);
+        $assert->string($factoryList->at(''))->is('factory');
+
+        $factoryList = $this
+            ->parserFromSuiteName('AbstractFactory', $assert)
+            ->factories()
+        ;
+        $assert->int($factoryList->count())->eq(0);
     }
 
     <<Test>>
@@ -225,5 +230,85 @@ class SuiteParserTest
         $parser = $this->parserFromSuiteName('AbstractSuite', $assert);
 
         $assert->int($parser->tests()->count())->eq(0);
+    }
+
+    <<Test>>
+    public function SuiteUpDownParseErrors(Assert $assert) : void
+    {
+        $parser = $this->parserFromSuiteName('SuiteUpParams', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->suiteUp()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('SuiteUpNonStatic', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->suiteUp()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('SuiteDownParams', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->suiteDown()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('SuiteDownNonStatic', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->suiteDown()->count())->eq(0);
+    }
+
+    <<Test>>
+    public function TestUpDownParseErrors(Assert $assert) : void
+    {
+        $parser = $this->parserFromSuiteName('TestUpParams', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->testUp()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('TestUpConstructDestruct', $assert);
+        $assert->int($parser->errors()->count())->eq(2);
+        $assert->int($parser->testUp()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('TestDownConstructDestruct', $assert);
+        $assert->int($parser->errors()->count())->eq(2);
+        $assert->int($parser->testUp()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('TestUpParams', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->testUp()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('TestDownParams', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->testUp()->count())->eq(0);
+    }
+
+    <<Test>>
+    public function TestParseErrors(Assert $assert) : void
+    {
+        $parser = $this->parserFromSuiteName('TestConstructDestruct', $assert);
+        $assert->int($parser->errors()->count())->eq(2);
+        $assert->int($parser->tests()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('TestParams', $assert);
+        $assert->int($parser->errors()->count())->eq(3);
+        $assert->int($parser->tests()->count())->eq(0);
+    }
+
+    <<Test>>
+    public function FactoryParseErrors(Assert $assert) : void
+    {
+        $parser = $this->parserFromSuiteName('DuplicateFactories', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->factories()->count())->eq(1);
+
+        $parser = $this->parserFromSuiteName('FactoryParams', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->factories()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('NonStaticFactory', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->factories()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('FactoryReturnType', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->factories()->count())->eq(0);
+
+        $parser = $this->parserFromSuiteName('InvalidDerivedFactory', $assert);
+        $assert->int($parser->errors()->count())->eq(1);
+        $assert->int($parser->factories()->count())->eq(0);
     }
 }

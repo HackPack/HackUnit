@@ -8,10 +8,13 @@ class TestUpParams
     public function invalid(int $requiredParam) : void { }
 }
 
-class TestUpConstructor
+class TestUpConstructDestruct
 {
     <<Setup>>
     public function __construct() { }
+
+    <<Setup>>
+    public function __destruct() { }
 }
 
 class TestDownParams
@@ -20,8 +23,11 @@ class TestDownParams
     public function invalid(int $requiredParam) : void { }
 }
 
-class TestDownConstructor
+class TestDownConstructDestruct
 {
     <<TearDown>>
     public function __construct() { }
+
+    <<TearDown>>
+    public function __destruct() { }
 }
