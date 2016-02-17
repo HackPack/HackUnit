@@ -14,21 +14,25 @@ final class HackUnit
          */
         $testReporter = new Test\Reporter();
 
-        $suiteBuilder = (\ReflectionClass $c) ==> {
-            return new Test\Suite($c, class_meth(Test\TestCase::class, 'build'));
-        };
+        $suiteBuilder = new Test\SuiteBuilder(($className, $fileName) ==> new Test\Parser($className, $fileName));
+        $suiteBuilder->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
 
         $testLoader = new Test\Loader(
-            $suiteBuilder,
+            $class ==> $suiteBuilder->buildSuites($class),
             $options->includes->toSet(),
             $options->excludes->toSet(),
         );
-        $testLoader->onMalformedSuite(inst_meth($testReporter, 'reportMalformedSuite'));
 
         /*
          * Register events with the runner
          */
         $testRunner = new Test\Runner(class_meth(Assert::class, 'build'));
+
+        // Identify the package before running tests
+        $testRunner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
+
+        // Start timing after identification
+        $testRunner->onRunStart(inst_meth($testReporter, 'startTiming'));
 
         // Allow us to set the exit code
         $testRunner->onFailure($event ==> {self::$failures = true;});
@@ -39,12 +43,6 @@ final class HackUnit
         $testRunner->onSuccess(inst_meth($testReporter, 'reportSuccess'));
         $testRunner->onPass(inst_meth($testReporter, 'reportPass'));
         $testRunner->onUncaughtException(inst_meth($testReporter, 'reportUntestedException'));
-
-        // Identify the package before running tests
-        $testRunner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
-
-        // Start timing after identification
-        $testRunner->onRunStart(inst_meth($testReporter, 'startTiming'));
 
         // Stop timing after tests
         $testRunner->onRunEnd(inst_meth($testReporter, 'displaySummary'));

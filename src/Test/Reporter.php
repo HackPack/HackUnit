@@ -16,6 +16,7 @@ class Reporter
     private Vector<Failure> $failEvents = Vector{};
     private Vector<Skip> $skipEvents = Vector{};
     private Vector<MalformedSuite> $malformedEvents = Vector{};
+    private Vector<\Exception> $untestedExceptions = Vector{};
 
     private int $assertCount = 0;
     private int $successCount = 0;
@@ -71,14 +72,26 @@ class Reporter
 
     public function reportUntestedException(\Exception $e) : void
     {
-        $message = 'Fatal exception thrown in ' . $e->getFile() . ' on line ' . $e->getLine() . '.';
+        $this->untestedExceptions->add($e);
+    }
 
-        $this->line(PHP_EOL);
-        $this->line($message);
-        $this->line('Exception message:');
-        $this->line($e->getMessage());
-        $this->line('Trace:');
-        $this->line($e->getTraceAsString());
+    public function untestedExceptionReport() : string
+    {
+        $entries = Vector{};
+        foreach($this->untestedExceptions as $e) {
+
+            $message = 'Fatal exception thrown in ' . $e->getFile() . ' on line ' . $e->getLine() . '.';
+
+            $entries->add(implode(PHP_EOL, [
+                $message,
+                'Exception message:',
+                $e->getMessage(),
+                'Trace:',
+                $e->getTraceAsString(),
+            ]));
+        }
+
+        return PHP_EOL . implode(PHP_EOL, $entries) . PHP_EOL;
     }
 
     public function reportMalformedSuite(MalformedSuite $event) : void
@@ -95,6 +108,7 @@ class Reporter
         $this->show($this->malformedReport());
         $this->show($this->skipReport());
         $this->show($this->errorReport());
+        $this->show($this->untestedExceptionReport());
     }
 
     public function testSummary() : string
@@ -123,7 +137,8 @@ class Reporter
         return PHP_EOL . 'Skipped tests:' . PHP_EOL .
             implode(PHP_EOL . PHP_EOL, $this->skipEvents->mapWithKey(($idx, $e) ==> {
                 return implode(PHP_EOL, [
-                    ($idx + 1) . ') ' . $this->buildMethodCall($e->callSite()),
+                    '-*-*-*- Test Skip ' . ($idx + 1) . ' -*-*-*-',
+                    $this->buildMethodCall($e->callSite()),
                     '  In file ' . $e->callSite()['file'],
                     $e->message(),
                 ]);
@@ -145,7 +160,8 @@ class Reporter
             $testMethod = $this->buildMethodCall($testTraceItem);
             $report .= implode(PHP_EOL,[
                 '',
-                ($idx + 1) . ' Test failure - ' . $testMethod,
+                '-*-*-*- Test Failure ' . ($idx + 1) . ' -*-*-*-',
+                'Test failure - ' . $testMethod,
                 'Assertion failed in ' . $assertionCall,
                 'On line ' . $assertionTraceItem['line'] . ' of ' . $assertionTraceItem['file'],
                 $e->getMessage(),
@@ -177,7 +193,8 @@ class Reporter
         foreach($this->malformedEvents as $idx => $event) {
             $report .= implode(PHP_EOL,[
                 PHP_EOL,
-                ($idx + 1) . ') ' . $this->buildMethodCall($event->traceItem()),
+                '-*-*-*- Malformed Error ' . ($idx + 1) . ' -*-*-*-',
+                $this->buildMethodCall($event->traceItem()),
                 $this->buildLineReference($event->traceItem()),
                 $event->message(),
             ]);

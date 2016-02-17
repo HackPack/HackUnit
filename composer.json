@@ -17,9 +17,15 @@
         }
     ],
     "minimum-stability" : "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/kilahm/definitions-finder"
+        }
+    ],
     "require": {
         "hhvm": "^3.10.0",
-        "fredemmott/definition-finder": "dev-master as 0.3.6",
+        "fredemmott/definition-finder": "dev-feature/allow-use-statements as 0.3.6",
         "hhvm/asio-utilities": "^2.0"
     },
     "autoload": {

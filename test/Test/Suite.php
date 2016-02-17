@@ -3,261 +3,223 @@
 namespace HackPack\HackUnit\Tests\Test;
 
 use HackPack\HackUnit\Contract\Assert;
+use HackPack\HackUnit\Event\Interruption;
+use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Test\Suite;
-use HackPack\HackUnit\Tests\Mocks\Test\TestCase;
-use HackPack\HackUnit\Tests\Fixtures\SpySuite;
-use HackPack\HackUnit\Tests\Fixtures\RunCounts;
+use HackPack\HackUnit\Test\Test as TestShape;
+use HackPack\HackUnit\Test\InvokerWithParams;
+use HackPack\HackUnit\Util\Trace;
+use HackPack\HackUnit\Util\TraceItem;
+use HH\Asio;
 
 class SuiteTest
 {
-    private Suite $suite;
-    private Vector<TestCase> $testCases = Vector{};
-    private \ReflectionClass $mirror;
+    private int $factoryRuns = 0;
+    private int $suiteUpRuns = 0;
+    private int $suiteDownRuns = 0;
+    private int $testUpRuns = 0;
+    private int $testDownRuns = 0;
+    private int $testRuns = 0;
+    private int $passedEvents = 0;
+    private Vector<Skip> $skipEvents = Vector{};
+
+    private (function():Awaitable<mixed>) $factory;
+    private TraceItem $traceItem;
 
     public function __construct()
     {
-        $this->mirror = new \ReflectionClass(SpySuite::class);
-        $this->suite = $this->buildSuite();
-    }
-
-    <<Setup>>
-    public function resetCounts() : void
-    {
-        $this->testCases->clear();
-        SpySuite::resetCounts();
-        $this->suite = $this->buildSuite();
-    }
-
-    public function testCaseBuilder(
-        (function(Assert):Awaitable<void>) $test,
-        Vector<(function():Awaitable<void>)> $setup,
-        Vector<(function():Awaitable<void>)> $teardown,
-    ) : TestCase
-    {
-        $case = new TestCase();
-        $case->setup->addAll($setup);
-        $case->teardown->addAll($teardown);
-        $this->testCases->add($case);
-        return $case;
-    }
-
-    private function buildSuite() : Suite
-    {
-        return new Suite($this->mirror, inst_meth($this, 'testCaseBuilder'));
-    }
-
-    private function buildSuiteSetup() : \ReflectionMethod
-    {
-        return $this->mirror->getMethod('suiteUp');
-    }
-
-    private function buildSuiteTeardown() : \ReflectionMethod
-    {
-        return $this->mirror->getMethod('suiteDown');
-    }
-
-    private function buildTestSetup() : \ReflectionMethod
-    {
-        return $this->mirror->getMethod('setup');
-    }
-
-    private function buildTestTeardown() : \ReflectionMethod
-    {
-        return $this->mirror->getMethod('teardown');
-    }
-
-    private function buildTestMethod() : \ReflectionMethod
-    {
-        return $this->mirror->getMethod('test');
+        $this->factory = async () ==> {$this->factoryRuns++; return $this;};
+        $this->traceItem = Trace::buildItem([]);
     }
 
     <<Test>>
-    public function suiteGivesBuiltTestCases(Assert $assert) : void
+    public function suiteTests(Assert $assert) : void
     {
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        $cases = $this->suite->testCases();
+        foreach(range(0, 3) as $thirdTestCount) {
 
-        // Ensure 2 cases were built
-        $assert->int($this->testCases->count())->eq(2);
-        // Ensure 2 cases were returned
-        $assert->int($cases->count())->eq(2);
-
-        // Ensure the cases returned are the ones built
-        foreach($this->testCases as $idx => $case) {
-            $assert->mixed($cases->at($idx))
-                ->identicalTo($case);
+            $tests = Vector{};
+            for($i = 0; $i < $thirdTestCount; $i++) {
+                $tests->add($this->makeInterruptedTest($assert));
+                $tests->add($this->makeSkippedTest($assert));
+                $tests->add($this->makePassingTest($assert));
+            }
+            $this->runTests($assert, $tests);
         }
     }
 
-    <<Test>>
-    public function testCasesAreNotRun(Assert $assert) : void
+    private function runTests(Assert $assert, Vector<TestShape> $tests) : void
     {
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        $this->suite->testCases()->at(0);
+        $thirdTestCount = (int)floor($tests->count() / 3);
 
-        $cases = $this->suite->testCases();
+        foreach(range(0, 2) as $upDownCount) {
+            $suite = new Suite(
+                $tests,
+                $this->repeat($upDownCount, $this->makeSuiteUp($assert)),
+                $this->repeat($upDownCount, $this->makeSuiteDown($assert)),
+                $this->repeat($upDownCount, $this->makeTestUp($assert)),
+                $this->repeat($upDownCount, $this->makeTestDown($assert)),
+            );
 
-        $expectedCounts = shape(
-            'test up' => 0,
-            'test down' => 0,
-            'suite up' => 0,
-            'suite down' => 0,
-            'test' => 0,
-        );
-        $assert->mixed($this->testCases->at(0)->assert)->isNull();
-        TestRunCounter::verifyRunCounts(SpySuite::$counts, $expectedCounts, $assert);
-    }
+            $this->runSuite($suite);
 
-    <<Test>>
-    public function setupMethodsArePassedToTestCase(Assert $assert) : void
-    {
-        // Test added before setup
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        $this->suite->registerTestSetup($this->buildTestSetup());
-        // Test added after setup
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        // Setup added after second test
-        $this->suite->registerTestSetup($this->buildTestSetup());
+            // Skipped tests shouldn't run the factory
+            $assert->int($this->factoryRuns)->eq(2 * $thirdTestCount);
 
-        // Generate the test cases
-        $this->suite->testCases();
+            // Skipped tests shouldn't be run
+            $assert->int($this->testRuns)->eq(2 * $thirdTestCount);
 
-        // Each test case should get both setup methods
-        $case1 = $this->testCases->at(0);
-        $case2 = $this->testCases->at(1);
+            // Interrupted and skipped tests shouldn't be passed
+            $assert->int($this->passedEvents)->eq($thirdTestCount);
 
-        $assert->int($case1->setup->count())->eq(2);
-        $assert->int($case2->setup->count())->eq(2);
+            // Make sure the skip event is triggered for skipped tests
+            $assert->int($this->skipEvents->count())->eq($thirdTestCount);
 
-        // The setup methods should be identical
-        foreach($case1->setup as $idx => $setup) {
-            $assert->mixed($setup)
-                ->identicalTo($case2->setup->at($idx));
+            // Make sure the test trace item is passed to the skip event
+            if($thirdTestCount > 0) {
+                $event = $this->skipEvents->at(0);
+                $assert->mixed($event->callSite())->identicalTo($this->traceItem);
+            }
+
+            // Test up/down should not run skipped tests, should run for interrupted tests
+            $assert->int($this->testUpRuns)->eq(2 * $thirdTestCount * $upDownCount);
+            $assert->int($this->testDownRuns)->eq(2 * $thirdTestCount * $upDownCount);
+
+            // Running shouldn't trigger suite up/down
+            $assert->int($this->suiteUpRuns)->eq(0);
+            $assert->int($this->suiteDownRuns)->eq(0);
+
+            // Should be independent of test count, and only ups are run
+            Asio\join($suite->up());
+            $assert->int($this->suiteUpRuns)->eq($upDownCount);
+            $assert->int($this->suiteDownRuns)->eq(0);
+
+            // Should be independent of test count, and only downs are run
+            Asio\join($suite->down());
+            $assert->int($this->suiteUpRuns)->eq($upDownCount);
+            $assert->int($this->suiteDownRuns)->eq($upDownCount);
+
+            $this->resetCounts();
         }
+    }
 
-        // Make sure the passed in reflection methods are called
-        $setup1 = $case1->setup->at(0);
-        $setup2 = $case1->setup->at(1);
+    private function resetCounts() : void
+    {
+        $this->factoryRuns = 0;
+        $this->suiteUpRuns = 0;
+        $this->suiteDownRuns = 0;
+        $this->testUpRuns = 0;
+        $this->testDownRuns = 0;
+        $this->testRuns = 0;
+        $this->passedEvents = 0;
+        $this->skipEvents->clear();
+    }
 
-        \HH\Asio\join($setup1());
-        $expectedCounts = shape(
-            'test up' => 1,
-            'test down' => 0,
-            'suite up' => 0,
-            'suite down' => 0,
-            'test' => 0,
-        );
-        TestRunCounter::verifyRunCounts(
-            SpySuite::$counts,
-            $expectedCounts,
-            $assert,
-        );
+    private function repeat<T>(int $count, T $item) : Vector<T>
+    {
+        $list = Vector{};
+        $list->resize($count, $item);
+        return $list;
+    }
 
-        \HH\Asio\join($setup2());
-        $expectedCounts['test up'] = 2;
-        TestRunCounter::verifyRunCounts(
-            SpySuite::$counts,
-            $expectedCounts,
-            $assert,
+    private function makeTestMethod(Assert $assert) : InvokerWithParams
+    {
+        return async ($instance, $args) ==> {
+            $assert->mixed($instance)->identicalTo($this);
+            $assert->int(count($args))->eq(1);
+            $assert->mixed($args[0])->isTypeOf(Assert::class);
+            $this->testRuns++;
+        };
+    }
+
+    private function makePassingTest(Assert $assert) : TestShape
+    {
+        return shape(
+            'factory' => $this->factory,
+            'method' => $this->makeTestMethod($assert),
+            'trace item' => $this->traceItem,
+            'skip' => false,
         );
     }
 
-    <<Test>>
-    public function teardownMethodsArePassedToTestCase(Assert $assert) : void
+    private function makeSkippedTest(Assert $assert) : TestShape
     {
-        // Test added before teardown
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        $this->suite->registerTestTeardown($this->buildTestTeardown());
-        // Test added after teardown
-        $this->suite->registerTestMethod($this->buildTestMethod());
-        // teardown added after second test
-        $this->suite->registerTestTeardown($this->buildTestTeardown());
-
-        // Generate the test cases
-        $this->suite->testCases();
-
-        // Each test case should get both teardown methods
-        $case1 = $this->testCases->at(0);
-        $case2 = $this->testCases->at(1);
-
-        $assert->int($case1->teardown->count())->eq(2);
-        $assert->int($case2->teardown->count())->eq(2);
-
-        // The teardown methods should be identical
-        foreach($case1->teardown as $idx => $teardown) {
-            $assert->mixed($teardown)
-                ->identicalTo($case2->teardown->at($idx));
-        }
-
-        // Make sure the passed in reflection methods are called
-        $teardown1 = $case1->teardown->at(0);
-        $teardown2 = $case1->teardown->at(1);
-
-        \HH\Asio\join($teardown1());
-        $expectedCounts = shape(
-            'test up' => 0,
-            'test down' => 1,
-            'suite up' => 0,
-            'suite down' => 0,
-            'test' => 0,
-        );
-        TestRunCounter::verifyRunCounts(
-            SpySuite::$counts,
-            $expectedCounts,
-            $assert,
-        );
-
-        \HH\Asio\join($teardown2());
-        $expectedCounts['test down'] = 2;
-        TestRunCounter::verifyRunCounts(
-            SpySuite::$counts,
-            $expectedCounts,
-            $assert,
+        return shape(
+            'factory' => $this->factory,
+            'method' => $this->makeTestMethod($assert),
+            'trace item' => $this->traceItem,
+            'skip' => true,
         );
     }
 
-    <<Test>>
-    public function suiteSetupMethodsAreRegistered(Assert $assert) : void
+    private function makeInterruptedTest(Assert $assert) : TestShape
     {
-        $this->suite->registerSuiteSetup($this->buildSuiteSetup());
-        $cases = $this->suite->testCases();
-        $assert->int($cases->count())->eq(0);
-
-        \HH\Asio\join($this->suite->setup());
-        $expectedCounts = shape(
-            'test up' => 0,
-            'test down' => 0,
-            'suite up' => 1,
-            'suite down' => 0,
-            'test' => 0,
-        );
-        TestRunCounter::verifyRunCounts(
-            SpySuite::$counts,
-            $expectedCounts,
-            $assert,
+        return shape(
+            'factory' => $this->factory,
+            'method' => async ($instance, $args) ==> {
+                $this->testRuns++;
+                throw new Interruption();
+            },
+            'trace item' => $this->traceItem,
+            'skip' => false,
         );
     }
 
-    <<Test>>
-    public function suiteTeardownMethodsAreRegistered(Assert $assert) : void
+    private function makeSuiteUp(Assert $assert) : InvokerWithParams
     {
-        $this->suite->registerSuiteTeardown($this->buildSuiteTeardown());
-        $cases = $this->suite->testCases();
-        $assert->int($cases->count())->eq(0);
+        return async ($instance, $params) ==> {
+            $this->suiteUpRuns++;
+            // All suite up methods are static, so no instance should be passed
+            $assert->mixed($instance)->isNull();
+        };
+    }
 
-        \HH\Asio\join($this->suite->teardown());
-        $expectedCounts = shape(
-            'test up' => 0,
-            'test down' => 0,
-            'suite up' => 0,
-            'suite down' => 1,
-            'test' => 0,
+    private function makeSuiteDown(Assert $assert) : InvokerWithParams
+    {
+        return async ($instance, $params) ==> {
+            $this->suiteDownRuns++;
+            // All suite down methods are static, so no instance should be passed
+            $assert->mixed($instance)->isNull();
+        };
+    }
+
+    private function makeTestUp(Assert $assert) : InvokerWithParams
+    {
+        return async ($instance, $params) ==> {
+            $this->testUpRuns++;
+            // The test factories all return $this.  Ensure it is passed to the test up methods.
+            $assert->mixed($instance)->identicalTo($this);
+        };
+    }
+
+    private function makeTestDown(Assert $assert) : InvokerWithParams
+    {
+        return async ($instance, $params) ==> {
+            $this->testDownRuns++;
+            // The test factories all return $this.  Ensure it is passed to the test up methods.
+            $assert->mixed($instance)->identicalTo($this);
+        };
+    }
+
+    private function runSuite(Suite $suite) : void
+    {
+        Asio\join(
+            $suite->run(
+                $this->makeAssert(),
+                () ==> {$this->passedEvents++;},
+            )
         );
-        TestRunCounter::verifyRunCounts(
-            SpySuite::$counts,
-            $expectedCounts,
-            $assert,
+    }
+
+    private function makeAssert() : Assert
+    {
+        $skipListener = ($skipEvent) ==> {
+            $this->skipEvents->add($skipEvent);
+        };
+
+        return new \HackPack\HackUnit\Assert(
+            Vector{},
+            Vector{$skipListener},
+            Vector{},
         );
     }
 }

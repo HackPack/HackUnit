@@ -4,105 +4,63 @@ namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\TestCase;
+use HackPack\HackUnit\Event\Interruption;
 use HackPack\HackUnit\Util\Trace;
+use HackPack\HackUnit\Util\TraceItem;
+use HH\Asio;
+
+type Test = shape(
+    'factory' => (function():Awaitable<mixed>),
+    'method' => InvokerWithParams,
+    'trace item' => TraceItem,
+    'skip' => bool,
+);
 
 class Suite implements \HackPack\HackUnit\Contract\Test\Suite
 {
-    private Vector<(function():Awaitable<void>)> $suiteup = Vector{};
-    private Vector<(function():Awaitable<void>)> $suitedown = Vector{};
-    private Vector<(function():Awaitable<void>)> $testup = Vector{};
-    private Vector<(function():Awaitable<void>)> $testdown = Vector{};
-    private Vector<\ReflectionMethod> $testMethods = Vector{};
-    private bool $skip;
-    private mixed $instance;
 
     public function __construct(
-        \ReflectionClass $mirror,
-        private (function(
-            (function(Assert):Awaitable<void>),
-            Vector<(function():Awaitable<void>)>,
-            Vector<(function():Awaitable<void>)>,
-        ) : TestCase) $caseBuilder,
+        private \ConstVector<Test> $tests = Vector{},
+        private \ConstVector<InvokerWithParams> $suiteup = Vector{},
+        private \ConstVector<InvokerWithParams> $suitedown = Vector{},
+        private \ConstVector<InvokerWithParams> $testup = Vector{},
+        private \ConstVector<InvokerWithParams> $testdown = Vector{},
     )
     {
-        $this->skip = $mirror->getAttribute('Skip') !== null;
-        $this->instance = $mirror->newInstance();
     }
 
-    public function registerSuiteSetup(\ReflectionMethod $method) : void
+    public async function run(Assert $assert, (function():void) $testPassed) : Awaitable<void>
     {
-        $this->suiteup->add(async () ==> {
-            $result = $method->invoke($this->instance);
-            if($method->isAsync()) {
-                 await $result;
+        await Asio\v($this->tests->map(async ($test) ==> {
+
+            if($test['skip']) {
+                $assert->skip('Test marked <<Skip>>', $test['trace item']);
+                return;
             }
-        });
-    }
 
-    public function registerSuiteTeardown(\ReflectionMethod $method) : void
-    {
-        $this->suitedown->add(async () ==> {
-            $result = $method->invoke($this->instance);
-            if($method->isAsync()) {
-                 await $result;
+            $instance = await $test['factory']();
+            await Asio\v($this->testup->map($pretest ==> $pretest($instance, [])));
+
+            try{
+                await $test['method']($instance, [$assert]);
+                $testPassed();
+            } catch (Interruption $e) {
+                // any listeners should have been notified by now
             }
-        });
+
+            await Asio\v($this->testdown->map($posttest ==> $posttest($instance, [])));
+        }));
     }
 
-    public function registerTestSetup(\ReflectionMethod $method) : void
+
+    public async function up() : Awaitable<void>
     {
-        $this->testup->add(async () ==> {
-            $result = $method->invoke($this->instance);
-            if($method->isAsync()) {
-                 await $result;
-            }
-        });
+        await \HH\Asio\v($this->suiteup->map($f ==> $f(null, [])));
     }
 
-    public function registerTestTeardown(\ReflectionMethod $method) : void
+    public async function down() : Awaitable<void>
     {
-        $this->testdown->add(async () ==> {
-            $result = $method->invoke($this->instance);
-            if($method->isAsync()) {
-                 await $result;
-            }
-        });
-    }
-
-    public function registerTestMethod(\ReflectionMethod $testMethod) : void
-    {
-        $this->testMethods->add($testMethod);
-    }
-
-    public async function setup() : Awaitable<void>
-    {
-        await \HH\Asio\v($this->suiteup->map($f ==> $f()));
-    }
-
-    public async function teardown() : Awaitable<void>
-    {
-        await \HH\Asio\v($this->suitedown->map($f ==> $f()));
-    }
-
-    public function testCases() : Vector<TestCase>
-    {
-        return $this->testMethods->map($m ==> {
-            if($this->skip) {
-                $test = $this->buildSkipTest($m, 'Suite marked skip.');
-            } elseif($m->getAttribute('Skip') !== null) {
-                $test = $this->buildSkipTest($m, 'Test marked skip.');
-            } else {
-                $test = async (Assert $a) ==> {
-                    if($m->isAsync()) {
-                        await $m->invoke($this->instance, $a);
-                    } else {
-                        $m->invoke($this->instance, $a);
-                    }
-                };
-            }
-            $builder = $this->caseBuilder;
-            return $builder($test, $this->testup, $this->testdown);
-        });
+        await \HH\Asio\v($this->suitedown->map($f ==> $f(null, [])));
     }
 
     private function buildSkipTest(\ReflectionMethod $m, string $reason) : (function(Assert):Awaitable<void>)

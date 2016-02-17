@@ -2,6 +2,8 @@
 
 namespace HackPack\HackUnit\Util;
 
+use FredEmmott\DefinitionFinder\ScannedBasicClass;
+use FredEmmott\DefinitionFinder\ScannedMethod;
 use HackPack\HackUnit\Contract\Assertion\Assertion;
 
 type TraceItem = shape(
@@ -13,6 +15,35 @@ type TraceItem = shape(
 
 class Trace
 {
+    public static function fromScannedMethod(ScannedBasicClass $class, ScannedMethod $method) : TraceItem
+    {
+        return self::buildItem([
+            'line' => Shapes::idx($method->getPosition(), 'line'),
+            'class' => $class->getName(),
+            'file' => $method->getFileName(),
+            'function' => $method->getName(),
+        ]);
+    }
+
+    public static function fromReflectionClass(\ReflectionClass $classMirror) : TraceItem
+    {
+        return self::buildItem([
+            'line' => $classMirror->getStartLine(),
+            'class' => $classMirror->getName(),
+            'file' => $classMirror->getFileName(),
+        ]);
+    }
+
+    public static function fromReflectionMethod(\ReflectionMethod $methodMirror) : TraceItem
+    {
+        return self::buildItem([
+            'line' => $methodMirror->getStartLine(),
+            'function' => $methodMirror->name,
+            'class' => $methodMirror->class,
+            'file' => $methodMirror->getFileName(),
+        ]);
+    }
+
     public static function generate() : Vector<TraceItem>
     {
         return self::convert(

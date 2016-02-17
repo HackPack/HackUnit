@@ -2,10 +2,19 @@
 
 namespace HackPack\HackUnit\Event;
 
+use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
-class Skip
+final class Skip
 {
+    public static function fromCallStack(string $message) : this
+    {
+        return new static(
+            $message,
+            Trace::findTestMethod(),
+        );
+    }
+
     public function __construct(private string $reason, private TraceItem $callSite)
     {
     }

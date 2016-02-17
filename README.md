@@ -1,10 +1,10 @@
 HackUnit
 ========
 
-xUnit testing framework written in and for Facebook's language, [Hack](http://hacklang.org)
+Testing framework written in and for Facebook's language, [Hack.](http://hacklang.org)
 
-###But Why?!###
-There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat](http://behat.org).  Why should you use this one?
+### But Why?!
+There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat.](http://behat.org)  Why should you use this one?
 
 *Because you like Hack specific features!*
 
@@ -18,7 +18,7 @@ Install
 Install HackUnit using [Composer](https://getcomposer.org):
 
 ```bash
-composer require hackpack/hackunit
+composer require --dev hackpack/hackunit
 ```
 
 Usage
@@ -29,93 +29,19 @@ Thus, the most common way to invoke HackUnit is:
 ```bash
 vendor/bin/hackunit path1 [path2] ...
 ```
-where `path1`, `path2`, etc... are each base paths/files to scan for test suites.
+where `path1`, `path2`, etc... are each base paths/files to scan for test suites.  If any specified path is a directory, the directory will be recursively scanned.
 
 Some command line options exist to alter the behavior of HackUnit:
 
-* --exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files. 
+* --exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files.
 
 Test Suites
 -----------
 To define a test suite, create a class and [annotate](http://docs.hhvm.com/manual/en/hack.attributes.php) the appropriate methods.
-All methods annotated as described below must be instance methods (non-static), and may not be the constructor, nor the destructor.
-
-For now, the constructor of a test suite MUST accept exactly 0 parameters.
 
 You may inspect HackUnit’s test files for concrete examples.
 
-###Setup###
-You may have HackUnit run some methods before each individual test method is run and/or before any test method is
-run for the suite.  To do so, mark the appropriate method with the
-`<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
-Multiple setup methods may be declared, but the execution order is not guaranteed.
-
-Each setup method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as setup and it requires a parameter, it will not be executed.
-
-```php
-class MySuite
-{
-    <<Setup(‘suite’)>>
-    public function setUpSuite() : void
-    {
-      // Perform tasks before any tests in this suite are run
-    }
-
-    <<Setup(‘test’)>>
-    public function setUpTest() : void
-    {
-      // Perform tasks just before each test in this suite is run
-    }
-
-    <<Setup>>
-    public function setUpTest() : void
-    {
-      // Multiple set up methods may be defined
-      // If there are no parameters to the stup attribute, the method is treated like a test setup
-    }
-}
-```
-
-Suite setup methods are run once, before any of the test methods in the class are run.
-
-Test setup methods are run just before each test method is run (and thus are potentially run multiple times).
-
-###Teardown###
-You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
-run for the suite.  To do so, mark the appropriate method with the
-`<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
-Multiple teardown methods may be declared, but the execution order is not guaranteed.
-
-Each teardown method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as teardown and it requires a parameter, it will not be executed.
-
-```php
-class MySuite
-{
-    <<TearDown(‘suite’)>>
-    public function cleanUpAfterSuite() : void
-    {
-      // Perform tasks after all tests in this suite are run
-    }
-
-    <<TearDown(‘test’)>>
-    public function cleanUpAfterTest() : void
-    {
-      // Perform tasks just after each test in this suite is run
-    }
-
-    <<TearDown>>
-    public function cleanUpMoarStuff() : void
-    {
-      // This is also a ‘test’ teardown method
-    }
-}
-```
-
-Suite tear down methods are run once, after all of the test methods in the class are run.
-
-Test tear down methods are run just after each test method is run (and thus are potentially run multiple times).
-
-###Tests###
+### Tests
 
 Individual test methods are defined using the
 `<<Test>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
@@ -123,6 +49,8 @@ Execution order of the tests is not guaranteed.
 
 Each test method MUST accept exactly 1 parameter, with the type hint of `HackPack\HackUnit\Contract\Assert`.
 If you mark a method as a test and the signature does not match, the test will not be run.
+
+Test methods may be instance methods, or they may be class (static) methods.
 
 ```php
 namespace My\Namespace\Test;
@@ -144,7 +72,7 @@ class MySuite
 }
 ```
 
-###Async###
+### Async
 
 Running your tests async is as easy as adding the async keyword to your test method.
 
@@ -169,8 +97,126 @@ class MyAsyncSuite
 }
 ```
 
-All such `async` tests are run in "parallel" (see the [async documentation](http://docs.hhvm.com/hack/async/introduction)), allowing your entire test suite to run faster, especially
-if your tests perform real I/O operations (DB calls, curl calls, etc...)
+All such `async` tests are run using cooperative multitasking (see the [async documentation](http://docs.hhvm.com/hack/async/introduction)),
+allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, curl calls, etc...).
+
+
+### Setup
+
+You may have HackUnit run some methods before each individual test method is run and/or before any test method is
+run for the suite.  To do so, mark the appropriate method with the
+`<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
+Multiple setup methods may be declared, but the execution order is not guaranteed.
+
+Each setup method (both suite and test) MUST require exactly 0 parameters.
+If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.
+
+```php
+class MySuite
+{
+    <<Setup(‘suite’)>>
+    public function setUpSuite() : void
+    {
+      // Suite level Setup methods must be class (static) methods
+      // Perform tasks before any tests in this suite are run
+    }
+
+    <<Setup(‘test’)>>
+    public function setUpTest() : void
+    {
+      // Perform tasks just before each test in this suite is run
+    }
+
+    <<Setup>>
+    public function setUpTest() : void
+    {
+      // Multiple set up methods may be defined
+      // If there are no parameters to the setup attribute, the method is treated like a test setup
+    }
+}
+```
+
+Suite setup methods are run once, before any of the test methods in the class are run.
+
+Test setup methods are run just before each test method is run (and thus are potentially run multiple times).
+
+### Teardown
+You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
+run for the suite.  To do so, mark the appropriate method with the
+`<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
+Multiple teardown methods may be declared, but the execution order is not guaranteed.
+
+Each teardown method (both suite and test) MUST require exactly 0 parameters.
+If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.
+
+```php
+class MySuite
+{
+    <<TearDown(‘suite’)>>
+    public static function cleanUpAfterSuite() : void
+    {
+      // Suite level TearDown methods must be class (static) methods
+      // Perform tasks after all tests in this suite are run
+    }
+
+    <<TearDown(‘test’)>>
+    public function cleanUpAfterTest() : void
+    {
+      // Perform tasks just after each test in this suite is run
+    }
+
+    <<TearDown>>
+    public function cleanUpMoarStuff() : void
+    {
+      // This is also a ‘test’ teardown method
+    }
+}
+```
+
+Suite tear down methods are run once, after all of the test methods in the class are run.
+
+Test tear down methods are run just after each test method is run (and thus are potentially run multiple times).
+
+### Suite Providers
+Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider.
+A Suite Provider is marked with the `<<SuiteProvider>>` attribute.
+
+You may define multiple Suite Providers for a single test suite.  To do so, you must label each one
+by passing in one string parameter to the attribute (i.e., `<<SuiteProvider('name of provider')>>`).
+There are no restrictions on the name of a provider except that each provider name must be unique.
+
+To use a particular Suite Provider for a particular test, you must pass the name of the Suite Provider to the Test attribute.
+
+```
+class SuiteWithProviders
+{
+    <<SuiteProvider('One')>>
+    public static function() : this
+    {
+        $someDependency = new TestDoubleOne();
+        return new static($someDependency);
+    }
+
+    <<SuiteProvider('Two')>>
+    public static function() : this
+    {
+        $someDependency = new TestDoubleTwo();
+        return new static($someDependency);
+    }
+
+    <<Test('One')>>
+    public function testOne(Assert $assert) : void
+    {
+        // Do some assertions using TestDoubleOne
+    }
+
+    <<Test('Two')>>
+    public function testTwo(Assert $assert) : void
+    {
+        // Do some assertions using TestDoubleTwo
+    }
+}
+```
 
 Assertions
 ----------
@@ -180,11 +226,11 @@ This object is used to build assertions that will be checked and reported by Hac
 
 In all examples below, `$assert` contains an instance of `HackPack\HackUnit\Contract\Assert`.
 
-### Bool Assertions ###
+### Bool Assertions
 
 To make assertions about `bool` type variables, call `$assert->bool($myBool)->is($expected)`.
 
-### Numeric Assertions ###
+### Numeric Assertions
 
 To make assertions about `int` and `float` type variables, call `$assert->int($myInt)` and `$assert->float($myFloat)` respectively.
 The resulting object contains the following methods to actually perform the appropriate assertion.
@@ -203,7 +249,7 @@ All of the above may be modified with a call to `not()` before the assertion to 
 
 *Note*: This library only allows assertions to compare identical numeric types.  `$assert->int(1)->eq(1.0);` produces a type error.
 
-### String Assertions ###
+### String Assertions
 
 To make assertions about `string` type variables, call `$assert->string($myString)`.  The resulting object contains the following methods to actually perform the appropriate assertion.
 
@@ -219,7 +265,7 @@ All of the above assertions may be negated by calling `not()` before making the 
  $assert->string($myString)->not()->containedBy($superString);
 ```
 
-### Mixed Assertions ###
+### Mixed Assertions
 
 To make generic assertions about a variable of any type, call `$assert->mixed($context)`.  The resulting object contains the following methods to actually perform the appropriate assertion.
 
@@ -230,8 +276,8 @@ To make generic assertions about a variable of any type, call `$assert->mixed($c
 * `$assert->mixed($context)->isString();` : Assert that `$context` is of type `string`
 * `$assert->mixed($context)->isArray();` : Assert that `$context` is of type `array`
 * `$assert->mixed($context)->isObject();` : Assert that `$context` is of type `object`
-* `$assert->mixed($contect)->isTypeOf($className)` : Assert that `$context instanceof $className`  
-* `$assert->mixed($context)->looselyEquals($expected)` : Assert that `$context == $expected` *note the loose comparison* 
+* `$assert->mixed($contect)->isTypeOf($className)` : Assert that `$context instanceof $className`
+* `$assert->mixed($context)->looselyEquals($expected)` : Assert that `$context == $expected` *note the loose comparison*
 * `$assert->mixed($context)->identicalTo($expected)` : Assert that `$context === $expected` *note the strict comparison*
 
 Skipping Tests
@@ -271,27 +317,30 @@ class MySuite
 Future Plans
 ------------
 
-I would like to implement collection type assertions.  These may take the form of `$assert->map($myMap)->hasSameKeysAs($expectedMap);` or similar.  If you have suggestions for the types of assertions that could be made on collections, please open a ticket!
+I would like to implement collection type assertions.  These may take the form of `$assert->map($myMap)->hasSameKeysAs($expectedMap);` or similar.
+If you have suggestions for the types of assertions that could be made on collections, please open an issue!
 
 How HackUnit loads tests
 ------------------------
-All files inside the base path(s) specified from the command line will be scanned for class definitions using HackPack’s
-[Class Scanner](https://github.com/HackPack/HackClassScanner) library.  Those files will then be loaded and reflection is used to determine
+All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's
+[Definition Finder](https://github.com/fredemmott/definition-finder) library. Those files will then be loaded and reflection is used to determine
 which classes are test suites, and which methods perform each task in the suite.
 
-Strict mode all of the files!
+Thanks [Fred!](https://github.com/fredemmott)
+
+Strict mode all the files!
 -----------------------------
 
 Well... not quite.
 
 Top level code must use `// partial` mode, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
-The loader class must dynamically include test suite files.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
+Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
 of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
 one line.
 
 Running HackUnit's tests
 ------------------------
-From the project directory run:
+HackUnit is tested with HackUnit. From the project directory run:
 
 ```
 bin/hackunit test --exclude test/Fixtures/ --exclude test/Mocks/

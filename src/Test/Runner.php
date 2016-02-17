@@ -15,6 +15,7 @@ use HackPack\HackUnit\Event\SkipListener;
 use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Event\SuiteEndListener;
 use HackPack\HackUnit\Event\SuiteStartListener;
+use HH\Asio;
 
 class Runner implements \HackPack\HackUnit\Contract\Test\Runner
 {
@@ -47,12 +48,6 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
     public function onUncaughtException(ExceptionListener $l) : this
     {
         $this->exceptionListeners->add($l);
-        return $this;
-    }
-
-    public function onPass(PassListener $l) : this
-    {
-        $this->passListeners->add($l);
         return $this;
     }
 
@@ -92,6 +87,12 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
         return $this;
     }
 
+    public function onPass(PassListener $l) : this
+    {
+        $this->passListeners->add($l);
+        return $this;
+    }
+
     public function run(Vector<Suite> $suites) : void
     {
 
@@ -105,42 +106,36 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner
         });
         $this->emitRunStart();
 
-        $awaitable = \HH\Asio\v($suites->map(async ($s) ==> {
+        $builder = $this->assertBuilder;
 
-            try{
-                await $s->setup();
+        $awaitable = Asio\v(
+            $suites->map(async ($s) ==> {
                 $this->emitSuiteStart();
-                await $this->runSuite($s);
+                await $s->up();
+
+                await $s->run(
+                    $builder(
+                        $this->failureListeners,
+                        $this->skipListeners,
+                        $this->successListeners,
+                    ),
+                    () ==> {$this->emitPass();},
+                );
+
+                await $s->down();
                 $this->emitSuiteEnd();
-                await $s->teardown();
-            } catch (\Exception $e) {
-                $this->emitException($e);
+            })
+            ->map(fun('\HH\Asio\wrap'))
+        );
+
+        foreach(Asio\join($awaitable) as $result)
+        {
+            if($result->isFailed()) {
+                $this->emitException($result->getException());
             }
-
-        }));
-
-        \HH\Asio\join($awaitable);
+        }
 
         $this->emitRunEnd();
-    }
-
-    private async function runSuite(Suite $s) : Awaitable<void>
-    {
-        $builder = $this->assertBuilder;
-        await \HH\Asio\v($s->testCases()->map(async ($case) ==> {
-            await $case->setup();
-            try{
-                await $case->run($builder(
-                    $this->failureListeners,
-                    $this->skipListeners,
-                    $this->successListeners,
-                ));
-            } catch (Interruption $e) {
-                // Nothing to do anymore
-            }
-            await $case->teardown();
-            $this->emitPass();
-        }));
     }
 
     private function emitSuiteEnd() : void

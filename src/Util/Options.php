@@ -21,6 +21,9 @@ final class Options
         $arglist = new Vector($args);
         $arglist->reverse();
 
+        // first arg is always path to executable
+        $arglist->pop();
+
         $addPathToArray = ($path, $array) ==> {
             $realpath = realpath($path);
             if(is_string($realpath)) {
