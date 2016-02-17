@@ -1,10 +1,10 @@
 HackUnit
 ========
 
-xUnit testing framework written in and for Facebook's language, [Hack](http://hacklang.org)
+Testing framework written in and for Facebook's language, [Hack.](http://hacklang.org)
 
-###But Why?!###
-There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat](http://behat.org).  Why should you use this one?
+### But Why?!
+There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat.](http://behat.org)  Why should you use this one?
 
 *Because you like Hack specific features!*
 
@@ -18,7 +18,7 @@ Install
 Install HackUnit using [Composer](https://getcomposer.org):
 
 ```bash
-composer require hackpack/hackunit
+composer require --dev hackpack/hackunit
 ```
 
 Usage
@@ -41,7 +41,7 @@ To define a test suite, create a class and [annotate](http://docs.hhvm.com/manua
 
 You may inspect HackUnit’s test files for concrete examples.
 
-###Tests###
+### Tests
 
 Individual test methods are defined using the
 `<<Test>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
@@ -72,7 +72,7 @@ class MySuite
 }
 ```
 
-###Async###
+### Async
 
 Running your tests async is as easy as adding the async keyword to your test method.
 
@@ -101,14 +101,15 @@ All such `async` tests are run using cooperative multitasking (see the [async do
 allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, curl calls, etc...).
 
 
-###Setup###
+### Setup
 
 You may have HackUnit run some methods before each individual test method is run and/or before any test method is
 run for the suite.  To do so, mark the appropriate method with the
 `<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 Multiple setup methods may be declared, but the execution order is not guaranteed.
 
-Each setup method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as setup and it requires a parameter, it will not be executed.
+Each setup method (both suite and test) MUST require exactly 0 parameters.
+If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.
 
 ```php
 class MySuite
@@ -130,7 +131,7 @@ class MySuite
     public function setUpTest() : void
     {
       // Multiple set up methods may be defined
-      // If there are no parameters to the stup attribute, the method is treated like a test setup
+      // If there are no parameters to the setup attribute, the method is treated like a test setup
     }
 }
 ```
@@ -139,13 +140,14 @@ Suite setup methods are run once, before any of the test methods in the class ar
 
 Test setup methods are run just before each test method is run (and thus are potentially run multiple times).
 
-###Teardown###
+### Teardown
 You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
 run for the suite.  To do so, mark the appropriate method with the
 `<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
 Multiple teardown methods may be declared, but the execution order is not guaranteed.
 
-Each teardown method (both suite and test) MUST require exactly 0 parameters.  If you mark a method as teardown and it requires a parameter, it will not be executed.
+Each teardown method (both suite and test) MUST require exactly 0 parameters.
+If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.
 
 ```php
 class MySuite
@@ -175,10 +177,13 @@ Suite tear down methods are run once, after all of the test methods in the class
 
 Test tear down methods are run just after each test method is run (and thus are potentially run multiple times).
 
-###Suite Providers###
+### Suite Providers
 Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider.
-A Suite Provider is marked with the `<<SuiteProvider>>` attribute.  You may define multiple Suite Providers for a single test suite.  To do so, you must label each one
-by passing in one string parameter to the attribute (i.e., `<<SuiteProvider('name of provider')>>`). There are no restrictions on the name of a provider.
+A Suite Provider is marked with the `<<SuiteProvider>>` attribute.
+
+You may define multiple Suite Providers for a single test suite.  To do so, you must label each one
+by passing in one string parameter to the attribute (i.e., `<<SuiteProvider('name of provider')>>`).
+There are no restrictions on the name of a provider except that each provider name must be unique.
 
 To use a particular Suite Provider for a particular test, you must pass the name of the Suite Provider to the Test attribute.
 
@@ -221,11 +226,11 @@ This object is used to build assertions that will be checked and reported by Hac
 
 In all examples below, `$assert` contains an instance of `HackPack\HackUnit\Contract\Assert`.
 
-### Bool Assertions ###
+### Bool Assertions
 
 To make assertions about `bool` type variables, call `$assert->bool($myBool)->is($expected)`.
 
-### Numeric Assertions ###
+### Numeric Assertions
 
 To make assertions about `int` and `float` type variables, call `$assert->int($myInt)` and `$assert->float($myFloat)` respectively.
 The resulting object contains the following methods to actually perform the appropriate assertion.
@@ -244,7 +249,7 @@ All of the above may be modified with a call to `not()` before the assertion to 
 
 *Note*: This library only allows assertions to compare identical numeric types.  `$assert->int(1)->eq(1.0);` produces a type error.
 
-### String Assertions ###
+### String Assertions
 
 To make assertions about `string` type variables, call `$assert->string($myString)`.  The resulting object contains the following methods to actually perform the appropriate assertion.
 
@@ -260,7 +265,7 @@ All of the above assertions may be negated by calling `not()` before making the 
  $assert->string($myString)->not()->containedBy($superString);
 ```
 
-### Mixed Assertions ###
+### Mixed Assertions
 
 To make generic assertions about a variable of any type, call `$assert->mixed($context)`.  The resulting object contains the following methods to actually perform the appropriate assertion.
 
@@ -317,23 +322,25 @@ If you have suggestions for the types of assertions that could be made on collec
 
 How HackUnit loads tests
 ------------------------
-All files inside the base path(s) specified from the command line will be scanned for class definitions using HackPack’s
-[Class Scanner](https://github.com/HackPack/HackClassScanner) library.  Those files will then be loaded and reflection is used to determine
+All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's
+[Definition Finder](https://github.com/fredemmott/definition-finder) library. Those files will then be loaded and reflection is used to determine
 which classes are test suites, and which methods perform each task in the suite.
 
-Strict mode all of the files!
+Thanks [Fred!](https://github.com/fredemmott)
+
+Strict mode all the files!
 -----------------------------
 
 Well... not quite.
 
 Top level code must use `// partial` mode, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
-The loader class must dynamically include test suite files.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
+Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
 of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
 one line.
 
 Running HackUnit's tests
 ------------------------
-From the project directory run:
+HackUnit is tested with HackUnit. From the project directory run:
 
 ```
 bin/hackunit test --exclude test/Fixtures/ --exclude test/Mocks/
