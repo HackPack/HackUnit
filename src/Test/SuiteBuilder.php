@@ -41,6 +41,7 @@ final class SuiteBuilder
                 $suites->add(new SkippedSuite(
                     $scannedClass->getName(),
                     Trace::buildItem( [
+                        'line' => $pos['line'],
                         'class' => $scannedClass->getName(),
                         'file' => $pos['filename'],
                     ]),
