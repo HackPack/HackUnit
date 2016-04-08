@@ -2,5 +2,4 @@
 
 namespace HackPack\HackUnit\Exception;
 
-class InterruptTest extends \Exception
-{}
+class InterruptTest extends \Exception {}

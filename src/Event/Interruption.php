@@ -2,6 +2,4 @@
 
 namespace HackPack\HackUnit\Event;
 
-class Interruption extends \Exception
-{
-}
+class Interruption extends \Exception {}

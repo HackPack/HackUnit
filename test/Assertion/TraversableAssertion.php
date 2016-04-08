@@ -372,11 +372,11 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
     $assert->string($this->failEvents->at(0)->getMessage())
-      ->is('Traversable expected to contain ' . var_export('c', true));
+      ->is('Traversable expected to contain '.var_export('c', true));
   }
 
   <<Test>>
-  public function failsToNotContainOnly(Assert $assert):void{
+  public function failsToNotContainOnly(Assert $assert): void {
     $assertion = $this->makeAssertion(Vector {'a', 'b'});
 
     $assertion->not()->containsOnly(Vector {'b', 'a'});
@@ -386,7 +386,7 @@ class TraversableAssertionTest {
   }
 
   <<Test>>
-  public function isEmpty(Assert $assert):void{
+  public function isEmpty(Assert $assert): void {
     $assertion = $this->makeAssertion([]);
 
     $assertion->isEmpty();
@@ -396,7 +396,7 @@ class TraversableAssertionTest {
   }
 
   <<Test>>
-  public function isNotEmpty(Assert $assert):void{
+  public function isNotEmpty(Assert $assert): void {
     $assertion = $this->makeAssertion([1]);
 
     $assertion->not()->isEmpty();
@@ -404,9 +404,9 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(1);
     $assert->int($this->failEvents->count())->eq(0);
   }
-  
+
   <<Test>>
-  public function failsToBeEmpty(Assert $assert):void{
+  public function failsToBeEmpty(Assert $assert): void {
     $assertion = $this->makeAssertion([1]);
 
     $assertion->isEmpty();
@@ -416,7 +416,7 @@ class TraversableAssertionTest {
   }
 
   <<Test>>
-  public function failsToNotBeEmpty(Assert $assert):void{
+  public function failsToNotBeEmpty(Assert $assert): void {
     $assertion = $this->makeAssertion([]);
 
     $assertion->not()->isEmpty();

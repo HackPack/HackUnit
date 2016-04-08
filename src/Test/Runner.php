@@ -17,166 +17,152 @@ use HackPack\HackUnit\Event\SuiteEndListener;
 use HackPack\HackUnit\Event\SuiteStartListener;
 use HH\Asio;
 
-class Runner implements \HackPack\HackUnit\Contract\Test\Runner
-{
-    private Vector<ExceptionListener> $exceptionListeners = Vector{};
-    private Vector<FailureListener> $failureListeners = Vector{};
-    private Vector<PassListener> $passListeners = Vector{};
-    private Vector<RunEndListener> $runEndListeners = Vector{};
-    private Vector<RunStartListener> $runStartListeners = Vector{};
-    private Vector<SkipListener> $skipListeners = Vector{};
-    private Vector<SuccessListener> $successListeners = Vector{};
-    private Vector<SuiteEndListener> $suiteEndListeners = Vector{};
-    private Vector<SuiteStartListener> $suiteStartListeners = Vector{};
+class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
+  private Vector<ExceptionListener> $exceptionListeners = Vector {};
+  private Vector<FailureListener> $failureListeners = Vector {};
+  private Vector<PassListener> $passListeners = Vector {};
+  private Vector<RunEndListener> $runEndListeners = Vector {};
+  private Vector<RunStartListener> $runStartListeners = Vector {};
+  private Vector<SkipListener> $skipListeners = Vector {};
+  private Vector<SuccessListener> $successListeners = Vector {};
+  private Vector<SuiteEndListener> $suiteEndListeners = Vector {};
+  private Vector<SuiteStartListener> $suiteStartListeners = Vector {};
 
-    public function __construct(
-        private (function(
-            Vector<FailureListener>,
-            Vector<SkipListener>,
-            Vector<SuccessListener>,
-        ):Assert) $assertBuilder,
-    )
-    {
+  public function __construct(
+    private (function(Vector<FailureListener>,
+    Vector<SkipListener>,
+    Vector<SuccessListener>,
+    ): Assert) $assertBuilder,
+  ) {}
+
+  public function onFailure(FailureListener $l): this {
+    $this->failureListeners->add($l);
+    return $this;
+  }
+
+  public function onUncaughtException(ExceptionListener $l): this {
+    $this->exceptionListeners->add($l);
+    return $this;
+  }
+
+  public function onRunEnd(RunEndListener $l): this {
+    $this->runEndListeners->add($l);
+    return $this;
+  }
+
+  public function onRunStart(RunStartListener $l): this {
+    $this->runStartListeners->add($l);
+    return $this;
+  }
+
+  public function onSkip(SkipListener $l): this {
+    $this->skipListeners->add($l);
+    return $this;
+  }
+
+  public function onSuccess(SuccessListener $l): this {
+    $this->successListeners->add($l);
+    return $this;
+  }
+
+  public function onSuiteEnd(SuiteEndListener $l): this {
+    $this->suiteEndListeners->add($l);
+    return $this;
+  }
+
+  public function onSuiteStart(SuiteStartListener $l): this {
+    $this->suiteStartListeners->add($l);
+    return $this;
+  }
+
+  public function onPass(PassListener $l): this {
+    $this->passListeners->add($l);
+    return $this;
+  }
+
+  public function run(Vector<Suite> $suites): void {
+
+    // Throw an interruption after all other handlers
+    $this->failureListeners->add(
+      $failure ==> {
+        throw new Interruption();
+      },
+    );
+
+    $this->skipListeners->add(
+      $skip ==> {
+        throw new Interruption();
+      },
+    );
+    $this->emitRunStart();
+
+    $builder = $this->assertBuilder;
+
+    $awaitable = Asio\v(
+      $suites->map(
+        async ($s) ==> {
+          $this->emitSuiteStart();
+          await $s->up();
+
+          await $s->run(
+            $builder(
+              $this->failureListeners,
+              $this->skipListeners,
+              $this->successListeners,
+            ),
+            () ==> {
+              $this->emitPass();
+            },
+          );
+
+          await $s->down();
+          $this->emitSuiteEnd();
+        },
+      )->map(fun('\HH\Asio\wrap')),
+    );
+
+    foreach (Asio\join($awaitable) as $result) {
+      if ($result->isFailed()) {
+        $this->emitException($result->getException());
+      }
     }
 
-    public function onFailure(FailureListener $l) : this
-    {
-        $this->failureListeners->add($l);
-        return $this;
+    $this->emitRunEnd();
+  }
+
+  private function emitSuiteEnd(): void {
+    foreach ($this->suiteEndListeners as $l) {
+      $l();
     }
+  }
 
-    public function onUncaughtException(ExceptionListener $l) : this
-    {
-        $this->exceptionListeners->add($l);
-        return $this;
+  private function emitSuiteStart(): void {
+    foreach ($this->suiteStartListeners as $l) {
+      $l();
     }
+  }
 
-    public function onRunEnd(RunEndListener $l) : this
-    {
-        $this->runEndListeners->add($l);
-        return $this;
+  private function emitRunEnd(): void {
+    foreach ($this->runEndListeners as $l) {
+      $l();
     }
+  }
 
-    public function onRunStart(RunStartListener $l) : this
-    {
-        $this->runStartListeners->add($l);
-        return $this;
+  private function emitRunStart(): void {
+    foreach ($this->runStartListeners as $l) {
+      $l();
     }
+  }
 
-    public function onSkip(SkipListener $l) : this
-    {
-        $this->skipListeners->add($l);
-        return $this;
+  private function emitPass(): void {
+    foreach ($this->passListeners as $l) {
+      $l();
     }
+  }
 
-    public function onSuccess(SuccessListener $l) : this
-    {
-        $this->successListeners->add($l);
-        return $this;
+  private function emitException(\Exception $e): void {
+    foreach ($this->exceptionListeners as $l) {
+      $l($e);
     }
-
-    public function onSuiteEnd(SuiteEndListener $l) : this
-    {
-        $this->suiteEndListeners->add($l);
-        return $this;
-    }
-
-    public function onSuiteStart(SuiteStartListener $l) : this
-    {
-        $this->suiteStartListeners->add($l);
-        return $this;
-    }
-
-    public function onPass(PassListener $l) : this
-    {
-        $this->passListeners->add($l);
-        return $this;
-    }
-
-    public function run(Vector<Suite> $suites) : void
-    {
-
-        // Throw an interruption after all other handlers
-        $this->failureListeners->add($failure ==> {
-            throw new Interruption();
-        });
-
-        $this->skipListeners->add($skip ==> {
-            throw new Interruption();
-        });
-        $this->emitRunStart();
-
-        $builder = $this->assertBuilder;
-
-        $awaitable = Asio\v(
-            $suites->map(async ($s) ==> {
-                $this->emitSuiteStart();
-                await $s->up();
-
-                await $s->run(
-                    $builder(
-                        $this->failureListeners,
-                        $this->skipListeners,
-                        $this->successListeners,
-                    ),
-                    () ==> {$this->emitPass();},
-                );
-
-                await $s->down();
-                $this->emitSuiteEnd();
-            })
-            ->map(fun('\HH\Asio\wrap'))
-        );
-
-        foreach(Asio\join($awaitable) as $result)
-        {
-            if($result->isFailed()) {
-                $this->emitException($result->getException());
-            }
-        }
-
-        $this->emitRunEnd();
-    }
-
-    private function emitSuiteEnd() : void
-    {
-        foreach($this->suiteEndListeners as $l) {
-            $l();
-        }
-    }
-
-    private function emitSuiteStart() : void
-    {
-        foreach($this->suiteStartListeners as $l) {
-            $l();
-        }
-    }
-
-    private function emitRunEnd() : void
-    {
-        foreach($this->runEndListeners as $l) {
-            $l();
-        }
-    }
-
-    private function emitRunStart() : void
-    {
-        foreach($this->runStartListeners as $l) {
-            $l();
-        }
-    }
-
-    private function emitPass() : void
-    {
-        foreach($this->passListeners as $l) {
-            $l();
-        }
-    }
-
-    private function emitException(\Exception $e) : void
-    {
-        foreach($this->exceptionListeners as $l) {
-            $l($e);
-        }
-    }
+  }
 }

@@ -2,6 +2,4 @@
 
 namespace HackPack\HackUnit\Tests\Fixtures;
 
-class TestException extends \Exception
-{
-}
+class TestException extends \Exception {}

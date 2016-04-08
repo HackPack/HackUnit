@@ -14,142 +14,144 @@ use HackPack\HackUnit\Test\Runner;
 use HackPack\HackUnit\Tests\Doubles\SpySuite;
 use HackPack\HackUnit\Tests\Doubles\AsyncSuite;
 
-class RunnerTest
-{
-    private Vector<FailureListener> $failureListeners = Vector{};
-    private Vector<SkipListener> $skipListeners = Vector{};
-    private Vector<SuccessListener> $successListeners = Vector{};
-    private Vector<Assert> $asserts = Vector{};
-    private Runner $runner;
-    private int $testsPassed = 0;
+class RunnerTest {
+  private Vector<FailureListener> $failureListeners = Vector {};
+  private Vector<SkipListener> $skipListeners = Vector {};
+  private Vector<SuccessListener> $successListeners = Vector {};
+  private Vector<Assert> $asserts = Vector {};
+  private Runner $runner;
+  private int $testsPassed = 0;
 
-    public function __construct()
-    {
-        $this->runner = new Runner(inst_meth($this, 'assertionBuilder'));
+  public function __construct() {
+    $this->runner = new Runner(inst_meth($this, 'assertionBuilder'));
+  }
+
+  public function assertionBuilder(
+    Vector<FailureListener> $failures,
+    Vector<SkipListener> $skips,
+    Vector<SuccessListener> $successes,
+  ): Assert {
+    $this->failureListeners->addAll($failures);
+    $this->skipListeners->addAll($skips);
+    $this->successListeners->addAll($successes);
+
+    $assert = new \HackPack\HackUnit\Assert($failures, $skips, $successes);
+
+    $this->asserts->add($assert);
+    return $assert;
+  }
+
+  <<Test>>
+  public function allSuitesAreRun(Assert $assert): void {
+    $suites = Vector {};
+    for ($i = 0; $i < 3; $i++) {
+      $suites->add(new SpySuite());
     }
 
-    public function assertionBuilder(
-        Vector<FailureListener> $failures,
-        Vector<SkipListener> $skips,
-        Vector<SuccessListener> $successes,
-    ) : Assert
-    {
-        $this->failureListeners->addAll($failures);
-        $this->skipListeners->addAll($skips);
-        $this->successListeners->addAll($successes);
+    $this->runner->run($suites);
 
-        $assert = new \HackPack\HackUnit\Assert($failures, $skips, $successes);
+    foreach ($suites as $index => $suite) {
 
-        $this->asserts->add($assert);
-        return $assert;
+      // Tell the typechecker we know what's going on
+      invariant($suite instanceof SpySuite, '');
+
+      // Ensure each suite is run once
+      $assert->int($suite->counts['up'])->eq(1);
+      $assert->int($suite->counts['run'])->eq(1);
+      $assert->int($suite->counts['down'])->eq(1);
+
+      // Ensure the suites are passed the generated assert objects
+      $assert->mixed($suite->asserts->at(0))
+        ->identicalTo($this->asserts->at($index));
+    }
+  }
+
+  <<Test>>
+  public function suitesAreRunAsync(Assert $assert): void {
+    // 0.01 second per suite
+    $sleepTime = 10000;
+    $suites = Vector {};
+    for ($i = 0; $i < 3; $i++) {
+      $suites->add(new AsyncSuite($sleepTime));
     }
 
-    <<Test>>
-    public function allSuitesAreRun(Assert $assert) : void
-    {
-        $suites = Vector{};
-        for($i = 0; $i < 3; $i++) {
-            $suites->add(new SpySuite());
-        }
+    $start = microtime(true);
+    $this->runner->run($suites);
+    $end = microtime(true);
 
-        $this->runner->run($suites);
+    // Convert delta time to microseconds
+    $deltaTime = ($end - $start) * 1000000;
 
-        foreach($suites as $index => $suite) {
+    // Total run time should be less than twice the sleep time
+    // since all are running in async
+    $assert->float($deltaTime)->lt(2.0 * $sleepTime);
+  }
 
-            // Tell the typechecker we know what's going on
-            invariant($suite instanceof SpySuite, '');
+  <<Test>>
+  public function interruptionEventHandlersAreAdded(Assert $assert): void {
+    $this->runner->run(Vector {new SpySuite()});
 
-            // Ensure each suite is run once
-            $assert->int($suite->counts['up'])->eq(1);
-            $assert->int($suite->counts['run'])->eq(1);
-            $assert->int($suite->counts['down'])->eq(1);
+    $assert->int($this->failureListeners->count())->eq(1);
+    $assert->int($this->skipListeners->count())->eq(1);
+    $assert->int($this->successListeners->count())->eq(0);
 
-            // Ensure the suites are passed the generated assert objects
-            $assert->mixed($suite->asserts->at(0))->identicalTo($this->asserts->at($index));
-        }
-    }
+    // Ensure the handlers called throw an Interruption exception
+    $assert->whenCalled(
+      () ==> {
+        $listener = $this->failureListeners->at(0);
+        $listener(Failure::fromCallStack('fake failure'));
+      },
+    )->willThrowClass(Interruption::class);
 
-    <<Test>>
-    public function suitesAreRunAsync(Assert $assert) : void
-    {
-        // 0.01 second per suite
-        $sleepTime = 10000;
-        $suites = Vector{};
-        for($i = 0; $i < 3; $i++) {
-            $suites->add(new AsyncSuite($sleepTime));
-        }
+    $assert->whenCalled(
+      () ==> {
+        $listener = $this->skipListeners->at(0);
+        $listener(Skip::fromCallStack('fake failure'));
+      },
+    )->willThrowClass(Interruption::class);
+  }
 
-        $start = microtime(true);
-        $this->runner->run($suites);
-        $end = microtime(true);
+  <<Test>>
+  public function listenersArePassedToAssertBuilder(Assert $assert): void {
+    $failure = ($event) ==> {
+    };
+    $skip = ($event) ==> {
+    };
+    $success = () ==> {
+    };
 
-        // Convert delta time to microseconds
-        $deltaTime = ($end - $start) * 1000000;
+    $this->runner->onFailure($failure);
+    $this->runner->onSkip($skip);
+    $this->runner->onSuccess($success);
 
-        // Total run time should be less than twice the sleep time
-        // since all are running in async
-        $assert->float($deltaTime)->lt(2.0 * $sleepTime);
-    }
+    $this->runner->run(Vector {new SpySuite()});
 
-    <<Test>>
-    public function interruptionEventHandlersAreAdded(Assert $assert) : void
-    {
-        $this->runner->run(Vector{new SpySuite()});
+    $assert->int($this->failureListeners->count())->eq(2);
+    $assert->int($this->skipListeners->count())->eq(2);
+    $assert->int($this->successListeners->count())->eq(1);
 
-        $assert->int($this->failureListeners->count())->eq(1);
-        $assert->int($this->skipListeners->count())->eq(1);
-        $assert->int($this->successListeners->count())->eq(0);
+    // This also implicitly tests that the interruption handlers are added at the end
+    $assert->mixed($this->failureListeners->at(0))->identicalTo($failure);
+    $assert->mixed($this->skipListeners->at(0))->identicalTo($skip);
+    $assert->mixed($this->successListeners->at(0))->identicalTo($success);
+  }
 
-        // Ensure the handlers called throw an Interruption exception
-        $assert->whenCalled(() ==> {
-            $listener = $this->failureListeners->at(0);
-            $listener(Failure::fromCallStack('fake failure'));
-        })->willThrowClass(Interruption::class);
+  <<Test>>
+  public function testPassListenersAreRun(Assert $assert): void {
+    $this->runner->onPass(
+      () ==> {
+        $this->testsPassed++;
+      },
+    );
 
-        $assert->whenCalled(() ==> {
-            $listener = $this->skipListeners->at(0);
-            $listener(Skip::fromCallStack('fake failure'));
-        })->willThrowClass(Interruption::class);
-    }
+    $suite = new SpySuite();
+    $this->runner->run(Vector {$suite});
 
-    <<Test>>
-    public function listenersArePassedToAssertBuilder(Assert $assert) : void
-    {
-        $failure = ($event) ==> {};
-        $skip = ($event) ==> {};
-        $success = () ==> {};
+    $assert->int($suite->passCallbacks->count())->eq(1);
+    $passCallback = $suite->passCallbacks->at(0);
 
-        $this->runner->onFailure($failure);
-        $this->runner->onSkip($skip);
-        $this->runner->onSuccess($success);
-
-        $this->runner->run(Vector{new SpySuite()});
-
-        $assert->int($this->failureListeners->count())->eq(2);
-        $assert->int($this->skipListeners->count())->eq(2);
-        $assert->int($this->successListeners->count())->eq(1);
-
-        // This also implicitly tests that the interruption handlers are added at the end
-        $assert->mixed($this->failureListeners->at(0))->identicalTo($failure);
-        $assert->mixed($this->skipListeners->at(0))->identicalTo($skip);
-        $assert->mixed($this->successListeners->at(0))->identicalTo($success);
-    }
-
-    <<Test>>
-    public function testPassListenersAreRun(Assert $assert) : void
-    {
-        $this->runner->onPass(() ==> {
-            $this->testsPassed++;
-        });
-
-        $suite = new SpySuite();
-        $this->runner->run(Vector{$suite});
-
-        $assert->int($suite->passCallbacks->count())->eq(1);
-        $passCallback = $suite->passCallbacks->at(0);
-
-        $assert->int($this->testsPassed)->eq(0);
-        $passCallback();
-        $assert->int($this->testsPassed)->eq(1);
-    }
+    $assert->int($this->testsPassed)->eq(0);
+    $passCallback();
+    $assert->int($this->testsPassed)->eq(1);
+  }
 }

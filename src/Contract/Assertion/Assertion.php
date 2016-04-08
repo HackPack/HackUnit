@@ -8,6 +8,4 @@ namespace HackPack\HackUnit\Contract\Assertion;
  * The trace utility looks for classes that implement
  * this when attempting to find the assertion call from the stack
  */
-interface Assertion
-{
-}
+interface Assertion {}
