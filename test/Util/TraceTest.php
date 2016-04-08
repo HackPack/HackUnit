@@ -117,7 +117,7 @@ class TraceTest {
   ): void {
     $mockAssert = new \HackPack\HackUnit\Tests\Doubles\Util\Assertion();
     $items = Vector {};
-    $line = __LINE__ + 3;
+    $line = __LINE__ + 5;
     $mockAssert->run(
       () ==> {
         $items->add(Trace::findAssertionCall());

@@ -1,4 +1,4 @@
-!/usr/bin/env hhvm
+#!/usr/bin/env hhvm
 <?hh
 
 // Find the composer autoloader
