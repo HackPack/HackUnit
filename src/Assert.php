@@ -69,10 +69,10 @@ final class Assert implements Contract\Assert {
     );
   }
 
-  public function traversable<T>(
-    Traversable<T> $context,
-  ): Contract\Assertion\TraversableAssertion<T> {
-    return new Assertion\TraversableAssertion(
+  public function container<T>(
+    Container<T> $context,
+  ): Contract\Assertion\ContainerAssertion<T> {
+    return new Assertion\ContainerAssertion(
       $context,
       $this->failureListeners,
       $this->successListeners,

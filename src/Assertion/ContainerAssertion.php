@@ -9,9 +9,9 @@ use HackPack\HackUnit\Event\SuccessEmitter;
 use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Util\Trace;
 
-class TraversableAssertion<Tval>
+class ContainerAssertion<Tval>
   implements
-    \HackPack\HackUnit\Contract\Assertion\TraversableAssertion<Tval> {
+    \HackPack\HackUnit\Contract\Assertion\ContainerAssertion<Tval> {
 
   use FailureEmitter;
   use SuccessEmitter;
@@ -20,7 +20,7 @@ class TraversableAssertion<Tval>
   private \ConstVector<Tval> $context;
 
   public function __construct(
-    Traversable<Tval> $context,
+    Container<Tval> $context,
     Vector<FailureListener> $failureListeners,
     Vector<SuccessListener> $successListeners,
   ) {
@@ -44,7 +44,7 @@ class TraversableAssertion<Tval>
         $this->emitSuccess();
         return;
       }
-      $this->emitFailure(Failure::fromCallStack('The Traversable is empty.'));
+      $this->emitFailure(Failure::fromCallStack('The Container is empty.'));
       return;
     }
 
@@ -58,7 +58,7 @@ class TraversableAssertion<Tval>
         if ($this->negate) {
           $this->emitFailure(
             Failure::fromCallStack(
-              'Expected Traversable to not contain '.
+              'Expected Container to not contain '.
               var_export($expected, true),
             ),
           );
@@ -77,13 +77,13 @@ class TraversableAssertion<Tval>
 
     $this->emitFailure(
       Failure::fromCallStack(
-        'Expected Traversable to contain '.var_export($expected, true),
+        'Expected Container to contain '.var_export($expected, true),
       ),
     );
   }
 
   public function containsAll(
-    Traversable<Tval> $expected,
+    Container<Tval> $expected,
     ?(function(Tval, Tval): bool) $comparitor = null,
   ): void {
     if ($this->context->isEmpty()) {
@@ -91,7 +91,7 @@ class TraversableAssertion<Tval>
         $this->emitSuccess();
         return;
       }
-      $this->emitFailure(Failure::fromCallStack('The Traversable is empty.'));
+      $this->emitFailure(Failure::fromCallStack('The Container is empty.'));
       return;
     }
 
@@ -118,7 +118,7 @@ class TraversableAssertion<Tval>
       }
       $this->emitFailure(
         Failure::fromCallStack(
-          'Traversable expected to contain '.var_export($other, true),
+          'Container expected to contain '.var_export($other, true),
         ),
       );
       return;
@@ -127,7 +127,7 @@ class TraversableAssertion<Tval>
     if ($this->negate) {
       $this->emitFailure(
         Failure::fromCallStack(
-          'Traversable expected to not contain all of the given list.',
+          'Container expected to not contain all of the given list.',
         ),
       );
       return;
@@ -137,7 +137,7 @@ class TraversableAssertion<Tval>
   }
 
   public function containsAny(
-    Traversable<Tval> $expected,
+    Container<Tval> $expected,
     ?(function(Tval, Tval): bool) $comparitor = null,
   ): void {
     if ($this->context->isEmpty()) {
@@ -145,7 +145,7 @@ class TraversableAssertion<Tval>
         $this->emitSuccess();
         return;
       }
-      $this->emitFailure(Failure::fromCallStack('The Traversable is empty.'));
+      $this->emitFailure(Failure::fromCallStack('The Container is empty.'));
       return;
     }
 
@@ -166,7 +166,7 @@ class TraversableAssertion<Tval>
         if ($this->negate) {
           $this->emitFailure(
             Failure::fromCallStack(
-              'Traversable expected to not contain '.
+              'Container expected to not contain '.
               var_export($otherValue, true),
             ),
           );
@@ -184,13 +184,13 @@ class TraversableAssertion<Tval>
 
     $this->emitFailure(
       Failure::fromCallStack(
-        'Traversable expected to contain at least one item from the list.',
+        'Container expected to contain at least one item from the list.',
       ),
     );
   }
 
   public function containsOnly(
-    Traversable<Tval> $expected,
+    Container<Tval> $expected,
     ?(function(Tval, Tval): bool) $comparitor = null,
   ): void {
     $expected = new Vector($expected);
@@ -202,8 +202,8 @@ class TraversableAssertion<Tval>
       }
       $message =
         $this->context->count() > $expected->count()
-          ? 'Traversable contains more elements than expected.'
-          : 'Traversable contains fewer elements than expected.';
+          ? 'Container contains more elements than expected.'
+          : 'Container contains fewer elements than expected.';
       $this->emitFailure(Failure::fromCallStack($message));
       return;
     }
@@ -227,7 +227,7 @@ class TraversableAssertion<Tval>
     if ($this->context->isEmpty()) {
       if ($this->negate) {
         $this->emitFailure(
-          Failure::fromCallStack('Traversable expected not to be empty.'),
+          Failure::fromCallStack('Container expected not to be empty.'),
         );
         return;
       }
@@ -240,7 +240,7 @@ class TraversableAssertion<Tval>
       return;
     }
     $this->emitFailure(
-      Failure::fromCallStack('Traversable expected to be empty.'),
+      Failure::fromCallStack('Container expected to be empty.'),
     );
   }
 

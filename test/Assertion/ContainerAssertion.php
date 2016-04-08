@@ -3,17 +3,17 @@
 namespace HackPack\HackUnit\Tests\Assertion;
 
 use HackPack\HackUnit\Contract\Assert;
-use HackPack\HackUnit\Assertion\TraversableAssertion;
+use HackPack\HackUnit\Assertion\ContainerAssertion;
 use HackPack\HackUnit\Tests\TraceItemTest;
 
-class TraversableAssertionTest {
+class ContainerAssertionTest {
 
   use AssertionTest;
 
   private function makeAssertion<T>(
-    Traversable<T> $actual,
-  ): TraversableAssertion<T> {
-    return new TraversableAssertion(
+    Container<T> $actual,
+  ): ContainerAssertion<T> {
+    return new ContainerAssertion(
       $actual,
       $this->failListeners(),
       $this->successListeners(),
@@ -90,7 +90,7 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
     $assert->string($this->failEvents->at(0)->getMessage())
-      ->is('The Traversable is empty.');
+      ->is('The Container is empty.');
   }
 
   <<Test>>
@@ -272,7 +272,7 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
     $assert->string($this->failEvents->at(0)->getMessage())
-      ->is('The Traversable is empty.');
+      ->is('The Container is empty.');
   }
 
   <<Test>>
@@ -348,7 +348,7 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
     $assert->string($this->failEvents->at(0)->getMessage())
-      ->is('Traversable contains more elements than expected.');
+      ->is('Container contains more elements than expected.');
   }
 
   <<Test>>
@@ -360,7 +360,7 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
     $assert->string($this->failEvents->at(0)->getMessage())
-      ->is('Traversable contains fewer elements than expected.');
+      ->is('Container contains fewer elements than expected.');
   }
 
   <<Test>>
@@ -372,7 +372,7 @@ class TraversableAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
     $assert->string($this->failEvents->at(0)->getMessage())
-      ->is('Traversable expected to contain '.var_export('c', true));
+      ->is('Container expected to contain '.var_export('c', true));
   }
 
   <<Test>>

@@ -13,8 +13,8 @@ interface Assert {
     (function(): void) $context,
   ): Assertion\CallableAssertion;
   public function mixed(mixed $context): Assertion\MixedAssertion;
-  public function traversable<T>(
-    Traversable<T> $context,
-  ): Assertion\TraversableAssertion<T>;
+  public function container<T>(
+    Container<T> $context,
+  ): Assertion\ContainerAssertion<T>;
   public function skip(string $reason, ?TraceItem $traceItem = null): void;
 }
