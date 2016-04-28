@@ -6,8 +6,8 @@ final class Options {
   const string VERSION = '0.5';
 
   public function __construct(
-    public ImmSet<string> $includes,
-    public ImmSet<string> $excludes,
+    public \ConstSet<string> $includes,
+    public \ConstSet<string> $excludes,
   ) {}
 
   public static function fromCli(Traversable<string> $args): Options {

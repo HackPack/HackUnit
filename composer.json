@@ -35,5 +35,8 @@
             "HackPack\\HackUnit\\Tests\\": "test"
         }
     },
-    "bin": ["bin/hackunit"]
+    "bin": ["bin/hackunit"],
+    "scripts": {
+      "test": ["HackPack\\HackUnit\\HackUnit::selfTest"]
+    }
 }
