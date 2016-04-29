@@ -187,4 +187,40 @@ class KeyedContainerAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
   }
+
+  <<Test>>
+  public function doesContainOnly(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsOnly(['a' => 1, 1 => 'a']);
+    $assert->int($this->successCount)->eq(1);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function doesNotContainOnly(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()->containsOnly(['a' => 1, 1 => 'a', 'b' => 1]);
+    $assertion->not()->containsOnly(['a' => 1, 2 => 'a']);
+    $assertion->not()->containsOnly([2 => 'a']);
+    $assert->int($this->successCount)->eq(3);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function failsToContainOnly(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsOnly(['a' => 1, 1 => 'a', 'b' => 1]);
+    $assertion->containsOnly(['a' => 1, 2 => 'a']);
+    $assertion->containsOnly([2 => 'a']);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(3);
+  }
+
+  <<Test>>
+  public function failsToNotContainOnly(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()->containsOnly(['a' => 1, 1 => 'a']);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(1);
+  }
 }

@@ -8,11 +8,11 @@ use HackPack\HackUnit\Event\FailureListener;
 use HackPack\HackUnit\Event\SuccessEmitter;
 use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Util\Trace;
+use
+  HackPack\HackUnit\Contract\Assertion\KeyedContainerAssertion as IAssertion
+;
 
-class KeyedContainerAssertion<Tkey, Tval>
-  implements
-    \HackPack\HackUnit\Contract\Assertion\KeyedContainerAssertion<Tkey,
-    Tval> {
+class KeyedContainerAssertion<Tkey, Tval> implements IAssertion<Tkey, Tval> {
 
   use FailureEmitter;
   use SuccessEmitter;
@@ -149,6 +149,53 @@ class KeyedContainerAssertion<Tkey, Tval>
     $this->emitFailure(
       Failure::fromCallStack(
         'Expected Keyed Container to contain all elements of given list.',
+      ),
+    );
+  }
+
+  public function containsOnly(
+    KeyedContainer<Tkey, Tval> $expected,
+    ?(function(Tkey, Tval, Tval): bool) $comparitor = null,
+  ): void {
+    $comparitor =
+      $comparitor === null ? self::identityComparitor() : $comparitor;
+    $filter = ($a, $b) ==> {
+
+      return $a->filterWithKey(
+        ($k, $v) ==> {
+          if ($b->containsKey($k)) {
+            return !$comparitor($k, $b->at($k), $v);
+          }
+          return true;
+        },
+      );
+    };
+
+    $expected = new Map($expected);
+    $filteredContext = $filter($this->context, $expected);
+    $filteredExpected = $filter($expected, $this->context);
+
+    if ($filteredContext->isEmpty() && $filteredExpected->isEmpty()) {
+      if ($this->negate) {
+        $this->emitFailure(
+          Failure::fromCallStack(
+            'Expected Keyed Container to not contain only the elements of the given list',
+          ),
+        );
+        return;
+      }
+      $this->emitSuccess();
+      return;
+    }
+
+    if ($this->negate) {
+      $this->emitSuccess();
+      return;
+    }
+
+    $this->emitFailure(
+      Failure::fromCallStack(
+        'Expected Keyed Container to contain only the elements of the given list',
       ),
     );
   }
