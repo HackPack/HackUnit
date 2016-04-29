@@ -37,6 +37,7 @@
     },
     "bin": ["bin/hackunit"],
     "scripts": {
-      "test": ["HackPack\\HackUnit\\HackUnit::selfTest"]
+      "test": ["HackPack\\HackUnit\\HackUnit::selfTest"],
+      "format": "hh_format src; hh_format test;"
     }
 }
