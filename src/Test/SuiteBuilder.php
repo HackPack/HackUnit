@@ -100,23 +100,24 @@ final class SuiteBuilder {
     $getMethod = inst_meth($classMirror, 'getMethod');
     $nameToInvoker = $name ==> $this->buildInvoker($getMethod($name));
 
-    $factories = $parser->factories()->map(
-      $methodName ==> {
-        return async () ==> {
+    $factories =
+      $parser->factories()->map(
+        $methodName ==> {
+          return async () ==> {
 
-          if ($methodName === '__construct') {
-            return $classMirror->newInstance();
-          }
+            if ($methodName === '__construct') {
+              return $classMirror->newInstance();
+            }
 
-          $method = $classMirror->getMethod($methodName);
-          $result = $method->invoke(null);
-          if ($method->isAsync()) {
-            $result = await $result;
-          }
-          return $result;
-        };
-      },
-    );
+            $method = $classMirror->getMethod($methodName);
+            $result = $method->invoke(null);
+            if ($method->isAsync()) {
+              $result = await $result;
+            }
+            return $result;
+          };
+        },
+      );
     // Set the default constructor if possible
     if (!$factories->containsKey('')) {
       $default = $this->getDefaultFactory($classMirror);

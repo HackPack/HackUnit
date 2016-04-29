@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit;
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once dirname(__DIR__).'/vendor/autoload.php';
 
 final class HackUnit {
   private static bool $failures = false;
@@ -69,13 +69,8 @@ final class HackUnit {
 
   public static function selfTest(): void {
     $root = dirname(__DIR__);
-    $includes = Set{
-      $root . '/test',
-    };
-    $excludes = Set{
-      $root . '/test/Fixtures',
-      $root . '/test/Doubles',
-    };
+    $includes = Set {$root.'/test'};
+    $excludes = Set {$root.'/test/Fixtures', $root.'/test/Doubles'};
     $options = new Util\Options($includes, $excludes);
     self::run($options);
   }

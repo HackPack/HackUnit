@@ -10,8 +10,7 @@ use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Util\Trace;
 
 class ContainerAssertion<Tval>
-  implements
-    \HackPack\HackUnit\Contract\Assertion\ContainerAssertion<Tval> {
+  implements \HackPack\HackUnit\Contract\Assertion\ContainerAssertion<Tval> {
 
   use FailureEmitter;
   use SuccessEmitter;
