@@ -223,4 +223,50 @@ class KeyedContainerAssertionTest {
     $assert->int($this->successCount)->eq(0);
     $assert->int($this->failEvents->count())->eq(1);
   }
+
+  <<Test>>
+  public function doesContainOnlyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsOnly(['a' => 0, 1 => 0], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(1);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function doesNotContainOnlyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()
+      ->containsOnly(['a' => 1, 1 => 'a'], ($k, $a, $b) ==> false);
+    $assertion->not()->containsOnly([1 => 'a'], ($k, $a, $b) ==> true);
+    $assertion->not()
+      ->containsOnly(['b' => 1, 1 => 'a'], ($k, $a, $b) ==> true);
+    $assertion->not()
+      ->containsOnly(['a' => 1, 1 => 'a', 'b' => 0], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(4);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function failsToContainOnlyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsOnly(['a' => 1, 1 => 'a'], ($k, $a, $b) ==> false);
+    $assertion->containsOnly([1 => 'a'], ($k, $a, $b) ==> true);
+    $assertion->containsOnly(['b' => 1, 1 => 'a'], ($k, $a, $b) ==> true);
+    $assertion->containsOnly(
+      ['a' => 1, 1 => 'a', 'b' => 0],
+      ($k, $a, $b) ==> true,
+    );
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(4);
+  }
+
+  <<Test>>
+  public function failsToNotContainOnlyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()
+      ->containsOnly(['a' => 1, 1 => 'b'], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(1);
+  }
+
 }
