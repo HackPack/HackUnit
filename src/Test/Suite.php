@@ -35,7 +35,11 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
         async ($test) ==> {
 
           if ($test['skip']) {
-            $assert->skip('Test marked <<Skip>>', $test['trace item']);
+            try {
+              $assert->skip('Test marked <<Skip>>', $test['trace item']);
+            } catch (Interruption $e) {
+              // any listeners should have been notified by now
+            }
             return;
           }
 

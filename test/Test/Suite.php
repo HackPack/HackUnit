@@ -39,7 +39,7 @@ class SuiteTest {
 
       $tests = Vector {};
       for ($i = 0; $i < $thirdTestCount; $i++) {
-        $tests->add($this->makeInterruptedTest($assert));
+        $tests->add($this->makeInterruptedTest());
         $tests->add($this->makeSkippedTest($assert));
         $tests->add($this->makePassingTest($assert));
       }
@@ -59,7 +59,7 @@ class SuiteTest {
         $this->repeat($upDownCount, $this->makeTestDown($assert)),
       );
 
-      $this->runSuite($suite);
+      $assert->whenCalled(() ==> $this->runSuite($suite))->willNotThrow();
 
       // Skipped tests shouldn't run the factory
       $assert->int($this->factoryRuns)->eq(2 * $thirdTestCount);
@@ -146,7 +146,7 @@ class SuiteTest {
     );
   }
 
-  private function makeInterruptedTest(Assert $assert): TestShape {
+  private function makeInterruptedTest(): TestShape {
     return shape(
       'factory' => $this->factory,
       'method' => async ($instance, $args) ==> {

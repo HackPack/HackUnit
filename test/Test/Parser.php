@@ -83,18 +83,15 @@ class SuiteParserTest {
     $assert->string($factoryList->at('named'))->is('factory');
 
     $factoryList =
-      $this->parserFromSuiteName('ConstructorIsNotDefault')
-        ->factories();
+      $this->parserFromSuiteName('ConstructorIsNotDefault')->factories();
     $assert->bool($factoryList->containsKey(''))->is(true);
     $assert->string($factoryList->at(''))->is('factory');
 
-    $factoryList =
-      $this->parserFromSuiteName('DerivedFactory')->factories();
+    $factoryList = $this->parserFromSuiteName('DerivedFactory')->factories();
     $assert->bool($factoryList->containsKey(''))->is(true);
     $assert->string($factoryList->at(''))->is('factory');
 
-    $factoryList =
-      $this->parserFromSuiteName('AbstractFactory')->factories();
+    $factoryList = $this->parserFromSuiteName('AbstractFactory')->factories();
     $assert->int($factoryList->count())->eq(0);
   }
 
@@ -239,8 +236,7 @@ class SuiteParserTest {
     $assert->int($parser->errors()->count())->eq(2);
     $assert->int($parser->testUp()->count())->eq(0);
 
-    $parser =
-      $this->parserFromSuiteName('TestDownConstructDestruct');
+    $parser = $this->parserFromSuiteName('TestDownConstructDestruct');
     $assert->int($parser->errors()->count())->eq(2);
     $assert->int($parser->testUp()->count())->eq(0);
 
