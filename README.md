@@ -265,6 +265,30 @@ All of the above assertions may be negated by calling `not()` before making the 
  $assert->string($myString)->not()->containedBy($superString);
 ```
 
+### Collection Assertions
+
+To make assertions about collections and arrays, call `$assert->container($context)`.  The resulting object contains the following methods to perform assertions.
+
+* `$assert->container($context)->isEmpty();` : Assert that the context has no elements
+* `$assert->container($context)->contains($value);` : Assert that the context contains the value given
+* `$assert->container($context)->containsAny($list);` : Assert that the context contains at least one element in the list provided
+* `$assert->container($context)->containsAll($list);` : Assert that the context contains all elements in the list provided
+* `$assert->container($context)->containsOnly($list);` : Assert that the context contains all elements in the list provided and no more
+
+All of the `contains*` assertions above accept an optional second parameter which must be a callable.  The callable will be used to compare the elements in the context with the element(s) provided. If the elements passed to the callable should be treated as equivalent, the callable should return `true`, otherwise it should return `false`.
+
+#### Keyed Collections
+
+If the keys of the container are important for the assertions, you should use `$assert->keyedContainer($context)`.  The resulting object contains the following methods to perform assertions.
+
+* `$assert->container($context)->contains($key, $value);` : Assert that the value contained in the context at the key provided matches the value provided
+* `$assert->container($context)->containsKey($key);` : Assert that the context contains the provided key
+* `$assert->container($context)->containsAny($list);` : Assert that the context contains at least one element in the list provided where both the key and value must be considered equivalent
+* `$assert->container($context)->containsAll($list);` : Assert that the context contains all elements in the list provided where both the key and value must be considered equivalent
+* `$assert->container($context)->containsOnly($list);` : Assert that the context contains all elements in the list provided and no more where both the key and value must be considered equivalent
+
+All of the assertions above accept an optional second (or third in the case of `contains`) parameter which must be a callable.  The callable will be used to compare the values of the elements in the context with the element(s) provided. If the values passed to the callable should be treated as equivalent, the callable should return `true`, otherwise it should return `false`.
+
 ### Mixed Assertions
 
 To make generic assertions about a variable of any type, call `$assert->mixed($context)`.  The resulting object contains the following methods to actually perform the appropriate assertion.
@@ -276,7 +300,7 @@ To make generic assertions about a variable of any type, call `$assert->mixed($c
 * `$assert->mixed($context)->isString();` : Assert that `$context` is of type `string`
 * `$assert->mixed($context)->isArray();` : Assert that `$context` is of type `array`
 * `$assert->mixed($context)->isObject();` : Assert that `$context` is of type `object`
-* `$assert->mixed($contect)->isTypeOf($className)` : Assert that `$context instanceof $className`
+* `$assert->mixed($context)->isTypeOf($className)` : Assert that `$context instanceof $className`
 * `$assert->mixed($context)->looselyEquals($expected)` : Assert that `$context == $expected` *note the loose comparison*
 * `$assert->mixed($context)->identicalTo($expected)` : Assert that `$context === $expected` *note the strict comparison*
 
@@ -305,7 +329,7 @@ class MySuite
     }
 
     <<Test>>
-    public function skippFromMiddleOfTest(Assert $assert) : void
+    public function skipFromMiddleOfTest(Assert $assert) : void
     {
         // This will be run
         $assert->skip();
@@ -313,12 +337,6 @@ class MySuite
     }
 }
 ```
-
-Future Plans
-------------
-
-I would like to implement collection type assertions.  These may take the form of `$assert->map($myMap)->hasSameKeysAs($expectedMap);` or similar.
-If you have suggestions for the types of assertions that could be made on collections, please open an issue!
 
 How HackUnit loads tests
 ------------------------
@@ -343,5 +361,5 @@ Running HackUnit's tests
 HackUnit is tested with HackUnit. From the project directory run:
 
 ```
-bin/hackunit test --exclude test/Fixtures/ --exclude test/Mocks/
+hhvm /path/to/composer.phar test
 ```
