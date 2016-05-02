@@ -200,6 +200,48 @@ class KeyedContainerAssertion<Tkey, Tval> implements IAssertion<Tkey, Tval> {
     );
   }
 
+  public function containsAny(
+    KeyedContainer<Tkey, Tval> $expected,
+    ?(function(Tkey, Tval, Tval): bool) $comparitor = null,
+  ): void {
+    if ($comparitor === null) {
+      $comparitor = self::identityComparitor();
+    }
+
+    foreach ($expected as $expectedKey => $expectedValue) {
+      if (!$this->context->containsKey($expectedKey)) {
+        continue;
+      }
+
+      if ($comparitor(
+            $expectedKey,
+            $this->context->at($expectedKey),
+            $expectedValue,
+          )) {
+        if ($this->negate) {
+          $this->emitFailure(
+            Failure::fromCallStack(
+              'Expected Keyed Container to not contain any elements of the given list.',
+            ),
+          );
+          return;
+        }
+        $this->emitSuccess();
+        return;
+      }
+    }
+
+    if ($this->negate) {
+      $this->emitSuccess();
+      return;
+    }
+    $this->emitFailure(
+      Failure::fromCallStack(
+        'Expected Keyed Container to contain any elements of the given list.',
+      ),
+    );
+  }
+
   <<__Memoize>>
   private static function identityComparitor(
   ): (function(Tkey, Tval, Tval): bool) {

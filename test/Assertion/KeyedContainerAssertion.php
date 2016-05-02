@@ -269,4 +269,83 @@ class KeyedContainerAssertionTest {
     $assert->int($this->failEvents->count())->eq(1);
   }
 
+  <<Test>>
+  public function doesContainAny(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsAny(['a' => 2, 1 => 'a']);
+    $assertion->containsAny([1 => 'a']);
+    $assertion->containsAny([1 => 'a', 'a' => 1]);
+    $assert->int($this->successCount)->eq(3);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function doesContainAnyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsAny(['a' => 2, 4 => 'a'], ($k, $a, $b) ==> true);
+    $assertion->containsAny([1 => 'b'], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(2);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function doesNotContainAny(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()->containsAny([]);
+    $assertion->not()->containsAny(['a' => 2, 2 => 'a']);
+    $assert->int($this->successCount)->eq(2);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function doesNotContainAnyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()
+      ->containsAny(['a' => 2, 4 => 'a'], ($k, $a, $b) ==> false);
+    $assertion->not()->containsAny([1 => 'b'], ($k, $a, $b) ==> false);
+    $assertion->not()->containsAny([4 => 'b'], ($k, $a, $b) ==> true);
+    $assertion->not()->containsAny([], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(4);
+    $assert->int($this->failEvents->count())->eq(0);
+  }
+
+  <<Test>>
+  public function failsToNotContainAny(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()->containsAny(['a' => 2, 1 => 'a']);
+    $assertion->not()->containsAny([1 => 'a']);
+    $assertion->not()->containsAny([1 => 'a', 'a' => 1]);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(3);
+  }
+
+  <<Test>>
+  public function failsToNotContainAnyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->not()
+      ->containsAny(['a' => 2, 4 => 'a'], ($k, $a, $b) ==> true);
+    $assertion->not()->containsAny([1 => 'b'], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(2);
+  }
+
+  <<Test>>
+  public function failsToContainAny(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsAny([]);
+    $assertion->containsAny(['a' => 2, 2 => 'a']);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(2);
+  }
+
+  <<Test>>
+  public function failsToContainAnyCustom(Assert $assert): void {
+    $assertion = $this->makeAssertion(['a' => 1, 1 => 'a']);
+    $assertion->containsAny(['a' => 2, 4 => 'a'], ($k, $a, $b) ==> false);
+    $assertion->containsAny([1 => 'b'], ($k, $a, $b) ==> false);
+    $assertion->containsAny([4 => 'b'], ($k, $a, $b) ==> true);
+    $assertion->containsAny([], ($k, $a, $b) ==> true);
+    $assert->int($this->successCount)->eq(0);
+    $assert->int($this->failEvents->count())->eq(4);
+  }
 }
