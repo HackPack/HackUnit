@@ -1,7 +1,7 @@
 HackUnit
 ========
 
-Testing framework written in and for Facebook's language, [Hack.](http://hacklang.org)
+Testing framework written in and for [Hack.](http://hacklang.org)
 
 ### But Why?!
 There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat.](http://behat.org)  Why should you use this one?
@@ -9,6 +9,8 @@ There are already many testing frameworks available, such as [PHPUnit](https://p
 *Because you like Hack specific features!*
 
 With HackUnit, you can easily run your tests using cooperative async using the built in `async` keyword.
+
+With HackUnit, you indicate test methods using [annotations.](http://docs.hhvm.com/manual/en/hack.attributes.php)
 
 The original goal of HackUnit was to write a testing framework using Hack's strict mode. The project will stay consistent with this goal as more features are added.
 
@@ -25,6 +27,7 @@ Usage
 -----
 
 HackUnit can be run from the command line using the included executable script `bin/hackunit`. By default, this will be symlinked in your `vendor/bin` directory.
+
 Thus, the most common way to invoke HackUnit is:
 ```bash
 vendor/bin/hackunit path1 [path2] ...
@@ -98,8 +101,7 @@ class MyAsyncSuite
 ```
 
 All such `async` tests are run using cooperative multitasking (see the [async documentation](http://docs.hhvm.com/hack/async/introduction)),
-allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, curl calls, etc...).
-
+allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, network calls, etc...).
 
 ### Setup
 
@@ -128,7 +130,7 @@ class MySuite
     }
 
     <<Setup>>
-    public function setUpTest() : void
+    public function setUpTestAgain() : void
     {
       // Multiple set up methods may be defined
       // If there are no parameters to the setup attribute, the method is treated like a test setup
