@@ -3,6 +3,8 @@ HackUnit
 
 Testing framework written in and for [Hack.](http://hacklang.org)
 
+[![Gitter](https://badges.gitter.im/HackPack/HackUnit.svg)](https://gitter.im/HackPack/HackUnit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 ### But Why?!
 There are already many testing frameworks available, such as [PHPUnit](https://phpunit.de/) and [behat.](http://behat.org)  Why should you use this one?
 
