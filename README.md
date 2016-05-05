@@ -10,7 +10,9 @@ There are already many testing frameworks available, such as [PHPUnit](https://p
 
 *Because you like Hack specific features!*
 
-With HackUnit, you can easily run your tests using cooperative async using the built in `async` keyword.
+With HackUnit, you can easily run your tests using cooperative async with the built in `async` keyword.
+
+With HackUnit, you can easily iterate through your test data in an async way using the `yield` keyword.
 
 With HackUnit, you indicate test methods using [annotations.](http://docs.hhvm.com/manual/en/hack.attributes.php)
 
@@ -38,7 +40,7 @@ where `path1`, `path2`, etc... are each base paths/files to scan for test suites
 
 Some command line options exist to alter the behavior of HackUnit:
 
-* --exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files.
+* `--exclude="path/to/exclude"` : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files.
 
 Test Suites
 -----------
@@ -102,18 +104,13 @@ class MyAsyncSuite
 }
 ```
 
-All such `async` tests are run using cooperative multitasking (see the [async documentation](http://docs.hhvm.com/hack/async/introduction)),
-allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, network calls, etc...).
+All such `async` tests are run using cooperative multitasking (see the [async documentation](http://docs.hhvm.com/hack/async/introduction)), allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, network calls, etc...).
 
 ### Setup
 
-You may have HackUnit run some methods before each individual test method is run and/or before any test method is
-run for the suite.  To do so, mark the appropriate method with the
-`<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
-Multiple setup methods may be declared, but the execution order is not guaranteed.
+You may have HackUnit run some methods before each individual test method is run and/or before any test method is run for the suite.  To do so, mark the appropriate method with the `<<Setup>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php). Multiple setup methods may be declared, but the execution order is not guaranteed.
 
-Each setup method (both suite and test) MUST require exactly 0 parameters.
-If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.
+Each setup method (both suite and test) MUST require exactly 0 parameters. If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.
 
 ```php
 class MySuite
@@ -145,13 +142,9 @@ Suite setup methods are run once, before any of the test methods in the class ar
 Test setup methods are run just before each test method is run (and thus are potentially run multiple times).
 
 ### Teardown
-You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
-run for the suite.  To do so, mark the appropriate method with the
-`<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php).
-Multiple teardown methods may be declared, but the execution order is not guaranteed.
+You may have HackUnit run some methods after each individual test method is run and/or after all test methods are run for the suite.  To do so, mark the appropriate method with the `<<TearDown>>` [attribute](http://docs.hhvm.com/manual/en/hack.attributes.php). Multiple teardown methods may be declared, but the execution order is not guaranteed.
 
-Each teardown method (both suite and test) MUST require exactly 0 parameters.
-If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.
+Each teardown method (both suite and test) MUST require exactly 0 parameters. If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.
 
 ```php
 class MySuite
@@ -182,16 +175,13 @@ Suite tear down methods are run once, after all of the test methods in the class
 Test tear down methods are run just after each test method is run (and thus are potentially run multiple times).
 
 ### Suite Providers
-Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider.
-A Suite Provider is marked with the `<<SuiteProvider>>` attribute.
+Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider. A Suite Provider is marked with the `<<SuiteProvider>>` attribute.
 
-You may define multiple Suite Providers for a single test suite.  To do so, you must label each one
-by passing in one string parameter to the attribute (i.e., `<<SuiteProvider('name of provider')>>`).
-There are no restrictions on the name of a provider except that each provider name must be unique.
+You may define multiple Suite Providers for a single test suite.  To do so, you must label each one by passing in one string parameter to the attribute (i.e., `<<SuiteProvider('name of provider')>>`). There are no restrictions on the name of a provider except that each provider name must be unique.
 
 To use a particular Suite Provider for a particular test, you must pass the name of the Suite Provider to the Test attribute.
 
-```
+```php
 class SuiteWithProviders
 {
     <<SuiteProvider('One')>>
@@ -225,8 +215,7 @@ class SuiteWithProviders
 Assertions
 ----------
 
-All test methods must accept exactly one parameter of type `HackPack\HackUnit\Contract\Assert` which should be used to make testable assertions.
-This object is used to build assertions that will be checked and reported by HackUnit.
+All test methods must accept exactly one parameter of type `HackPack\HackUnit\Contract\Assert` which should be used to make testable assertions. This object is used to build assertions that will be checked and reported by HackUnit.
 
 In all examples below, `$assert` contains an instance of `HackPack\HackUnit\Contract\Assert`.
 
@@ -236,8 +225,7 @@ To make assertions about `bool` type variables, call `$assert->bool($myBool)->is
 
 ### Numeric Assertions
 
-To make assertions about `int` and `float` type variables, call `$assert->int($myInt)` and `$assert->float($myFloat)` respectively.
-The resulting object contains the following methods to actually perform the appropriate assertion.
+To make assertions about `int` and `float` type variables, call `$assert->int($myInt)` and `$assert->float($myFloat)` respectively. The resulting object contains the following methods to actually perform the appropriate assertion.
 
 * `$assert->int($myInt)->eq($expected);` : Assert that `$myInt` is identical to `$expected`
 * `$assert->int($myInt)->gt($expected);` : Assert that `$myInt` is greater than `$expected`
@@ -342,23 +330,63 @@ class MySuite
 }
 ```
 
+Data Providers
+--------------
+
+You may mark some methods as providing a list of data that should be iterated and passed to a test method.  To do this, mark the data providing method with the `<<DataProvider('name')>>` attribute.  You must name your data provider as shown to allow HackUnit to know which data provider should be used for each test that consumes data.
+
+```php
+class TestThatUsesData {
+
+  <<DataProvider('csv values')>>
+  public static function loadCsvValues(): AsyncIterator<array<string>>
+  {
+    $asynCsvLoader = new AsyncCsvLoader('/path/to/data.csv');
+    foreach($asyncCsvLoader await as $line) {
+      yield $line;
+    }
+  }
+
+  <<Test, Data('csv values')>>
+  public function testCsvValues(Assert $assert, array<string> $line): void
+  {
+    // Do assertions using the data from the csv file.
+  }
+
+  <<DataProvider('simple count')>>
+  public static function count(): Traversable<int>
+  {
+    return Vector{1, 2, 3, 4, 5};
+  }
+
+  <<Test, Data('simple count')>>
+  public function countingTest(Assert $assert, int $count): void
+  {
+    // This test will be run five times, once for each of the values in the vector above.
+  }
+}
+```
+
+The example above demonstrates defining both async and non-async data providers.  Special note should be taken of the return values.
+
+* Async data providers _MUST_ return `AsyncIterator<dataType>`.
+* Non-async data providers _MUST_ return `Traversable<dataType>`.
+* The consumer of a data provider _MUST_ accept exactly `dataType` as the second parameter.
+
+In the example above, a `MalformedSuite` error would occur if the csv consumer function had the signature `public function testCsvValues(Assert $assert, Traversable<string>): void`.  Even though an `array<string>` is a type of `Traversable<string>`, the HackUnit parser compares the string representation of the types to ensure invalid data is never passed to the test methods.
+
 How HackUnit loads tests
 ------------------------
-All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's
-[Definition Finder](https://github.com/fredemmott/definition-finder) library. Those files will then be loaded and reflection is used to determine
-which classes are test suites, and which methods perform each task in the suite.
+All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's [Definition Finder](https://github.com/fredemmott/definition-finder) library. Those files will then be loaded and reflection is used to determine which classes are test suites, and which methods perform each task in the suite.
 
 Thanks [Fred!](https://github.com/fredemmott)
 
 Strict mode all the files!
------------------------------
+--------------------------
 
 Well... not quite.
 
-Top level code must use `// partial` mode, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception.
-Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside
-of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that
-one line.
+Top level code must use `// partial` mode, so the `bin/hackunit` file is not in strict mode.  The rest of the project is, with one exception. Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use `include_once` inside of a class method, which is disallowed in strict mode.  This one exception is marked with a `/* HH_FIXME */` comment, which disables the type checker for that one line.
 
 Running HackUnit's tests
 ------------------------
