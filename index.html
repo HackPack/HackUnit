@@ -1,0 +1,476 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Hackunit by HackPack</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Hackunit</h1>
+        <p class="header">xUnit testing framework written in hacklang</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/HackPack/HackUnit/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/HackPack/HackUnit/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/HackPack/HackUnit">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/HackPack">HackPack</a></p>
+
+
+      </header>
+      <section>
+        <h1>
+<a id="hackunit" class="anchor" href="#hackunit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HackUnit</h1>
+
+<p>Testing framework written in and for <a href="http://hacklang.org">Hack.</a></p>
+
+<p><a href="https://gitter.im/HackPack/HackUnit?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge"><img src="https://badges.gitter.im/HackPack/HackUnit.svg" alt="Gitter"></a></p>
+
+<h3>
+<a id="but-why" class="anchor" href="#but-why" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>But Why?!</h3>
+
+<p>There are already many testing frameworks available, such as <a href="https://phpunit.de/">PHPUnit</a> and <a href="http://behat.org">behat.</a>  Why should you use this one?</p>
+
+<p><em>Because you like Hack specific features!</em></p>
+
+<p>With HackUnit, you can easily run your tests using cooperative async using the built in <code>async</code> keyword.</p>
+
+<p>With HackUnit, you indicate test methods using <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">annotations.</a></p>
+
+<p>The original goal of HackUnit was to write a testing framework using Hack's strict mode. The project will stay consistent with this goal as more features are added.</p>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h2>
+
+<p>Install HackUnit using <a href="https://getcomposer.org">Composer</a>:</p>
+
+<div class="highlight highlight-source-shell"><pre>composer require --dev hackpack/hackunit</pre></div>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>HackUnit can be run from the command line using the included executable script <code>bin/hackunit</code>. By default, this will be symlinked in your <code>vendor/bin</code> directory.</p>
+
+<p>Thus, the most common way to invoke HackUnit is:</p>
+
+<div class="highlight highlight-source-shell"><pre>vendor/bin/hackunit path1 [path2] ...</pre></div>
+
+<p>where <code>path1</code>, <code>path2</code>, etc... are each base paths/files to scan for test suites.  If any specified path is a directory, the directory will be recursively scanned.</p>
+
+<p>Some command line options exist to alter the behavior of HackUnit:</p>
+
+<ul>
+<li>--exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files.</li>
+</ul>
+
+<h2>
+<a id="test-suites" class="anchor" href="#test-suites" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Test Suites</h2>
+
+<p>To define a test suite, create a class and <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">annotate</a> the appropriate methods.</p>
+
+<p>You may inspect HackUnit’s test files for concrete examples.</p>
+
+<h3>
+<a id="tests" class="anchor" href="#tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests</h3>
+
+<p>Individual test methods are defined using the
+<code>&lt;&lt;Test&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>.
+Execution order of the tests is not guaranteed.</p>
+
+<p>Each test method MUST accept exactly 1 parameter, with the type hint of <code>HackPack\HackUnit\Contract\Assert</code>.
+If you mark a method as a test and the signature does not match, the test will not be run.</p>
+
+<p>Test methods may be instance methods, or they may be class (static) methods.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">My\Namespace\Test</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">HackPack\HackUnit\Contract\Assert</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MySuite</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Test</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">testSomething</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>) : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// Do some testing here!</span></span>
+<span class="pl-s1">      <span class="pl-smi">$assert</span><span class="pl-k">-&gt;</span>int(<span class="pl-c1">2</span>)<span class="pl-k">-&gt;</span>not()<span class="pl-k">-&gt;</span>eq(<span class="pl-c1">3</span>);</span>
+<span class="pl-s1">      <span class="pl-smi">$assert</span></span>
+<span class="pl-s1">          <span class="pl-k">-&gt;</span>whenCalled(() <span class="pl-k">==&gt;</span> {<span class="pl-k">throw</span> <span class="pl-k">new</span> <span class="pl-c1">\Exception</span>(‘<span class="pl-c1">bad</span> <span class="pl-c1">error</span>)})</span>
+<span class="pl-s1">          <span class="pl-k">-&gt;</span>willThrowClassWithMessage(<span class="pl-c1">\Exception</span><span class="pl-k">::</span><span class="pl-c1">class</span>, ‘<span class="pl-c1">bad</span> <span class="pl-c1">error</span>’)</span>
+<span class="pl-s1">          ;</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<h3>
+<a id="async" class="anchor" href="#async" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Async</h3>
+
+<p>Running your tests async is as easy as adding the async keyword to your test method.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">My\Namespace\Test</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">HackPack\HackUnit\Contract\Assert</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MyAsyncSuite</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Test</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-c1">async</span> <span class="pl-k">function</span> <span class="pl-en">testSomething</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>) : <span class="pl-c1">Awaitable</span><span class="pl-k">&lt;</span><span class="pl-c1">void</span><span class="pl-k">&gt;</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-c">// Make some async DB calls here as part of your test!</span></span>
+<span class="pl-s1">        <span class="pl-smi">$user</span> <span class="pl-k">=</span> <span class="pl-c1">await</span> get_user();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-c">// Or maybe an async curl call</span></span>
+<span class="pl-s1">        <span class="pl-smi">$result</span> <span class="pl-k">=</span> <span class="pl-c1">await</span> get_external_user(<span class="pl-smi">$user</span><span class="pl-k">-&gt;</span><span class="pl-smi">id</span>, <span class="pl-s"><span class="pl-pds">'</span>api password<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-smi">$assert</span><span class="pl-k">-&gt;</span>string(<span class="pl-smi">$result</span>[<span class="pl-s"><span class="pl-pds">'</span>user_name<span class="pl-pds">'</span></span>])<span class="pl-k">-&gt;</span>is(<span class="pl-s"><span class="pl-pds">'</span>expected username<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>All such <code>async</code> tests are run using cooperative multitasking (see the <a href="http://docs.hhvm.com/hack/async/introduction">async documentation</a>),
+allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, network calls, etc...).</p>
+
+<h3>
+<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup</h3>
+
+<p>You may have HackUnit run some methods before each individual test method is run and/or before any test method is
+run for the suite.  To do so, mark the appropriate method with the
+<code>&lt;&lt;Setup&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>.
+Multiple setup methods may be declared, but the execution order is not guaranteed.</p>
+
+<p>Each setup method (both suite and test) MUST require exactly 0 parameters.
+If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MySuite</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>Setup(‘<span class="pl-c1">suite</span>’)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setUpSuite</span>() : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// Suite level Setup methods must be class (static) methods</span></span>
+<span class="pl-s1">      <span class="pl-c">// Perform tasks before any tests in this suite are run</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>Setup(‘<span class="pl-c1">test</span>’)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setUpTest</span>() : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// Perform tasks just before each test in this suite is run</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Setup</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">setUpTestAgain</span>() : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// Multiple set up methods may be defined</span></span>
+<span class="pl-s1">      <span class="pl-c">// If there are no parameters to the setup attribute, the method is treated like a test setup</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>Suite setup methods are run once, before any of the test methods in the class are run.</p>
+
+<p>Test setup methods are run just before each test method is run (and thus are potentially run multiple times).</p>
+
+<h3>
+<a id="teardown" class="anchor" href="#teardown" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Teardown</h3>
+
+<p>You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
+run for the suite.  To do so, mark the appropriate method with the
+<code>&lt;&lt;TearDown&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>.
+Multiple teardown methods may be declared, but the execution order is not guaranteed.</p>
+
+<p>Each teardown method (both suite and test) MUST require exactly 0 parameters.
+If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MySuite</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>TearDown(‘<span class="pl-c1">suite</span>’)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span> <span class="pl-en">cleanUpAfterSuite</span>() : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// Suite level TearDown methods must be class (static) methods</span></span>
+<span class="pl-s1">      <span class="pl-c">// Perform tasks after all tests in this suite are run</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>TearDown(‘<span class="pl-c1">test</span>’)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">cleanUpAfterTest</span>() : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// Perform tasks just after each test in this suite is run</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span><span class="pl-c1">TearDown</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">cleanUpMoarStuff</span>() : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">      <span class="pl-c">// This is also a ‘test’ teardown method</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>Suite tear down methods are run once, after all of the test methods in the class are run.</p>
+
+<p>Test tear down methods are run just after each test method is run (and thus are potentially run multiple times).</p>
+
+<h3>
+<a id="suite-providers" class="anchor" href="#suite-providers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Suite Providers</h3>
+
+<p>Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider.
+A Suite Provider is marked with the <code>&lt;&lt;SuiteProvider&gt;&gt;</code> attribute.</p>
+
+<p>You may define multiple Suite Providers for a single test suite.  To do so, you must label each one
+by passing in one string parameter to the attribute (i.e., <code>&lt;&lt;SuiteProvider('name of provider')&gt;&gt;</code>).
+There are no restrictions on the name of a provider except that each provider name must be unique.</p>
+
+<p>To use a particular Suite Provider for a particular test, you must pass the name of the Suite Provider to the Test attribute.</p>
+
+<pre><code>class SuiteWithProviders
+{
+    &lt;&lt;SuiteProvider('One')&gt;&gt;
+    public static function() : this
+    {
+        $someDependency = new TestDoubleOne();
+        return new static($someDependency);
+    }
+
+    &lt;&lt;SuiteProvider('Two')&gt;&gt;
+    public static function() : this
+    {
+        $someDependency = new TestDoubleTwo();
+        return new static($someDependency);
+    }
+
+    &lt;&lt;Test('One')&gt;&gt;
+    public function testOne(Assert $assert) : void
+    {
+        // Do some assertions using TestDoubleOne
+    }
+
+    &lt;&lt;Test('Two')&gt;&gt;
+    public function testTwo(Assert $assert) : void
+    {
+        // Do some assertions using TestDoubleTwo
+    }
+}
+</code></pre>
+
+<h2>
+<a id="assertions" class="anchor" href="#assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Assertions</h2>
+
+<p>All test methods must accept exactly one parameter of type <code>HackPack\HackUnit\Contract\Assert</code> which should be used to make testable assertions.
+This object is used to build assertions that will be checked and reported by HackUnit.</p>
+
+<p>In all examples below, <code>$assert</code> contains an instance of <code>HackPack\HackUnit\Contract\Assert</code>.</p>
+
+<h3>
+<a id="bool-assertions" class="anchor" href="#bool-assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bool Assertions</h3>
+
+<p>To make assertions about <code>bool</code> type variables, call <code>$assert-&gt;bool($myBool)-&gt;is($expected)</code>.</p>
+
+<h3>
+<a id="numeric-assertions" class="anchor" href="#numeric-assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Numeric Assertions</h3>
+
+<p>To make assertions about <code>int</code> and <code>float</code> type variables, call <code>$assert-&gt;int($myInt)</code> and <code>$assert-&gt;float($myFloat)</code> respectively.
+The resulting object contains the following methods to actually perform the appropriate assertion.</p>
+
+<ul>
+<li>
+<code>$assert-&gt;int($myInt)-&gt;eq($expected);</code> : Assert that <code>$myInt</code> is identical to <code>$expected</code>
+</li>
+<li>
+<code>$assert-&gt;int($myInt)-&gt;gt($expected);</code> : Assert that <code>$myInt</code> is greater than <code>$expected</code>
+</li>
+<li>
+<code>$assert-&gt;int($myInt)-&gt;lt($expected);</code> : Assert that <code>$myInt</code> is less than <code>$expected</code>
+</li>
+<li>
+<code>$assert-&gt;int($myInt)-&gt;gte($expected);</code> : Assert that <code>$myInt</code> is greater than or equal to <code>$expected</code>
+</li>
+<li>
+<code>$assert-&gt;int($myInt)-&gt;lte($expected);</code> : Assert that <code>$myInt</code> is less than or equal to <code>$expected</code>
+</li>
+</ul>
+
+<p>All of the above may be modified with a call to <code>not()</code> before the assertion to negate the meaning of the assertion.  For example:</p>
+
+<pre><code> $assert-&gt;int($myInt)-&gt;not()-&gt;eq($expected);
+</code></pre>
+
+<p><em>Note</em>: This library only allows assertions to compare identical numeric types.  <code>$assert-&gt;int(1)-&gt;eq(1.0);</code> produces a type error.</p>
+
+<h3>
+<a id="string-assertions" class="anchor" href="#string-assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>String Assertions</h3>
+
+<p>To make assertions about <code>string</code> type variables, call <code>$assert-&gt;string($myString)</code>.  The resulting object contains the following methods to actually perform the appropriate assertion.</p>
+
+<ul>
+<li>
+<code>$assert-&gt;string($myString)-&gt;is($expected)</code> : Assert that <code>$myString === $expected</code>
+</li>
+<li>
+<code>$assert-&gt;string($myString)-&gt;hasLength($int)</code> : Assert that the string has a length of <code>$int</code>
+</li>
+<li>
+<code>$assert-&gt;string($myString)-&gt;matches($pattern)</code> : Assert that the regular expression contained in <code>$pattern</code> matches the string</li>
+<li>
+<code>$assert-&gt;string($myString)-&gt;contains($subString)</code> : Assert that <code>$subString</code> is a substring of <code>$myString</code>
+</li>
+<li>
+<code>$assert-&gt;string($myString)-&gt;containedBy($superString)</code> : Assert that <code>$myString</code> is a substring of <code>$superString</code>
+</li>
+</ul>
+
+<p>All of the above assertions may be negated by calling <code>not()</code> before making the assertion.  For example:</p>
+
+<pre><code> $assert-&gt;string($myString)-&gt;not()-&gt;containedBy($superString);
+</code></pre>
+
+<h3>
+<a id="collection-assertions" class="anchor" href="#collection-assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Collection Assertions</h3>
+
+<p>To make assertions about collections and arrays, call <code>$assert-&gt;container($context)</code>.  The resulting object contains the following methods to perform assertions.</p>
+
+<ul>
+<li>
+<code>$assert-&gt;container($context)-&gt;isEmpty();</code> : Assert that the context has no elements</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;contains($value);</code> : Assert that the context contains the value given</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsAny($list);</code> : Assert that the context contains at least one element in the list provided</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsAll($list);</code> : Assert that the context contains all elements in the list provided</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsOnly($list);</code> : Assert that the context contains all elements in the list provided and no more</li>
+</ul>
+
+<p>All of the <code>contains*</code> assertions above accept an optional second parameter which must be a callable.  The callable will be used to compare the elements in the context with the element(s) provided. If the elements passed to the callable should be treated as equivalent, the callable should return <code>true</code>, otherwise it should return <code>false</code>.</p>
+
+<h4>
+<a id="keyed-collections" class="anchor" href="#keyed-collections" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Keyed Collections</h4>
+
+<p>If the keys of the container are important for the assertions, you should use <code>$assert-&gt;keyedContainer($context)</code>.  The resulting object contains the following methods to perform assertions.</p>
+
+<ul>
+<li>
+<code>$assert-&gt;container($context)-&gt;contains($key, $value);</code> : Assert that the value contained in the context at the key provided matches the value provided</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsKey($key);</code> : Assert that the context contains the provided key</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsAny($list);</code> : Assert that the context contains at least one element in the list provided where both the key and value must be considered equivalent</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsAll($list);</code> : Assert that the context contains all elements in the list provided where both the key and value must be considered equivalent</li>
+<li>
+<code>$assert-&gt;container($context)-&gt;containsOnly($list);</code> : Assert that the context contains all elements in the list provided and no more where both the key and value must be considered equivalent</li>
+</ul>
+
+<p>All of the assertions above accept an optional second (or third in the case of <code>contains</code>) parameter which must be a callable.  The callable will be used to compare the values of the elements in the context with the element(s) provided. If the values passed to the callable should be treated as equivalent, the callable should return <code>true</code>, otherwise it should return <code>false</code>.</p>
+
+<h3>
+<a id="mixed-assertions" class="anchor" href="#mixed-assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Mixed Assertions</h3>
+
+<p>To make generic assertions about a variable of any type, call <code>$assert-&gt;mixed($context)</code>.  The resulting object contains the following methods to actually perform the appropriate assertion.</p>
+
+<ul>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isNull();</code> : Assert that <code>$context === null</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isBool();</code> : Assert that <code>$context</code> is of type <code>bool</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isInt();</code> : Assert that <code>$context</code> is of type <code>int</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isFloat();</code> : Assert that <code>$context</code> is of type <code>float</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isString();</code> : Assert that <code>$context</code> is of type <code>string</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isArray();</code> : Assert that <code>$context</code> is of type <code>array</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isObject();</code> : Assert that <code>$context</code> is of type <code>object</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;isTypeOf($className)</code> : Assert that <code>$context instanceof $className</code>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;looselyEquals($expected)</code> : Assert that <code>$context == $expected</code> <em>note the loose comparison</em>
+</li>
+<li>
+<code>$assert-&gt;mixed($context)-&gt;identicalTo($expected)</code> : Assert that <code>$context === $expected</code> <em>note the strict comparison</em>
+</li>
+</ul>
+
+<h2>
+<a id="skipping-tests" class="anchor" href="#skipping-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Skipping Tests</h2>
+
+<p>There are two ways to skip execution of a particular test method:</p>
+
+<ol>
+<li>Add the attribute <code>&lt;&lt;Skip&gt;&gt;</code> to the test method or the test suite.  If the <code>&lt;&lt;Skip&gt;&gt;</code> attribute is added to the suite, all tests in that class will be skipped.</li>
+<li>Invoke the <code>skip()</code> method of the <code>Assert</code> object passed to your test method.</li>
+</ol>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">use</span> <span class="pl-c1">\HackPack\HackUnit\Contract\Assert</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">&lt;&lt;</span><span class="pl-c1">Skip</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">SkippedSuite</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-c">// All methods here would be skipped</span></span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MySuite</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Test</span>, <span class="pl-c1">Skip</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">skippedTest</span>(<span class="pl-c1">Assertion</span> <span class="pl-smi">$assert</span>) : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-c">// This will not be run and the test will be marked skip in the report.</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Test</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">skipFromMiddleOfTest</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>) : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-c">// This will be run</span></span>
+<span class="pl-s1">        <span class="pl-smi">$assert</span><span class="pl-k">-&gt;</span>skip();</span>
+<span class="pl-s1">        <span class="pl-c">// This will not be run and the test will be marked skip in the report.</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<h2>
+<a id="how-hackunit-loads-tests" class="anchor" href="#how-hackunit-loads-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How HackUnit loads tests</h2>
+
+<p>All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's
+<a href="https://github.com/fredemmott/definition-finder">Definition Finder</a> library. Those files will then be loaded and reflection is used to determine
+which classes are test suites, and which methods perform each task in the suite.</p>
+
+<p>Thanks <a href="https://github.com/fredemmott">Fred!</a></p>
+
+<h2>
+<a id="strict-mode-all-the-files" class="anchor" href="#strict-mode-all-the-files" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Strict mode all the files!</h2>
+
+<p>Well... not quite.</p>
+
+<p>Top level code must use <code>// partial</code> mode, so the <code>bin/hackunit</code> file is not in strict mode.  The rest of the project is, with one exception.
+Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use <code>include_once</code> inside
+of a class method, which is disallowed in strict mode.  This one exception is marked with a <code>/* HH_FIXME */</code> comment, which disables the type checker for that
+one line.</p>
+
+<h2>
+<a id="running-hackunits-tests" class="anchor" href="#running-hackunits-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running HackUnit's tests</h2>
+
+<p>HackUnit is tested with HackUnit. From the project directory run:</p>
+
+<pre><code>hhvm /path/to/composer.phar test
+</code></pre>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
