@@ -44,7 +44,9 @@
 
 <p><em>Because you like Hack specific features!</em></p>
 
-<p>With HackUnit, you can easily run your tests using cooperative async using the built in <code>async</code> keyword.</p>
+<p>With HackUnit, you can easily run your tests using cooperative async with the built in <code>async</code> keyword.</p>
+
+<p>With HackUnit, you can easily iterate through your test data in an async way using the <code>yield</code> keyword.</p>
 
 <p>With HackUnit, you indicate test methods using <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">annotations.</a></p>
 
@@ -71,7 +73,8 @@
 <p>Some command line options exist to alter the behavior of HackUnit:</p>
 
 <ul>
-<li>--exclude="path/to/exclude" : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files.</li>
+<li>
+<code>--exclude="path/to/exclude"</code> : Do not scan the file or any file under the path provided.  This option may be given multiple times to exclude multiple paths/files.</li>
 </ul>
 
 <h2>
@@ -135,19 +138,14 @@ If you mark a method as a test and the signature does not match, the test will n
 <span class="pl-s1">    }</span>
 <span class="pl-s1">}</span></pre></div>
 
-<p>All such <code>async</code> tests are run using cooperative multitasking (see the <a href="http://docs.hhvm.com/hack/async/introduction">async documentation</a>),
-allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, network calls, etc...).</p>
+<p>All such <code>async</code> tests are run using cooperative multitasking (see the <a href="http://docs.hhvm.com/hack/async/introduction">async documentation</a>), allowing your entire test suite to run faster if your tests perform real I/O operations (DB calls, network calls, etc...).</p>
 
 <h3>
 <a id="setup" class="anchor" href="#setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setup</h3>
 
-<p>You may have HackUnit run some methods before each individual test method is run and/or before any test method is
-run for the suite.  To do so, mark the appropriate method with the
-<code>&lt;&lt;Setup&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>.
-Multiple setup methods may be declared, but the execution order is not guaranteed.</p>
+<p>You may have HackUnit run some methods before each individual test method is run and/or before any test method is run for the suite.  To do so, mark the appropriate method with the <code>&lt;&lt;Setup&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>. Multiple setup methods may be declared, but the execution order is not guaranteed.</p>
 
-<p>Each setup method (both suite and test) MUST require exactly 0 parameters.
-If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.</p>
+<p>Each setup method (both suite and test) MUST require exactly 0 parameters. If you mark a method as setup and it requires a parameter, it will not be executed and a parse error will be shown in the report.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MySuite</span></span>
 <span class="pl-s1">{</span>
@@ -179,13 +177,9 @@ If you mark a method as setup and it requires a parameter, it will not be execut
 <h3>
 <a id="teardown" class="anchor" href="#teardown" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Teardown</h3>
 
-<p>You may have HackUnit run some methods after each individual test method is run and/or after all test methods are
-run for the suite.  To do so, mark the appropriate method with the
-<code>&lt;&lt;TearDown&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>.
-Multiple teardown methods may be declared, but the execution order is not guaranteed.</p>
+<p>You may have HackUnit run some methods after each individual test method is run and/or after all test methods are run for the suite.  To do so, mark the appropriate method with the <code>&lt;&lt;TearDown&gt;&gt;</code> <a href="http://docs.hhvm.com/manual/en/hack.attributes.php">attribute</a>. Multiple teardown methods may be declared, but the execution order is not guaranteed.</p>
 
-<p>Each teardown method (both suite and test) MUST require exactly 0 parameters.
-If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.</p>
+<p>Each teardown method (both suite and test) MUST require exactly 0 parameters. If you mark a method as teardown and it requires a parameter, it will not be executed and a parse error will be shown in the report.</p>
 
 <div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MySuite</span></span>
 <span class="pl-s1">{</span>
@@ -216,50 +210,45 @@ If you mark a method as teardown and it requires a parameter, it will not be exe
 <h3>
 <a id="suite-providers" class="anchor" href="#suite-providers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Suite Providers</h3>
 
-<p>Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider.
-A Suite Provider is marked with the <code>&lt;&lt;SuiteProvider&gt;&gt;</code> attribute.</p>
+<p>Your test suite may require parameters to be passed to the constructor.  To tell HackUnit how to construct your test suite, you must define at least one Suite Provider. A Suite Provider is marked with the <code>&lt;&lt;SuiteProvider&gt;&gt;</code> attribute.</p>
 
-<p>You may define multiple Suite Providers for a single test suite.  To do so, you must label each one
-by passing in one string parameter to the attribute (i.e., <code>&lt;&lt;SuiteProvider('name of provider')&gt;&gt;</code>).
-There are no restrictions on the name of a provider except that each provider name must be unique.</p>
+<p>You may define multiple Suite Providers for a single test suite.  To do so, you must label each one by passing in one string parameter to the attribute (i.e., <code>&lt;&lt;SuiteProvider('name of provider')&gt;&gt;</code>). There are no restrictions on the name of a provider except that each provider name must be unique.</p>
 
 <p>To use a particular Suite Provider for a particular test, you must pass the name of the Suite Provider to the Test attribute.</p>
 
-<pre><code>class SuiteWithProviders
-{
-    &lt;&lt;SuiteProvider('One')&gt;&gt;
-    public static function() : this
-    {
-        $someDependency = new TestDoubleOne();
-        return new static($someDependency);
-    }
-
-    &lt;&lt;SuiteProvider('Two')&gt;&gt;
-    public static function() : this
-    {
-        $someDependency = new TestDoubleTwo();
-        return new static($someDependency);
-    }
-
-    &lt;&lt;Test('One')&gt;&gt;
-    public function testOne(Assert $assert) : void
-    {
-        // Do some assertions using TestDoubleOne
-    }
-
-    &lt;&lt;Test('Two')&gt;&gt;
-    public function testTwo(Assert $assert) : void
-    {
-        // Do some assertions using TestDoubleTwo
-    }
-}
-</code></pre>
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">SuiteWithProviders</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>SuiteProvider(<span class="pl-s"><span class="pl-pds">'</span>One<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span>() : this</span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-smi">$someDependency</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">TestDoubleOne</span>();</span>
+<span class="pl-s1">        <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-k">static</span>(<span class="pl-smi">$someDependency</span>);</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>SuiteProvider(<span class="pl-s"><span class="pl-pds">'</span>Two<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span>() : this</span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-smi">$someDependency</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">TestDoubleTwo</span>();</span>
+<span class="pl-s1">        <span class="pl-k">return</span> <span class="pl-k">new</span> <span class="pl-k">static</span>(<span class="pl-smi">$someDependency</span>);</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>Test(<span class="pl-s"><span class="pl-pds">'</span>One<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">testOne</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>) : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-c">// Do some assertions using TestDoubleOne</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">&lt;&lt;</span>Test(<span class="pl-s"><span class="pl-pds">'</span>Two<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">testTwo</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>) : <span class="pl-c1">void</span></span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-c">// Do some assertions using TestDoubleTwo</span></span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
 
 <h2>
 <a id="assertions" class="anchor" href="#assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Assertions</h2>
 
-<p>All test methods must accept exactly one parameter of type <code>HackPack\HackUnit\Contract\Assert</code> which should be used to make testable assertions.
-This object is used to build assertions that will be checked and reported by HackUnit.</p>
+<p>All test methods must accept exactly one parameter of type <code>HackPack\HackUnit\Contract\Assert</code> which should be used to make testable assertions. This object is used to build assertions that will be checked and reported by HackUnit.</p>
 
 <p>In all examples below, <code>$assert</code> contains an instance of <code>HackPack\HackUnit\Contract\Assert</code>.</p>
 
@@ -271,8 +260,7 @@ This object is used to build assertions that will be checked and reported by Hac
 <h3>
 <a id="numeric-assertions" class="anchor" href="#numeric-assertions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Numeric Assertions</h3>
 
-<p>To make assertions about <code>int</code> and <code>float</code> type variables, call <code>$assert-&gt;int($myInt)</code> and <code>$assert-&gt;float($myFloat)</code> respectively.
-The resulting object contains the following methods to actually perform the appropriate assertion.</p>
+<p>To make assertions about <code>int</code> and <code>float</code> type variables, call <code>$assert-&gt;int($myInt)</code> and <code>$assert-&gt;float($myFloat)</code> respectively. The resulting object contains the following methods to actually perform the appropriate assertion.</p>
 
 <ul>
 <li>
@@ -440,11 +428,54 @@ The resulting object contains the following methods to actually perform the appr
 <span class="pl-s1">}</span></pre></div>
 
 <h2>
+<a id="data-providers" class="anchor" href="#data-providers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data Providers</h2>
+
+<p>You may mark some methods as providing a list of data that should be iterated and passed to a test method.  To do this, mark the data providing method with the <code>&lt;&lt;DataProvider('name')&gt;&gt;</code> attribute.  You must name your data provider as shown to allow HackUnit to know which data provider should be used for each test that consumes data.</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">TestThatUsesData</span> {</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">&lt;&lt;</span>DataProvider(<span class="pl-s"><span class="pl-pds">'</span>csv values<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span> <span class="pl-en">loadCsvValues</span>(): <span class="pl-c1">AsyncIterator</span><span class="pl-k">&lt;</span><span class="pl-k">array</span><span class="pl-k">&lt;</span><span class="pl-k">string</span><span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">  {</span>
+<span class="pl-s1">    <span class="pl-smi">$asynCsvLoader</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">AsyncCsvLoader</span>(<span class="pl-s"><span class="pl-pds">'</span>/path/to/data.csv<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">    <span class="pl-k">foreach</span>(<span class="pl-smi">$asyncCsvLoader</span> <span class="pl-c1">await</span> <span class="pl-k">as</span> <span class="pl-smi">$line</span>) {</span>
+<span class="pl-s1">      <span class="pl-k">yield</span> <span class="pl-smi">$line</span>;</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Test</span>, Data(<span class="pl-s"><span class="pl-pds">'</span>csv values<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">testCsvValues</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>, array&lt;string&gt; <span class="pl-smi">$line</span>): <span class="pl-c1">void</span></span>
+<span class="pl-s1">  {</span>
+<span class="pl-s1">    <span class="pl-c">// Do assertions using the data from the csv file.</span></span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">&lt;&lt;</span>DataProvider(<span class="pl-s"><span class="pl-pds">'</span>simple count<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">static</span> <span class="pl-k">function</span> <span class="pl-en">count</span>(): <span class="pl-c1">Traversable</span><span class="pl-k">&lt;</span><span class="pl-k">int</span><span class="pl-k">&gt;</span></span>
+<span class="pl-s1">  {</span>
+<span class="pl-s1">    <span class="pl-k">return</span> <span class="pl-c1">Vector</span>{<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>, <span class="pl-c1">4</span>, <span class="pl-c1">5</span>};</span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-k">&lt;&lt;</span><span class="pl-c1">Test</span>, Data(<span class="pl-s"><span class="pl-pds">'</span>simple count<span class="pl-pds">'</span></span>)<span class="pl-k">&gt;&gt;</span></span>
+<span class="pl-s1">  <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">countingTest</span>(<span class="pl-c1">Assert</span> <span class="pl-smi">$assert</span>, <span class="pl-c1">int</span> <span class="pl-smi">$count</span>): <span class="pl-c1">void</span></span>
+<span class="pl-s1">  {</span>
+<span class="pl-s1">    <span class="pl-c">// This test will be run five times, once for each of the values in the vector above.</span></span>
+<span class="pl-s1">  }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>The example above demonstrates defining both async and non-async data providers.  Special note should be taken of the return values.</p>
+
+<ul>
+<li>Async data providers <em>MUST</em> return <code>AsyncIterator&lt;dataType&gt;</code>.</li>
+<li>Non-async data providers <em>MUST</em> return <code>Traversable&lt;dataType&gt;</code>.</li>
+<li>The consumer of a data provider <em>MUST</em> accept exactly <code>dataType</code> as the second parameter.</li>
+</ul>
+
+<p>In the example above, a <code>MalformedSuite</code> error would occur if the csv consumer function had the signature <code>public function testCsvValues(Assert $assert, Traversable&lt;string&gt;): void</code>.  Even though an <code>array&lt;string&gt;</code> is a type of <code>Traversable&lt;string&gt;</code>, the HackUnit parser compares the string representation of the types to ensure invalid data is never passed to the test methods.</p>
+
+<h2>
 <a id="how-hackunit-loads-tests" class="anchor" href="#how-hackunit-loads-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How HackUnit loads tests</h2>
 
-<p>All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's
-<a href="https://github.com/fredemmott/definition-finder">Definition Finder</a> library. Those files will then be loaded and reflection is used to determine
-which classes are test suites, and which methods perform each task in the suite.</p>
+<p>All files inside the base path(s) specified from the command line will be scanned for class definitions using Fred Emmott's <a href="https://github.com/fredemmott/definition-finder">Definition Finder</a> library. Those files will then be loaded and reflection is used to determine which classes are test suites, and which methods perform each task in the suite.</p>
 
 <p>Thanks <a href="https://github.com/fredemmott">Fred!</a></p>
 
@@ -453,10 +484,7 @@ which classes are test suites, and which methods perform each task in the suite.
 
 <p>Well... not quite.</p>
 
-<p>Top level code must use <code>// partial</code> mode, so the <code>bin/hackunit</code> file is not in strict mode.  The rest of the project is, with one exception.
-Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use <code>include_once</code> inside
-of a class method, which is disallowed in strict mode.  This one exception is marked with a <code>/* HH_FIXME */</code> comment, which disables the type checker for that
-one line.</p>
+<p>Top level code must use <code>// partial</code> mode, so the <code>bin/hackunit</code> file is not in strict mode.  The rest of the project is, with one exception. Test suite files must be dynamically loaded after being scanned for test suites.  The only way I can see to perform this dynamic inclusion is to use <code>include_once</code> inside of a class method, which is disallowed in strict mode.  This one exception is marked with a <code>/* HH_FIXME */</code> comment, which disables the type checker for that one line.</p>
 
 <h2>
 <a id="running-hackunits-tests" class="anchor" href="#running-hackunits-tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running HackUnit's tests</h2>
