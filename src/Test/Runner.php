@@ -98,13 +98,13 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
 
     $builder = $this->assertBuilder;
 
-    $awaitable = Asio\v(
+    $awaitable = Asio\vw(
       $suites->map(
         async ($s) ==> {
           $this->emitSuiteStart();
           await $s->up();
 
-          await $s->run(
+          $testResult = await $s->run(
             $builder(
               $this->failureListeners,
               $this->skipListeners,
@@ -113,12 +113,16 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
             () ==> {
               $this->emitPass();
             },
-          );
+          ) |> Asio\wrap($$);
 
           await $s->down();
           $this->emitSuiteEnd();
+
+          if ($testResult->isFailed()) {
+            throw $testResult->getException();
+          }
         },
-      )->map(fun('\HH\Asio\wrap')),
+      ),
     );
 
     foreach (Asio\join($awaitable) as $result) {

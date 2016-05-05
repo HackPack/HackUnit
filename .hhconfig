@@ -1,0 +1,2 @@
+assume_php = false
+user_attributes = Test Setup SuiteProvider TearDown Skip Data DataProvider

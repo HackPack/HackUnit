@@ -19,6 +19,7 @@ class RunnerTest {
   private Vector<SkipListener> $skipListeners = Vector {};
   private Vector<SuccessListener> $successListeners = Vector {};
   private Vector<Assert> $asserts = Vector {};
+  private Vector<\Exception> $uncaughtExceptions = Vector {};
   private Runner $runner;
   private int $testsPassed = 0;
 
@@ -153,5 +154,33 @@ class RunnerTest {
     $assert->int($this->testsPassed)->eq(0);
     $passCallback();
     $assert->int($this->testsPassed)->eq(1);
+  }
+
+  <<Test>>
+  public function unexpectedExceptionIsHandled(Assert $assert): void {
+    $this->runner->onUncaughtException(
+      $e ==> {
+        $this->uncaughtExceptions->add($e);
+      },
+    );
+
+    $exception = new \Exception('With a message');
+    $suite = new SpySuite(
+      () ==> {
+        throw $exception;
+      },
+    );
+
+    $assert->whenCalled(
+      () ==> {
+        $this->runner->run(Vector {$suite});
+      },
+    )->willNotThrow();
+
+    $assert->container($this->uncaughtExceptions)
+      ->containsOnly(Vector {$exception});
+    $assert->int($suite->counts['up'])->eq(1);
+    $assert->int($suite->counts['run'])->eq(1);
+    $assert->int($suite->counts['down'])->eq(1);
   }
 }

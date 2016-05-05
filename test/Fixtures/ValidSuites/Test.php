@@ -6,10 +6,10 @@ use HackPack\HackUnit\Contract\Assert;
 
 class Test {
   <<Test>>
-  public function defaultProvider(Assert $assert): void {}
+  public function defaultSuiteProvider(Assert $assert): void {}
 
   <<Test('named')>>
-  public function namedProvider(Assert $assert): void {}
+  public function namedSuiteProvider(Assert $assert): void {}
 
   <<Test>>
   public static function staticTest(Assert $assert): void {}

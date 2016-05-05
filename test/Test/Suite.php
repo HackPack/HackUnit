@@ -34,6 +34,55 @@ class SuiteTest {
   }
 
   <<Test>>
+  public function dataConsumerTest(Assert $assert): void {
+    $testMethod = async ($instance, $args) ==> {
+      $this->testRuns++;
+      $assert->mixed($instance)->identicalTo($this);
+      $assert->int(count($args))->eq(2);
+      $assert->mixed($args[0])->isTypeOf(Assert::class);
+      $assert->mixed($args[1])->identicalTo($this->testRuns);
+    };
+    $test = shape(
+      'factory' => $this->factory,
+      'method' => $testMethod,
+      'trace item' => $this->traceItem,
+      'skip' => false,
+      'data provider' => async () ==> {
+        yield [1];
+        yield [2];
+      },
+    );
+    $suite =
+      new Suite(Vector {$test}, Vector {}, Vector {}, Vector {}, Vector {});
+
+    $assert->whenCalled(() ==> $this->runSuite($suite))->willNotThrow();
+    $assert->int($this->passedEvents)->eq(2);
+    $assert->int($this->testRuns)->eq(2);
+  }
+
+  <<Test>>
+  public function unexpectedExceptionTest(Assert $assert): void {
+    $tests = Vector {
+      $this->makePassingTest($assert),
+      $this->makeUnexpectedExceptionTest(),
+      $this->makePassingTest($assert),
+    };
+    $suite = new Suite(
+      $tests,
+      Vector {},
+      Vector {},
+      Vector {$this->makeTestUp($assert)},
+      Vector {$this->makeTestDown($assert)},
+    );
+
+    $assert->whenCalled(() ==> $this->runSuite($suite))
+      ->willThrowMessage('This is the message');
+    $assert->int($this->passedEvents)->eq(2);
+    $assert->int($this->testUpRuns)->eq(3);
+    $assert->int($this->testDownRuns)->eq(2);
+  }
+
+  <<Test>>
   public function suiteTests(Assert $assert): void {
     foreach (range(0, 3) as $thirdTestCount) {
 
@@ -134,6 +183,9 @@ class SuiteTest {
       'method' => $this->makeTestMethod($assert),
       'trace item' => $this->traceItem,
       'skip' => false,
+      'data provider' => async () ==> {
+        yield [];
+      },
     );
   }
 
@@ -143,6 +195,24 @@ class SuiteTest {
       'method' => $this->makeTestMethod($assert),
       'trace item' => $this->traceItem,
       'skip' => true,
+      'data provider' => async () ==> {
+        yield [];
+      },
+    );
+  }
+
+  private function makeUnexpectedExceptionTest(): TestShape {
+    return shape(
+      'factory' => $this->factory,
+      'method' => async ($instance, $args) ==> {
+        $this->testRuns++;
+        throw new \Exception('This is the message');
+      },
+      'trace item' => $this->traceItem,
+      'skip' => false,
+      'data provider' => async () ==> {
+        yield [];
+      },
     );
   }
 
@@ -155,6 +225,9 @@ class SuiteTest {
       },
       'trace item' => $this->traceItem,
       'skip' => false,
+      'data provider' => async () ==> {
+        yield [];
+      },
     );
   }
 

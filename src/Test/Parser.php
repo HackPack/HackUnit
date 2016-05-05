@@ -11,6 +11,11 @@ use ReflectionMethod;
 class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
   private Vector<MalformedSuite> $errors = Vector {};
   private Map<string, string> $factories = Map {};
+  private Map<string,
+  shape(
+    'method' => string,
+    'data type' => string,
+  )> $dataProviders = Map {};
   private Vector<string> $suiteUp = Vector {};
   private Vector<string> $suiteDown = Vector {};
   private Vector<string> $testUp = Vector {};
@@ -19,6 +24,7 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
     'factory name' => string,
     'method' => string,
     'skip' => bool,
+    'data provider' => string,
   )> $tests = Vector {};
 
   private ReflectionClass $class;
@@ -32,14 +38,19 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
     $constructor = null;
 
     // Only look for tests if the class is instantiable
-    if (!$this->class->isAbstract()) {
-      foreach ($this->class->getMethods() as $method) {
-        if ($method->isConstructor()) {
-          $constructor = $method;
-          continue;
-        }
-        $this->categorize($method);
+    if ($this->class->isAbstract()) {
+      return;
+    }
+
+    // Need to identify data providers before validating test methods
+    $this->extractDataProviders();
+
+    foreach ($this->class->getMethods() as $method) {
+      if ($method->isConstructor()) {
+        $constructor = $method;
+        continue;
       }
+      $this->categorize($method);
     }
 
     if ($constructor !== null) {
@@ -72,6 +83,7 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
     'factory name' => string,
     'method' => string,
     'skip' => bool,
+    'data provider' => string,
   )> {
     return $this->tests;
   }
@@ -165,27 +177,26 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
 
   private function checkTest(ReflectionMethod $method): void {
     // Look for <<Test>> attribute
-    $attr = (new Map($method->getAttributes()))->get('Test');
-    if ($attr === null) {
+    $testAttr = (new Map($method->getAttributes()))->get('Test');
+    if ($testAttr === null) {
       return;
     }
 
     // If no value, this will be null cast to a string
     // and the empty string is the alias for the default factory
-    $factory = (string) (new Vector($attr))->get(0);
+    $factory = (string) (new Vector($testAttr))->get(0);
 
-    // Ensure method takes an Assert as the only parameter
-    $params = new Vector($method->getParameters());
+    $dataAttr = $method->getAttribute('Data');
+    if ($dataAttr === null) {
+      $dataProvider = null;
+    } else {
+      $dataProvider = $this->determineDataProviderForTest($method, $dataAttr);
+      if ($dataProvider === null) {
+        return;
+      }
+    }
 
-    if ($params->count() !== 1 ||
-        $params->at(0)->getType()?->__toString() !== Assert::class) {
-      $this->errors
-        ->add(
-          new MalformedSuite(
-            Trace::fromReflectionMethod($method),
-            'Test methods must accept exactly 1 parameter of type HackPack\HackUnit\Contract\Assert',
-          ),
-        );
+    if ($this->testParamsAreInvalid($method, $dataProvider)) {
       return;
     }
 
@@ -194,8 +205,82 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
         'factory name' => $factory,
         'method' => $method->getName(),
         'skip' => (new Map($method->getAttributes()))->containsKey('Skip'),
+        'data provider' =>
+          $dataProvider === null ? '' : $dataProvider['method'],
       ),
     );
+  }
+
+  private function determineDataProviderForTest(
+    ReflectionMethod $method,
+    array<mixed> $dataAttr,
+  ): ?shape(
+    'method' => string,
+    'data type' => string,
+  ) {
+    if (count($dataAttr) < 1) {
+      $this->errors
+        ->add(
+          new MalformedSuite(
+            Trace::fromReflectionMethod($method),
+            'You must specify the data provider to use, e.g. <<Test, Data(\'my provider\')>>',
+          ),
+        );
+      return null;
+    }
+
+    $provider = $this->dataProviders->get((string) $dataAttr[0]);
+    if ($provider === null) {
+      $this->errors->add(
+        new MalformedSuite(
+          Trace::fromReflectionMethod($method),
+          'Unknown data provider "'.(string) $dataAttr[0].'"',
+        ),
+      );
+      return null;
+    }
+
+    return $provider;
+  }
+
+  private function testParamsAreInvalid(
+    ReflectionMethod $method,
+    ?shape(
+      'method' => string,
+      'data type' => string,
+    ) $dataProvider,
+  ): bool {
+
+    $expectedParams = Vector {Assert::class};
+    if ($dataProvider !== null) {
+      $expectedParams->add($dataProvider['data type']);
+    }
+
+    $params = new Vector($method->getParameters());
+    $invalidParams = $params->filterWithKey(
+      ($index, $parameter) ==> {
+        if (!$expectedParams->containsKey($index)) {
+          return true;
+        }
+
+        return $parameter->getTypeText() !== $expectedParams->at($index);
+      },
+    );
+
+    if ($invalidParams->count() > 0 || $params->isEmpty()) {
+      sprintf(
+        'Test method %s must accept exactly %d %s %s',
+        $method->getName(),
+        $expectedParams->count(),
+        $expectedParams->count() === 1 ? 'type' : 'types',
+        implode(' and ', $expectedParams),
+      )
+        |> $this->errors->add(
+          new MalformedSuite(Trace::fromReflectionMethod($method), $$),
+        );
+      return true;
+    }
+    return false;
   }
 
   private function checkFactory(ReflectionMethod $method): void {
@@ -281,6 +366,113 @@ class Parser implements \HackPack\HackUnit\Contract\Test\Parser {
       $returnString === 'HH\this' ||
       $this->class->getName() === $returnString;
 
+  }
+
+  private function extractDataProviders(): void {
+    foreach ($this->class->getMethods() as $method) {
+
+      $dataAttribute = $method->getAttribute('DataProvider');
+      if ($dataAttribute === null) {
+        continue;
+      }
+      if (count($dataAttribute) < 1) {
+        $this->errors
+          ->add(
+            new MalformedSuite(
+              Trace::fromReflectionMethod($method),
+              'Data providers must have a name, e.g. <<DataProvider(\'my provider\')>>',
+            ),
+          );
+        continue;
+      }
+
+      $providerName = $dataAttribute[0];
+      if (!is_string($providerName)) {
+        $this->errors->add(
+          new MalformedSuite(
+            Trace::fromReflectionMethod($method),
+            'Data provider names must be strings.',
+          ),
+        );
+        continue;
+      }
+
+      if (!$method->isStatic()) {
+        $this->errors->add(
+          new MalformedSuite(
+            Trace::fromReflectionMethod($method),
+            'Data providers must be static methods.',
+          ),
+        );
+        continue;
+      }
+
+      if ($method->getNumberOfRequiredParameters() !== 0) {
+        $this->errors->add(
+          new MalformedSuite(
+            Trace::fromReflectionMethod($method),
+            'Data providers must not require input parameters.',
+          ),
+        );
+        continue;
+      }
+
+      $dataType = $this->determineDataProviderType($method);
+      if ($dataType === null) {
+        continue;
+      }
+
+      $this->dataProviders->set(
+        $providerName,
+        shape('method' => $method->getName(), 'data type' => $dataType),
+      );
+    }
+  }
+
+  private function determineDataProviderType(
+    ReflectionMethod $method,
+  ): ?string {
+
+    // Ensure we have a return type
+    $return = $method->getReturnType();
+    if ($return === null) {
+      $this->errors->add(
+        new MalformedSuite(
+          Trace::fromReflectionMethod($method),
+          'You must specify a return type for data provider methods.',
+        ),
+      );
+      return null;
+    }
+
+    // No nullable types
+    if ($return->allowsNull()) {
+      $this->errors->add(
+        new MalformedSuite(
+          Trace::fromReflectionMethod($method),
+          'Data provider methods may not return nullable types.',
+        ),
+      );
+      return null;
+    }
+
+    // Ensure return is foreachable
+    $typeString = (string) $return;
+    $expectedStart =
+      $method->isAsync() ? 'HH\AsyncIterator<' : 'HH\Traversable<';
+    if (substr($typeString, 0, strlen($expectedStart)) !== $expectedStart) {
+      $message =
+        $method->isAsync()
+          ? 'Async data providers must return AsyncIterator<type>'
+          : 'Data providers must return a Traversable<type>';
+      $this->errors->add(
+        new MalformedSuite(Trace::fromReflectionMethod($method), $message),
+      );
+      return null;
+    }
+
+    // The rest of the return string is the type being passed to the test
+    return substr($typeString, strlen($expectedStart), -1);
   }
 
   private function checkConstructor(ReflectionMethod $method): void {

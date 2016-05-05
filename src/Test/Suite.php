@@ -14,6 +14,7 @@ type Test = shape(
   'method' => InvokerWithParams,
   'trace item' => TraceItem,
   'skip' => bool,
+  'data provider' => (function(): AsyncIterator<array<mixed>>),
 );
 
 class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
@@ -30,37 +31,48 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
     Assert $assert,
     (function(): void) $testPassed,
   ): Awaitable<void> {
-    await Asio\v(
-      $this->tests->map(
-        async ($test) ==> {
+    await (async (Test $test) ==> {
 
-          if ($test['skip']) {
-            try {
-              $assert->skip('Test marked <<Skip>>', $test['trace item']);
-            } catch (Interruption $e) {
-              // any listeners should have been notified by now
-            }
-            return;
-          }
+             if ($test['skip']) {
+               try {
+                 $assert->skip('Test marked <<Skip>>', $test['trace item']);
+               } catch (Interruption $e) {
+                 // any listeners should have been notified by now
+               }
+               return;
+             }
 
-          $instance = await $test['factory']();
-          await Asio\v(
-            $this->testup->map($pretest ==> $pretest($instance, [])),
-          );
+             $instance = await $test['factory']();
 
-          try {
-            await $test['method']($instance, [$assert]);
-            $testPassed();
-          } catch (Interruption $e) {
-            // any listeners should have been notified by now
-          }
+             await ($this->testup->map($pretest ==> $pretest($instance, []))
+                      |> Asio\v($$));
 
-          await Asio\v(
-            $this->testdown->map($posttest ==> $posttest($instance, [])),
-          );
-        },
-      ),
-    );
+             $results = Vector {};
+             foreach ($test['data provider']() await as $data) {
+               array_unshift($data, $assert);
+               $results->add($test['method']($instance, $data));
+             }
+             $results = await Asio\vw($results);
+             foreach ($results as $result) {
+               if ($result->isSucceeded()) {
+                 $testPassed();
+               }
+
+               if ($result->isFailed()) {
+                 $exception = $result->getException();
+                 if (!($exception instanceof Interruption)) {
+                   throw $exception;
+                 }
+               }
+             }
+
+             await $this->testdown->map(
+               $posttest ==> $posttest($instance, []),
+             )
+               |> Asio\v($$);
+           })
+      |> $this->tests->map($$)
+      |> Asio\v($$);
   }
 
   public async function up(): Awaitable<void> {
@@ -69,24 +81,5 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
 
   public async function down(): Awaitable<void> {
     await \HH\Asio\v($this->suitedown->map($f ==> $f(null, [])));
-  }
-
-  private function buildSkipTest(
-    \ReflectionMethod $m,
-    string $reason,
-  ): (function(Assert): Awaitable<void>) {
-    return async (Assert $assert) ==> {
-      $assert->skip(
-        $reason,
-        Trace::buildItem(
-          [
-            'file' => $m->getFileName(),
-            'line' => $m->getStartLine(),
-            'function' => $m->getName(),
-            'class' => $m->getDeclaringClass()->getName(),
-          ],
-        ),
-      );
-    };
   }
 }

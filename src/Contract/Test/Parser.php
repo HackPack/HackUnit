@@ -41,6 +41,7 @@ interface Parser {
     'factory name' => string,
     'method' => string,
     'skip' => bool,
+    'data provider' => string,
   )>;
 
   /**

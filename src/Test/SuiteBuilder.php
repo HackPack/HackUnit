@@ -33,18 +33,13 @@ final class SuiteBuilder {
 
       if ($this->markedAsSkipped($scannedClass)) {
         $pos = $scannedClass->getPosition();
-        $suites->add(
-          new SkippedSuite(
-            $scannedClass->getName(),
-            Trace::buildItem(
-              [
-                'line' => $pos['line'],
-                'class' => $scannedClass->getName(),
-                'file' => $pos['filename'],
-              ],
-            ),
-          ),
-        );
+        [
+          'line' => $pos['line'],
+          'class' => $scannedClass->getName(),
+          'file' => $pos['filename'],
+        ] |> Trace::buildItem($$)
+          |> new SkippedSuite($scannedClass->getName(), $$)
+          |> $suites->add($$);
         continue;
       }
 
@@ -89,6 +84,32 @@ final class SuiteBuilder {
     };
   }
 
+  private function buildDataProvider(
+    ?ReflectionMethod $method,
+  ): (function(): AsyncIterator<array<mixed>>) {
+    if ($method === null) {
+      return async () ==> {
+        yield [];
+      };
+    }
+
+    $result = $method->invoke(null);
+
+    if ($method->isAsync()) {
+      return async () ==> {
+        foreach ($result await as $data) {
+          yield [$data];
+        }
+      };
+    }
+
+    return async () ==> {
+      foreach ($result as $data) {
+        yield [$data];
+      }
+    };
+  }
+
   private function buildSuite(
     ReflectionClass $classMirror,
     Parser $parser,
@@ -101,23 +122,22 @@ final class SuiteBuilder {
     $nameToInvoker = $name ==> $this->buildInvoker($getMethod($name));
 
     $factories =
-      $parser->factories()->map(
-        $methodName ==> {
-          return async () ==> {
+      $methodName ==> {
+        return async () ==> {
 
-            if ($methodName === '__construct') {
-              return $classMirror->newInstance();
-            }
+          if ($methodName === '__construct') {
+            return $classMirror->newInstance();
+          }
 
-            $method = $classMirror->getMethod($methodName);
-            $result = $method->invoke(null);
-            if ($method->isAsync()) {
-              $result = await $result;
-            }
-            return $result;
-          };
-        },
-      );
+          $method = $classMirror->getMethod($methodName);
+          $result = $method->invoke(null);
+          if ($method->isAsync()) {
+            $result = await $result;
+          }
+          return $result;
+        };
+      } |> $parser->factories()->map($$);
+
     // Set the default constructor if possible
     if (!$factories->containsKey('')) {
       $default = $this->getDefaultFactory($classMirror);
@@ -132,37 +152,38 @@ final class SuiteBuilder {
     $testDown = $parser->testDown()->map($nameToInvoker);
 
     $nullTests =
-      $parser->tests()
-        ->map(
-          $test ==> {
+      $test ==> {
 
-            if (!$factories->containsKey($test['factory name'])) {
+          if (!$factories->containsKey($test['factory name'])) {
 
-              $msg =
-                $test['factory name'] === ''
-                  ? 'You must provide a factory method to construct your test suite and annotate it with <<SuiteProvider(\'name\')>>.'
-                  : 'Suite provider "'.$test['factory name'].'" not found.';
-
-              $errors->add(
+            ($test['factory name'] === ''
+               ? 'You must provide a factory method to construct your test suite and annotate it with <<SuiteProvider(\'name\')>>.'
+               : 'Suite provider "'.$test['factory name'].'" not found.')
+              |> $errors->add(
                 new MalformedSuite(
                   Trace::fromReflectionMethod($getMethod($test['method'])),
-                  $msg,
+                  $$,
                 ),
               );
 
-              return null;
-            }
+            return null;
+          }
 
-            $method = $getMethod($test['method']);
-            return shape(
+          return
+            $getMethod($test['method']) |> shape(
               'factory' => $factories->at($test['factory name']),
-              'method' => $this->buildInvoker($method),
-              'trace item' => Trace::fromReflectionMethod($method),
+              'method' => $this->buildInvoker($$),
+              'trace item' => Trace::fromReflectionMethod($$),
               'skip' => $test['skip'],
+              'data provider' =>
+                ($test['data provider'] === ''
+                   ? null
+                   : $getMethod($test['data provider']))
+                  |> $this->buildDataProvider($$),
             );
 
-          },
-        );
+        }
+          |> $parser->tests()->map($$);
 
     if (!$errors->isEmpty()) {
       foreach ($errors as $error) {

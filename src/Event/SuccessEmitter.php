@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit\Event;
 
-<<IgnoreCoverage>>
 trait SuccessEmitter {
   private Vector<SuccessListener> $successListeners = Vector {};
 

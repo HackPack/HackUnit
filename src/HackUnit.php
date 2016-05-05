@@ -2,7 +2,6 @@
 
 namespace HackPack\HackUnit;
 
-
 final class HackUnit {
   private static bool $failures = false;
 
