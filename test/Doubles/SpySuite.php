@@ -12,14 +12,18 @@ type RunCounts = shape(
 );
 
 class SpySuite implements Suite {
-  public RunCounts $counts = shape('up' => 0, 'down' => 0, 'run' => 0);
 
+  public RunCounts $counts = shape('up' => 0, 'down' => 0, 'run' => 0);
   public Vector<Assert> $asserts = Vector {};
   public Vector<(function(): void)> $passCallbacks = Vector {};
+
+  private (function(): void) $runAction;
+
   public function __construct(
-    private (function(): void) $runAction = () ==> {
-    },
-  ) {}
+    ?(function(): void) $runAction = null,
+  ) {
+    $this->runAction = $runAction === null ? () ==> {} : $runAction;
+  }
 
   public async function up(): Awaitable<void> {
     $this->counts['up']++;
