@@ -16,5 +16,8 @@ interface Assert {
   public function container<T>(
     Container<T> $context,
   ): Assertion\ContainerAssertion<T>;
+  public function keyedContainer<Tkey,Tval>(
+    KeyedContainer<Tkey,Tval> $context,
+  ): Assertion\KeyedContainerAssertion<Tkey,Tval>;
   public function skip(string $reason, ?TraceItem $traceItem = null): void;
 }
