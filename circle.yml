@@ -1,0 +1,14 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  override:
+    - docker info
+    - docker pull hhvm/hhvm:3.15-lts-latest
+    - docker pull kilahm/composer-hhvm:3.15.1
+    - docker run --rm -v "$(pwd)":"$(pwd)" --workdir="$(pwd)" kilahm/composer-hhvm:3.15.1 install
+
+test:
+  override:
+    - docker run -v "$(pwd)":"$(pwd)" --workdir="$(pwd)" --rm hhvm/hhvm:3.15-lts-latest hhvm -c test.ini test.php
