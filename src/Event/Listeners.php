@@ -11,4 +11,4 @@ type RunStartListener = (function(): void);
 type SkipListener = (function(Skip): void);
 type SuccessListener = (function(): void);
 type SuiteEndListener = (function(): void);
-type SuiteStartListener = (function(): void);
+type SuiteStartListener = (function(SuiteStart): void);

@@ -17,4 +17,8 @@ class AsyncSuite implements Suite {
   ): Awaitable<void> {
     await \HH\Asio\usleep($this->sleepTime);
   }
+
+  public function name(): string {
+    return 'Async test suite';
+  }
 }

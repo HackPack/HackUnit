@@ -20,12 +20,17 @@ type Test = shape(
 class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
 
   public function __construct(
+    private string $name,
     private \ConstVector<Test> $tests = Vector {},
     private \ConstVector<InvokerWithParams> $suiteup = Vector {},
     private \ConstVector<InvokerWithParams> $suitedown = Vector {},
     private \ConstVector<InvokerWithParams> $testup = Vector {},
     private \ConstVector<InvokerWithParams> $testdown = Vector {},
   ) {}
+
+  public function name(): string {
+    return $this->name;
+  }
 
   public async function run(
     Assert $assert,

@@ -198,7 +198,14 @@ final class SuiteBuilder {
         $tests->add($t);
       }
     }
-    return new Suite($tests, $suiteUp, $suiteDown, $testUp, $testDown);
+    return new Suite(
+      $classMirror->getName(),
+      $tests,
+      $suiteUp,
+      $suiteDown,
+      $testUp,
+      $testDown,
+    );
   }
 
   private function getDefaultFactory(

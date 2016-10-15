@@ -19,4 +19,7 @@ class SkippedSuite implements \HackPack\HackUnit\Contract\Test\Suite {
     $assert->skip('Class '.$this->name.' marked "Skipped"', $this->trace);
   }
 
+  public function name(): string {
+    return $this->name;
+  }
 }

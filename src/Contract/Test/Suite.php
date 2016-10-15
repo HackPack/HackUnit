@@ -11,4 +11,5 @@ interface Suite {
     (function(): void) $testPassed,
   ): Awaitable<void>;
   public function down(): Awaitable<void>;
+  public function name(): string;
 }

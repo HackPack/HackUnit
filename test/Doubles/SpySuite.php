@@ -19,10 +19,16 @@ class SpySuite implements Suite {
 
   private (function(): void) $runAction;
 
-  public function __construct(
-    ?(function(): void) $runAction = null,
-  ) {
-    $this->runAction = $runAction === null ? () ==> {} : $runAction;
+  public function __construct(?(function(): void) $runAction = null) {
+    $this->runAction =
+      $runAction === null
+        ? () ==> {
+        }
+        : $runAction;
+  }
+
+  public function name(): string {
+    return 'Spy Suite';
   }
 
   public async function up(): Awaitable<void> {

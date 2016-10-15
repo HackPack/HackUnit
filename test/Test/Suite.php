@@ -52,8 +52,14 @@ class SuiteTest {
         yield [2];
       },
     );
-    $suite =
-      new Suite(Vector {$test}, Vector {}, Vector {}, Vector {}, Vector {});
+    $suite = new Suite(
+      '',
+      Vector {$test},
+      Vector {},
+      Vector {},
+      Vector {},
+      Vector {},
+    );
 
     $assert->whenCalled(() ==> $this->runSuite($suite))->willNotThrow();
     $assert->int($this->passedEvents)->eq(2);
@@ -68,6 +74,7 @@ class SuiteTest {
       $this->makePassingTest($assert),
     };
     $suite = new Suite(
+      '',
       $tests,
       Vector {},
       Vector {},
@@ -101,6 +108,7 @@ class SuiteTest {
 
     foreach (range(0, 2) as $upDownCount) {
       $suite = new Suite(
+        '',
         $tests,
         $this->repeat($upDownCount, $this->makeSuiteUp($assert)),
         $this->repeat($upDownCount, $this->makeSuiteDown($assert)),

@@ -15,6 +15,7 @@ use HackPack\HackUnit\Event\SkipListener;
 use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Event\SuiteEndListener;
 use HackPack\HackUnit\Event\SuiteStartListener;
+use HackPack\HackUnit\Event\SuiteStart;
 use HH\Asio;
 
 class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
@@ -101,7 +102,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
     $awaitable = Asio\vw(
       $suites->map(
         async ($s) ==> {
-          $this->emitSuiteStart();
+          $this->emitSuiteStart(new SuiteStart($s->name()));
           await $s->up();
 
           $testResult = await $s->run(
@@ -140,9 +141,9 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
     }
   }
 
-  private function emitSuiteStart(): void {
+  private function emitSuiteStart(SuiteStart $e): void {
     foreach ($this->suiteStartListeners as $l) {
-      $l();
+      $l($e);
     }
   }
 
