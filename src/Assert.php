@@ -79,9 +79,9 @@ final class Assert implements Contract\Assert {
     );
   }
 
-  public function keyedContainer<Tkey,Tval>(
-    KeyedContainer<Tkey,Tval> $context,
-  ): Contract\Assertion\KeyedContainerAssertion<Tkey,Tval> {
+  public function keyedContainer<Tkey, Tval>(
+    KeyedContainer<Tkey, Tval> $context,
+  ): Contract\Assertion\KeyedContainerAssertion<Tkey, Tval> {
     return new Assertion\KeyedContainerAssertion(
       $context,
       $this->failureListeners,

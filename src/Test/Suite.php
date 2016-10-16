@@ -5,11 +5,15 @@ namespace HackPack\HackUnit\Test;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\TestCase;
 use HackPack\HackUnit\Event\Interruption;
+use HackPack\HackUnit\Event\TestStartListener;
+use HackPack\HackUnit\Event\TestStart;
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 use HH\Asio;
 
 type Test = shape(
+  'name' => string,
+  'suite name' => string,
   'factory' => (function(): Awaitable<mixed>),
   'method' => InvokerWithParams,
   'trace item' => TraceItem,
@@ -35,8 +39,15 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
   public async function run(
     Assert $assert,
     (function(): void) $testPassed,
+    \ConstVector<TestStartListener> $testStartListeners,
   ): Awaitable<void> {
     await (async (Test $test) ==> {
+
+             $testStartEvent =
+               new TestStart($test['suite name'], $test['name']);
+             foreach ($testStartListeners as $testStartListener) {
+               $testStartListener($testStartEvent);
+             }
 
              if ($test['skip']) {
                try {

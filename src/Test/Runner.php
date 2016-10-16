@@ -16,6 +16,8 @@ use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Event\SuiteEndListener;
 use HackPack\HackUnit\Event\SuiteStartListener;
 use HackPack\HackUnit\Event\SuiteStart;
+use HackPack\HackUnit\Event\TestStartListener;
+use HackPack\HackUnit\Event\TestStart;
 use HH\Asio;
 
 class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
@@ -28,6 +30,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
   private Vector<SuccessListener> $successListeners = Vector {};
   private Vector<SuiteEndListener> $suiteEndListeners = Vector {};
   private Vector<SuiteStartListener> $suiteStartListeners = Vector {};
+  private Vector<TestStartListener> $testStartListeners = Vector {};
 
   public function __construct(
     private (function(Vector<FailureListener>,
@@ -76,6 +79,11 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
     return $this;
   }
 
+  public function onTestStart(TestStartListener $l): this {
+    $this->testStartListeners->add($l);
+    return $this;
+  }
+
   public function onPass(PassListener $l): this {
     $this->passListeners->add($l);
     return $this;
@@ -114,6 +122,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
             () ==> {
               $this->emitPass();
             },
+            $this->testStartListeners,
           ) |> Asio\wrap($$);
 
           await $s->down();
@@ -143,6 +152,12 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
 
   private function emitSuiteStart(SuiteStart $e): void {
     foreach ($this->suiteStartListeners as $l) {
+      $l($e);
+    }
+  }
+
+  private function emitTestStart(TestStart $e): void {
+    foreach ($this->testStartListeners as $l) {
       $l($e);
     }
   }

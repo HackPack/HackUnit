@@ -170,17 +170,20 @@ final class SuiteBuilder {
           }
 
           return
-            $getMethod($test['method']) |> shape(
-              'factory' => $factories->at($test['factory name']),
-              'method' => $this->buildInvoker($$),
-              'trace item' => Trace::fromReflectionMethod($$),
-              'skip' => $test['skip'],
-              'data provider' =>
-                ($test['data provider'] === ''
-                   ? null
-                   : $getMethod($test['data provider']))
+            $getMethod($test['method'])
+              |> shape(
+                'name' => $$->getName(),
+                'suite name' => $classMirror->getName(),
+                'factory' => $factories->at($test['factory name']),
+                'method' => $this->buildInvoker($$),
+                'trace item' => Trace::fromReflectionMethod($$),
+                'skip' => $test['skip'],
+                'data provider' =>
+                  ($test['data provider'] === ''
+                     ? null
+                     : $getMethod($test['data provider']))
                   |> $this->buildDataProvider($$),
-            );
+              );
 
         }
           |> $parser->tests()->map($$);
