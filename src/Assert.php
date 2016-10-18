@@ -94,7 +94,6 @@ final class Assert implements Contract\Assert {
     ?Util\TraceItem $traceItem = null,
   ): void {
     if ($traceItem === null) {
-      // Assume the caller was a test method
       $stack = Util\Trace::generate();
       $traceItem = shape(
         'file' => $stack[0]['file'],
@@ -103,7 +102,7 @@ final class Assert implements Contract\Assert {
         'class' => $stack[1]['class'],
       );
     }
-    $skip = new Event\Skip($reason, $traceItem);
+    $skip = new Event\Skip($reason, $traceItem, Util\Trace::findTestMethod());
     foreach ($this->skipListeners as $l) {
       $l($skip);
     }

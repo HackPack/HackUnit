@@ -141,7 +141,7 @@ class SuiteTest {
       // Make sure the test trace item is passed to the skip event
       if ($thirdTestCount > 0) {
         $event = $this->skipEvents->at(0);
-        $assert->mixed($event->callSite())->identicalTo($this->traceItem);
+        $assert->mixed($event->skipCallSite())->identicalTo($this->traceItem);
       }
 
       // Test up/down should not run skipped tests, should run for interrupted tests

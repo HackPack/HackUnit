@@ -7,16 +7,18 @@ final class HackUnit {
 
   public static function run(Util\Options $options): void {
 
+    $reportFormatters = Vector {new Report\Format\Cli(STDOUT)};
+    $summaryBuilder = new Report\SummaryBuilder();
+    $status = new Report\Status(STDOUT);
     /*
      * Test case setup
      */
-    $testReporter = new Test\Reporter();
 
     $suiteBuilder = new Test\SuiteBuilder(
       ($className, $fileName) ==> new Test\Parser($className, $fileName),
     );
     $suiteBuilder->onMalformedSuite(
-      inst_meth($testReporter, 'reportMalformedSuite'),
+      inst_meth($summaryBuilder, 'handleMalformedSuite'),
     );
 
     $testLoader = new Test\Loader(
@@ -31,29 +33,32 @@ final class HackUnit {
     $testRunner = new Test\Runner(class_meth(Assert::class, 'build'));
 
     // Identify the package before running tests
-    $testRunner->onRunStart(inst_meth($testReporter, 'identifyPackage'));
-
-    // Start timing after identification
-    $testRunner->onRunStart(inst_meth($testReporter, 'startTiming'));
-
-    // Allow us to set the exit code
-    $testRunner->onFailure(
-      $event ==> {
-        self::$failures = true;
-      },
-    );
-
-    // Allow the reporter to listen
-    $testRunner->onFailure(inst_meth($testReporter, 'reportFailure'));
-    $testRunner->onSkip(inst_meth($testReporter, 'reportSkip'));
-    $testRunner->onSuccess(inst_meth($testReporter, 'reportSuccess'));
-    $testRunner->onPass(inst_meth($testReporter, 'reportPass'));
-    $testRunner->onUncaughtException(
-      inst_meth($testReporter, 'reportUntestedException'),
-    );
-
-    // Stop timing after tests
-    $testRunner->onRunEnd(inst_meth($testReporter, 'displaySummary'));
+    $testRunner->onRunStart(inst_meth($status, 'handleRunStart'))
+      ->onRunStart(inst_meth($summaryBuilder, 'startTiming')) // Start timing after identification
+      ->onFailure( // Allow us to set the exit code
+        $event ==> {
+          self::$failures = true;
+        },
+      )
+      ->onFailure(inst_meth($status, 'handleFailure'))
+      ->onFailure(inst_meth($summaryBuilder, 'handleFailure'))
+      ->onSkip(inst_meth($status, 'handleSkip'))
+      ->onSkip(inst_meth($summaryBuilder, 'handleSkip'))
+      ->onSuccess(inst_meth($summaryBuilder, 'handleSuccess'))
+      ->onPass(inst_meth($status, 'handlePass'))
+      ->onPass(inst_meth($summaryBuilder, 'handlePass'))
+      ->onUncaughtException(
+        inst_meth($summaryBuilder, 'handleUntestedException'),
+      )
+      ->onRunEnd(inst_meth($summaryBuilder, 'stopTiming'))
+      ->onRunEnd(
+        () ==> {
+          $summary = $summaryBuilder->getSummary();
+          foreach ($reportFormatters as $formatter) {
+            $formatter->writeReport($summary);
+          }
+        },
+      );
 
     // LET'S DO THIS!
     $testRunner->run($testLoader->testSuites());

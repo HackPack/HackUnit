@@ -8,6 +8,7 @@ use HackPack\HackUnit\Contract\Test\Suite;
 use HackPack\HackUnit\Event\ExceptionListener;
 use HackPack\HackUnit\Event\FailureListener;
 use HackPack\HackUnit\Event\Interruption;
+use HackPack\HackUnit\Event\Pass;
 use HackPack\HackUnit\Event\PassListener;
 use HackPack\HackUnit\Event\RunEndListener;
 use HackPack\HackUnit\Event\RunStartListener;
@@ -175,8 +176,9 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
   }
 
   private function emitPass(): void {
+    $event = Pass::fromCallStack();
     foreach ($this->passListeners as $l) {
-      $l();
+      $l($event);
     }
   }
 

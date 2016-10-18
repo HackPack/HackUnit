@@ -18,8 +18,9 @@ trait SuccessEmitter {
   }
 
   private function emitSuccess(): void {
+    $e = Success::fromCallStack();
     foreach ($this->successListeners as $l) {
-      $l();
+      $l($e);
     }
   }
 }
