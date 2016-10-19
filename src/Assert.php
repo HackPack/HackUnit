@@ -107,4 +107,19 @@ final class Assert implements Contract\Assert {
       $l($skip);
     }
   }
+
+  public function fail(string $message): void {
+    $stack = Util\Trace::generate();
+    $traceItem = shape(
+      'file' => $stack[0]['file'],
+      'line' => $stack[0]['line'],
+      'function' => $stack[1]['function'],
+      'class' => $stack[1]['class'],
+    );
+    $fail =
+      new Event\Failure($message, $traceItem, Util\Trace::findTestMethod());
+    foreach ($this->failureListeners as $l) {
+      $l($fail);
+    }
+  }
 }
