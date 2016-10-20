@@ -3,82 +3,87 @@
 namespace HackPack\HackUnit;
 
 final class HackUnit {
-  private static bool $failures = false;
+  private bool $failures = false;
 
-  public static function run(Util\Options $options): void {
+  private Report\SummaryBuilder $summaryBuilder;
 
-    $reportFormatters = Vector {new Report\Format\Cli(STDOUT)};
-    $summaryBuilder = new Report\SummaryBuilder();
-    $status = new Report\Status(STDOUT);
-    /*
-     * Test case setup
-     */
+  public function __construct(
+    private Traversable<Report\Format> $reportFormatters,
+    private Report\Status $status,
+    private Test\SuiteBuilder $suiteBuilder,
+    private Test\Loader $loader,
+    private Test\Runner $runner,
+  ) {
+    $this->summaryBuilder = new Report\SummaryBuilder();
+  }
 
-    $suiteBuilder = new Test\SuiteBuilder(
-      ($className, $fileName) ==> new Test\Parser($className, $fileName),
+  public function run(): void {
+    $this->loader->onBuildFailure(
+      ($event) ==> {
+        $this->failures = true;
+        $this->status->handleBuildFailure($event);
+      },
     );
-    $suiteBuilder->onMalformedSuite(
-      inst_meth($summaryBuilder, 'handleMalformedSuite'),
+    $this->suiteBuilder->onMalformedSuite(
+      inst_meth($this->summaryBuilder, 'handleMalformedSuite'),
     );
 
-    $testLoader = new Test\Loader(
-      $class ==> $suiteBuilder->buildSuites($class),
-      $options->includes->toSet(),
-      $options->excludes->toSet(),
+    $this->runner->onRunStart(
+      () ==> {
+        $this->status->handleRunStart();
+        $this->summaryBuilder->startTiming();
+      },
+    );
+    $this->runner->onFailure(
+      ($e) ==> {
+        // Allow us to set the exit code
+        $this->failures = true;
+        $this->status->handleFailure($e);
+        $this->summaryBuilder->handleFailure($e);
+
+      },
+    );
+    $this->runner->onSkip(
+      ($e) ==> {
+        $this->status->handleSkip($e);
+        $this->summaryBuilder->handleSkip($e);
+      },
     );
 
-    /*
-     * Register events with the runner
-     */
-    $testRunner = new Test\Runner(class_meth(Assert::class, 'build'));
+    $this->runner->onSuccess(
+      ($e) ==> {
+        $this->summaryBuilder->handleSuccess($e);
+      },
+    );
 
-    // Identify the package before running tests
-    $testRunner->onRunStart(inst_meth($status, 'handleRunStart'))
-      ->onRunStart(inst_meth($summaryBuilder, 'startTiming')) // Start timing after identification
-      ->onFailure( // Allow us to set the exit code
-        $event ==> {
-          self::$failures = true;
-        },
-      )
-      ->onFailure(inst_meth($status, 'handleFailure'))
-      ->onFailure(inst_meth($summaryBuilder, 'handleFailure'))
-      ->onSkip(inst_meth($status, 'handleSkip'))
-      ->onSkip(inst_meth($summaryBuilder, 'handleSkip'))
-      ->onSuccess(inst_meth($summaryBuilder, 'handleSuccess'))
-      ->onPass(inst_meth($status, 'handlePass'))
-      ->onPass(inst_meth($summaryBuilder, 'handlePass'))
-      ->onUncaughtException(
-        inst_meth($summaryBuilder, 'handleUntestedException'),
-      )
-      ->onRunEnd(inst_meth($summaryBuilder, 'stopTiming'))
-      ->onRunEnd(
-        () ==> {
-          $summary = $summaryBuilder->getSummary();
-          foreach ($reportFormatters as $formatter) {
-            $formatter->writeReport($summary);
-          }
-        },
-      );
+    $this->runner->onPass(
+      ($e) ==> {
+        $this->status->handlePass($e);
+        $this->summaryBuilder->handlePass($e);
+      },
+    );
 
+    $this->runner->onUncaughtException(
+      ($exception) ==> {
+        $this->summaryBuilder->handleUntestedException($exception);
+      },
+    );
+    $this->runner->onRunEnd(
+      () ==> {
+        $this->summaryBuilder->stopTiming();
+        $summary = $this->summaryBuilder->getSummary();
+        foreach ($this->reportFormatters as $formatter) {
+          $formatter->writeReport($summary);
+        }
+      },
+    );
     // LET'S DO THIS!
-    $testRunner->run($testLoader->testSuites());
+    $this->runner->run($this->loader->testSuites());
 
     // Exit codes FTW
-    if (self::$failures) {
+    if ($this->failures) {
       exit(1);
     }
     exit(0);
-  }
-
-  public static function selfTest(): void {
-    $root = dirname(__DIR__);
-    /* HH_FIXME[1002] */
-    require_once $root.'/vendor/autoload.php';
-
-    $includes = Set {$root.'/test'};
-    $excludes = Set {$root.'/test/Fixtures', $root.'/test/Doubles'};
-    $options = new Util\Options($includes, $excludes);
-
-    self::run($options);
   }
 }

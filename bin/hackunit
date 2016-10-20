@@ -13,17 +13,17 @@ do {
   $basedir = dirname($basedir);
   if ($basedir === '/') {
     echo
+      'Unable to find Composer generated autoloader'.
+      PHP_EOL.
       'You must set up the project dependencies using the following commands:'.
       PHP_EOL.
       'curl -s http://getcomposer.org/installer | hhvm'.
       PHP_EOL.
-      'php composer.phar install'.
+      'hhvm composer.phar install'.
       PHP_EOL
     ;
     exit(1);
   }
 } while (true);
 
-HackPack\HackUnit\HackUnit::run(
-  HackPack\HackUnit\Util\Options::fromCli($_SERVER['argv']),
-);
+HackPack\HackUnit\Util\Builder::fromCli($_SERVER['argv'])->build()->run();

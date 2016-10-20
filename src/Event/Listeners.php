@@ -2,6 +2,7 @@
 
 namespace HackPack\HackUnit\Event;
 
+type BuildFailureListener = (function(BuildFailure): void);
 type ExceptionListener = (function(\Exception): void);
 type FailureListener = (function(Failure): void);
 type MalformedSuiteListener = (function(MalformedSuite): void);
