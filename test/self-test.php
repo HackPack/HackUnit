@@ -18,10 +18,13 @@ require_once $root.'/vendor/autoload.php';
 $reportFormatters = Vector {new CliFormat(STDOUT)};
 
 // CircleCI provides this env
-// $circleReportDir = getenv('CIRCLE_TEST_REPORTS');
-// if (is_string($circleReportDir)) {
-//   $reportFormatters->add(JUnitFormat::build($circleReportDir.'/report.xml'));
-// }
+$circleReportDir = getenv('CIRCLE_TEST_REPORTS');
+if (is_string($circleReportDir)) {
+  echo
+    PHP_EOL.'jUnit report will be saved to '.$circleReportDir.'/report.xml'
+  ;
+  $reportFormatters->add(JUnitFormat::build($circleReportDir.'/report.xml'));
+}
 $status = new Status(STDOUT);
 
 $suiteBuilder = new SuiteBuilder(
