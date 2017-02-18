@@ -2,8 +2,8 @@
 
 namespace HackPack\HackUnit\Util;
 
-use FredEmmott\DefinitionFinder\ScannedBasicClass;
-use FredEmmott\DefinitionFinder\ScannedMethod;
+use Facebook\DefinitionFinder\ScannedBasicClass;
+use Facebook\DefinitionFinder\ScannedMethod;
 use HackPack\HackUnit\Contract\Assertion\Assertion;
 
 type TraceItem = shape(
