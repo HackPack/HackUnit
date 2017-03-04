@@ -13,7 +13,7 @@ use HackPack\HackUnit\Test\Runner;
 use HackPack\HackUnit\Test\SuiteBuilder;
 
 final class Builder {
-  public function fromCli(Traversable<string> $args): this {
+  public static function fromCli(Traversable<string> $args): this {
     return new self(Options::fromCli($args));
   }
 
