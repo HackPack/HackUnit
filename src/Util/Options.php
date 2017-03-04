@@ -3,7 +3,7 @@
 namespace HackPack\HackUnit\Util;
 
 final class Options {
-  const string VERSION = '1.0-dev';
+  const string VERSION = '1.1';
 
   public function __construct(
     public \ConstSet<string> $includes,
