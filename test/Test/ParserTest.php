@@ -4,7 +4,7 @@ namespace HackPack\HackUnit\Tests\Test;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Test\Parser;
-use FredEmmott\DefinitionFinder\TreeParser;
+use Facebook\DefinitionFinder\TreeParser;
 
 abstract class ParserTest {
 

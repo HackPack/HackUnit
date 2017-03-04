@@ -2,8 +2,8 @@
 
 namespace HackPack\HackUnit\Test;
 
-use FredEmmott\DefinitionFinder\FileParser;
-use FredEmmott\DefinitionFinder\ScannedBasicClass;
+use Facebook\DefinitionFinder\FileParser;
+use Facebook\DefinitionFinder\ScannedBasicClass;
 use HackPack\HackUnit\Contract\Test\Parser;
 use HackPack\HackUnit\Contract\Test\Suite as SuiteInterface;
 use HackPack\HackUnit\Event\MalformedSuite;
