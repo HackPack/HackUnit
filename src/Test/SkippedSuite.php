@@ -3,6 +3,7 @@
 namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Contract\Assert;
+use HackPack\HackUnit\Event\TestEndListener;
 use HackPack\HackUnit\Event\TestStartListener;
 use HackPack\HackUnit\Util\TraceItem;
 
@@ -17,6 +18,7 @@ class SkippedSuite implements \HackPack\HackUnit\Contract\Test\Suite {
     Assert $assert,
     (function(): void) $testPassed,
     \ConstVector<TestStartListener> $testStartListeners,
+    \ConstVector<TestEndListener> $testEndListeners,
   ): Awaitable<void> {
     $assert->skip('Class '.$this->name.' marked "Skipped"', $this->trace);
   }

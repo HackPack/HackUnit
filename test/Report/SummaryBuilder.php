@@ -6,6 +6,10 @@ use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Event\Failure;
 use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
+use HackPack\HackUnit\Event\SuiteEnd;
+use HackPack\HackUnit\Event\SuiteStart;
+use HackPack\HackUnit\Event\TestEnd;
+use HackPack\HackUnit\Event\TestStart;
 use HackPack\HackUnit\Report\TestResult;
 use HackPack\HackUnit\Report\SuiteSummary;
 use HackPack\HackUnit\Report\Summary;
@@ -13,6 +17,8 @@ use HackPack\HackUnit\Report\SummaryBuilder;
 use HackPack\HackUnit\Util\TraceItem;
 
 final class SummaryBuilderTest {
+
+  const TestLineNumber = 42;
 
   private SummaryBuilder $builder;
   public function __construct() {
@@ -47,6 +53,32 @@ final class SummaryBuilderTest {
 
   private function buildSkipEvent(): Skip {
     return new Skip('skip message', ...$this->buildStackTraces());
+  }
+
+  private function buildSuiteStartEvent(): SuiteStart {
+    return new SuiteStart('suite name');
+  }
+
+  private function buildSuiteEndEvent(): SuiteEnd {
+    return new SuiteEnd('suite name');
+  }
+
+  private function buildTestStartEvent(): TestStart {
+    return new TestStart(
+      'suite name',
+      'test name',
+      'test file',
+      self::TestLineNumber,
+    );
+  }
+
+  private function buildTestEndEvent(): TestEnd {
+    return new TestEnd(
+      'suite name',
+      'test name',
+      'file name',
+      self::TestLineNumber,
+    );
   }
 
   <<Test>>
@@ -88,7 +120,6 @@ final class SummaryBuilderTest {
 
     $expectedSuiteSummary = SummaryBuilder::emptySuiteSummary();
     $expectedSuiteSummary['assert count'] = 1;
-    $expectedSuiteSummary['test count'] = 1;
     $expectedSuiteSummary['fail count'] = 1;
     $expectedSuiteSummary['test summaries'] = Map {
       'testFunction' => $expectedTestSummary,
@@ -96,7 +127,6 @@ final class SummaryBuilderTest {
 
     $expectedSummary = SummaryBuilder::emptySummary();
     $expectedSummary['assert count'] = 1;
-    $expectedSummary['test count'] = 1;
     $expectedSummary['fail count'] = 1;
     $expectedSummary['fail events'] = Vector {$event};
     $expectedSummary['suite summaries'] = Map {
@@ -113,19 +143,16 @@ final class SummaryBuilderTest {
     $actualSummary = $this->builder->getSummary();
 
     $expectedTestSummary = SummaryBuilder::emptyTestSummary();
-    $expectedTestSummary['test count'] = 1;
     $expectedTestSummary['result'] = TestResult::Skip;
     $expectedTestSummary['skip event'] = $event;
 
     $expectedSuiteSummary = SummaryBuilder::emptySuiteSummary();
     $expectedSuiteSummary['skip count'] = 1;
-    $expectedSuiteSummary['test count'] = 1;
     $expectedSuiteSummary['test summaries'] = Map {
       'testFunction' => $expectedTestSummary,
     };
 
     $expectedSummary = SummaryBuilder::emptySummary();
-    $expectedSummary['test count'] = 1;
     $expectedSummary['skip count'] = 1;
     $expectedSummary['skip events'] = Vector {$event};
     $expectedSummary['suite summaries'] = Map {
@@ -133,6 +160,56 @@ final class SummaryBuilderTest {
     };
 
     $this->compareSummaries($assert, $actualSummary, $expectedSummary);
+  }
+
+  <<Test>>
+  public function suiteStartSetsAppropriateFields(Assert $assert): void {
+    $event = $this->buildSuiteStartEvent();
+    $this->builder->handleSuiteStart($event);
+    $summary = $this->builder->getSummary();
+
+    $suiteSummaries = $summary['suite summaries'];
+
+    $assert->int(count($suiteSummaries))->eq(1);
+    $assert->float($suiteSummaries->at('suite name')['start time'])->gt(0.0);
+  }
+
+  <<Test>>
+  public function testStartSetsAppropriateFields(Assert $assert): void {
+    $event = $this->buildTestStartEvent();
+    $this->builder->handleTestStart($event);
+    $summary = $this->builder->getSummary();
+
+    $testSummaries =
+      $summary['suite summaries']->at('suite name')['test summaries'];
+
+    $assert->int(count($testSummaries))->eq(1);
+    $assert->float($testSummaries->at('test name')['start time'])->gt(0.0);
+  }
+
+  <<Test>>
+  public function suiteEndSetsAppropriateFields(Assert $assert): void {
+    $event = $this->buildSuiteEndEvent();
+    $this->builder->handleSuiteEnd($event);
+    $summary = $this->builder->getSummary();
+
+    $suiteSummaries = $summary['suite summaries'];
+
+    $assert->int(count($suiteSummaries))->eq(1);
+    $assert->float($suiteSummaries->at('suite name')['end time'])->gt(0.0);
+  }
+
+  <<Test>>
+  public function testEndSetsAppropriateFields(Assert $assert): void {
+    $event = $this->buildTestEndEvent();
+    $this->builder->handleTestEnd($event);
+    $summary = $this->builder->getSummary();
+
+    $testSummaries =
+      $summary['suite summaries']->at('suite name')['test summaries'];
+
+    $assert->int(count($testSummaries))->eq(1);
+    $assert->float($testSummaries->at('test name')['end time'])->gt(0.0);
   }
 
   private function compareSummaries(

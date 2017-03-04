@@ -5,7 +5,7 @@ namespace HackPack\HackUnit\Tests\Test;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Event\Interruption;
 use HackPack\HackUnit\Event\Skip;
-use HackPack\HackUnit\Event\TestStartListener;
+use HackPack\HackUnit\Event\TestEnd;
 use HackPack\HackUnit\Event\TestStart;
 use HackPack\HackUnit\Test\Suite;
 use HackPack\HackUnit\Test\Test as TestShape;
@@ -24,6 +24,7 @@ class SuiteTest {
   private int $passedEvents = 0;
   private Vector<Skip> $skipEvents = Vector {};
   private Vector<TestStart> $testStartEvents = Vector {};
+  private Vector<TestEnd> $testEndEvents = Vector {};
 
   private (function(): Awaitable<mixed>) $factory;
   private TraceItem $traceItem;
@@ -125,6 +126,9 @@ class SuiteTest {
 
       // Test start events triggered
       $assert->int($this->testStartEvents->count())->eq($tests->count());
+
+      // Test end events triggered
+      $assert->int($this->testEndEvents->count())->eq($tests->count());
 
       // Skipped tests shouldn't run the factory
       $assert->int($this->factoryRuns)->eq(2 * $thirdTestCount);
@@ -300,6 +304,11 @@ class SuiteTest {
         Vector {
           (TestStart $e) ==> {
             $this->testStartEvents->add($e);
+          },
+        },
+        Vector {
+          (TestEnd $e) ==> {
+            $this->testEndEvents->add($e);
           },
         },
       ),

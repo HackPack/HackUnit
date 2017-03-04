@@ -15,8 +15,11 @@ use HackPack\HackUnit\Event\RunStartListener;
 use HackPack\HackUnit\Event\SkipListener;
 use HackPack\HackUnit\Event\SuccessListener;
 use HackPack\HackUnit\Event\SuiteEndListener;
+use HackPack\HackUnit\Event\SuiteEnd;
 use HackPack\HackUnit\Event\SuiteStartListener;
 use HackPack\HackUnit\Event\SuiteStart;
+use HackPack\HackUnit\Event\TestEndListener;
+use HackPack\HackUnit\Event\TestEnd;
 use HackPack\HackUnit\Event\TestStartListener;
 use HackPack\HackUnit\Event\TestStart;
 use HH\Asio;
@@ -32,6 +35,7 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
   private Vector<SuiteEndListener> $suiteEndListeners = Vector {};
   private Vector<SuiteStartListener> $suiteStartListeners = Vector {};
   private Vector<TestStartListener> $testStartListeners = Vector {};
+  private Vector<TestEndListener> $testEndListeners = Vector {};
 
   public function __construct(
     private (function(Vector<FailureListener>,
@@ -85,6 +89,11 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
     return $this;
   }
 
+  public function onTestEnd(TestEndListener $l): this {
+    $this->testEndListeners->add($l);
+    return $this;
+  }
+
   public function onPass(PassListener $l): this {
     $this->passListeners->add($l);
     return $this;
@@ -124,10 +133,11 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
               $this->emitPass();
             },
             $this->testStartListeners,
+            $this->testEndListeners,
           ) |> Asio\wrap($$);
 
           await $s->down();
-          $this->emitSuiteEnd();
+          $this->emitSuiteEnd(new SuiteEnd($s->name()));
 
           if ($testResult->isFailed()) {
             throw $testResult->getException();
@@ -145,20 +155,14 @@ class Runner implements \HackPack\HackUnit\Contract\Test\Runner {
     $this->emitRunEnd();
   }
 
-  private function emitSuiteEnd(): void {
+  private function emitSuiteEnd(SuiteEnd $e): void {
     foreach ($this->suiteEndListeners as $l) {
-      $l();
+      $l($e);
     }
   }
 
   private function emitSuiteStart(SuiteStart $e): void {
     foreach ($this->suiteStartListeners as $l) {
-      $l($e);
-    }
-  }
-
-  private function emitTestStart(TestStart $e): void {
-    foreach ($this->testStartListeners as $l) {
       $l($e);
     }
   }

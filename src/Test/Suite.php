@@ -5,6 +5,8 @@ namespace HackPack\HackUnit\Test;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\TestCase;
 use HackPack\HackUnit\Event\Interruption;
+use HackPack\HackUnit\Event\TestEndListener;
+use HackPack\HackUnit\Event\TestEnd;
 use HackPack\HackUnit\Event\TestStartListener;
 use HackPack\HackUnit\Event\TestStart;
 use HackPack\HackUnit\Util\Trace;
@@ -40,11 +42,17 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
     Assert $assert,
     (function(): void) $testPassed,
     \ConstVector<TestStartListener> $testStartListeners,
+    \ConstVector<TestEndListener> $testEndListeners,
   ): Awaitable<void> {
     await (async (Test $test) ==> {
+             $testTrace = $test['trace item'];
 
-             $testStartEvent =
-               new TestStart($test['suite name'], $test['name']);
+             $testStartEvent = new TestStart(
+               $test['suite name'],
+               $test['name'],
+               $testTrace['file'],
+               $testTrace['line'],
+             );
              foreach ($testStartListeners as $testStartListener) {
                $testStartListener($testStartEvent);
              }
@@ -63,6 +71,15 @@ class Suite implements \HackPack\HackUnit\Contract\Test\Suite {
              await ($this->testup->map($pretest ==> $pretest($instance, []))
                       |> Asio\v($$));
 
+             $testEndEvent = new TestEnd(
+               $test['suite name'],
+               $test['name'],
+               $testTrace['file'],
+               $testTrace['line'],
+             );
+             foreach ($testEndListeners as $testEndListener) {
+               $testEndListener($testEndEvent);
+             }
              $results = Vector {};
              foreach ($test['data provider']() await as $data) {
                array_unshift($data, $assert);

@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Tests\Doubles;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\Suite;
+use HackPack\HackUnit\Event\TestEndListener;
 use HackPack\HackUnit\Event\TestStartListener;
 
 class AsyncSuite implements Suite {
@@ -16,6 +17,7 @@ class AsyncSuite implements Suite {
     Assert $assert,
     (function(): void) $testPassed,
     \ConstVector<TestStartListener> $testStartListeners,
+    \ConstVector<TestEndListener> $testEndListeners,
   ): Awaitable<void> {
     await \HH\Asio\usleep($this->sleepTime);
   }

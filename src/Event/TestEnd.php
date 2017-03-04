@@ -2,7 +2,7 @@
 
 namespace HackPack\HackUnit\Event;
 
-class TestStart {
+final class TestEnd {
   public function __construct(
     private string $suiteName,
     private string $testName,

@@ -31,9 +31,16 @@ final class HackUnit {
     $this->runner->onRunStart(
       () ==> {
         $this->status->handleRunStart();
-        $this->summaryBuilder->startTiming();
+        $this->summaryBuilder->handleRunStart();
       },
     );
+
+    $this->runner->onTestStart(
+      ($e) ==> {
+        $this->summaryBuilder->handleTestStart($e);
+      },
+    );
+
     $this->runner->onFailure(
       ($e) ==> {
         // Allow us to set the exit code
@@ -70,7 +77,7 @@ final class HackUnit {
     );
     $this->runner->onRunEnd(
       () ==> {
-        $this->summaryBuilder->stopTiming();
+        $this->summaryBuilder->handleRunEnd();
         $summary = $this->summaryBuilder->getSummary();
         foreach ($this->reportFormatters as $formatter) {
           $formatter->writeReport($summary);

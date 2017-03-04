@@ -19,6 +19,7 @@ final class JUnit implements Format {
   public function __construct(private resource $out) {
     $this->report = new SimpleXMLElement('<testsuites/>');
   }
+
   public function writeReport(Summary $summary): void {
     foreach ($summary['suite summaries'] as $name => $suiteSummary) {
       $this->report->addChild('testsuite')

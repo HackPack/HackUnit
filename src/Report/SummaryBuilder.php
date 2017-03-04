@@ -7,6 +7,10 @@ use HackPack\HackUnit\Event\MalformedSuite;
 use HackPack\HackUnit\Event\Pass;
 use HackPack\HackUnit\Event\Skip;
 use HackPack\HackUnit\Event\Success;
+use HackPack\HackUnit\Event\SuiteEnd;
+use HackPack\HackUnit\Event\SuiteStart;
+use HackPack\HackUnit\Event\TestStart;
+use HackPack\HackUnit\Event\TestEnd;
 use HackPack\HackUnit\Util\Options;
 use HackPack\HackUnit\Util\TraceItem;
 
@@ -42,6 +46,8 @@ type Summary = shape(
 );
 
 type MutableSuiteSummary = shape(
+  'start time' => float,
+  'end time' => float,
   'assert count' => int,
   'success count' => int,
   'pass count' => int,
@@ -52,6 +58,8 @@ type MutableSuiteSummary = shape(
 );
 
 type SuiteSummary = shape(
+  'start time' => float,
+  'end time' => float,
   'assert count' => int,
   'success count' => int,
   'pass count' => int,
@@ -62,6 +70,8 @@ type SuiteSummary = shape(
 );
 
 type TestSummary = shape(
+  'start time' => float,
+  'end time' => float,
   'assert count' => int,
   'success count' => int,
   'result' => TestResult,
@@ -72,6 +82,8 @@ type TestSummary = shape(
 type TestInfo = shape(
   'test name' => string,
   'suite name' => string,
+  'file' => string,
+  'line' => int,
 );
 
 enum TestResult : string {
@@ -89,26 +101,51 @@ class SummaryBuilder {
     $this->summary = self::emptyMutableSummary();
   }
 
-  public function startTiming(): void {
+  public function handleRunStart(): void {
     $this->summary['start time'] = microtime(true);
   }
 
-  public function stopTiming(): void {
+  public function handleRunEnd(): void {
     $this->summary['end time'] = microtime(true);
+  }
+
+  public function handleSuiteStart(SuiteStart $event): void {}
+
+  public function handleTestStart(TestStart $event): void {
+    $testInfo = shape(
+      'test name' => $event->testName(),
+      'suite name' => $event->suiteName(),
+      'file' => $event->file(),
+      'line' => $event->line(),
+    );
+    $this->ensureTestExists($testInfo);
+
+    $this->summary['test count']++;
+
+    $suiteSummary =
+      $this->summary['suite summaries']->at($testInfo['suite name']);
+    $suiteSummary['test count']++;
+
+    $testSummary =
+      $suiteSummary['test summaries']->at($testInfo['test name']);
+    $testSummary['start time'] = microtime(true);
+
+    $suiteSummary['test summaries']
+      ->set($testInfo['test name'], $testSummary);
+    $this->summary['suite summaries']
+      ->set($testInfo['suite name'], $suiteSummary);
   }
 
   public function handleFailure(Failure $event): void {
     $testInfo = $this->determineTestInfo($event->testMethodTraceItem());
     $this->ensureTestExists($testInfo);
 
-    $this->summary['test count']++;
     $this->summary['fail count']++;
     $this->summary['assert count']++;
     $this->summary['fail events']->add($event);
 
     $suiteSummary =
       $this->summary['suite summaries']->at($testInfo['suite name']);
-    $suiteSummary['test count']++;
     $suiteSummary['fail count']++;
     $suiteSummary['assert count']++;
 
@@ -129,13 +166,11 @@ class SummaryBuilder {
     $testInfo = $this->determineTestInfo($event->testMethodTraceItem());
     $this->ensureTestExists($testInfo);
 
-    $this->summary['test count']++;
     $this->summary['skip count']++;
     $this->summary['skip events']->add($event);
 
     $suiteSummary =
       $this->summary['suite summaries']->at($testInfo['suite name']);
-    $suiteSummary['test count']++;
     $suiteSummary['skip count']++;
 
     $testSummary =
@@ -176,13 +211,14 @@ class SummaryBuilder {
     $testInfo = $this->determineTestInfo($event->testMethodTraceItem());
     $this->ensureTestExists($testInfo);
 
-    $this->summary['test count']++;
     $this->summary['pass count']++;
 
+    $suiteSummary =
+      $this->summary['suite summaries']->at($testInfo['suite name']);
+    $suiteSummary['pass count']++;
+
     $this->summary['suite summaries']
-      ->at($testInfo['suite name'])['test count']++;
-    $this->summary['suite summaries']
-      ->at($testInfo['suite name'])['pass count']++;
+      ->set($testInfo['suite name'], $suiteSummary);
   }
 
   public function handleUntestedException(\Exception $e): void {
@@ -192,6 +228,9 @@ class SummaryBuilder {
   public function handleMalformedSuite(MalformedSuite $event): void {
     $this->summary['malformed events']->add($event);
   }
+
+  public function handleSuiteEnd(SuiteEnd $event): void {}
+  public function handleTestEnd(TestEnd $event): void {}
 
   public function getSummary(): Summary {
     return $this->summary;
@@ -226,6 +265,8 @@ class SummaryBuilder {
   private static function emptyMutableSuiteSummary(): MutableSuiteSummary {
 
     return shape(
+      'start time' => 0.0,
+      'end time' => 0.0,
       'assert count' => 0,
       'success count' => 0,
       'pass count' => 0,
@@ -238,6 +279,8 @@ class SummaryBuilder {
 
   public static function emptyTestSummary(): TestSummary {
     return shape(
+      'start time' => 0.0,
+      'end time' => 0.0,
       'assert count' => 0,
       'success count' => 0,
       'message' => '',
@@ -256,7 +299,22 @@ class SummaryBuilder {
       $suiteName = '??';
     }
 
-    return shape('test name' => $testName, 'suite name' => $suiteName);
+    $fileName = Shapes::idx($trace, 'file', '??');
+    if ($fileName === null) {
+      $fileName = '??';
+    }
+
+    $line = Shapes::idx($trace, 'line', -1);
+    if ($line === null) {
+      $line = -1;
+    }
+
+    return shape(
+      'test name' => $testName,
+      'suite name' => $suiteName,
+      'file' => $fileName,
+      'line' => $line,
+    );
   }
 
   private function ensureTestExists(TestInfo $testInfo): void {
