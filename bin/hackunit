@@ -5,10 +5,15 @@
 $basedir = __DIR__;
 
 do {
-  if (file_exists($basedir.'/composer.json') &&
-      file_exists($basedir.'/vendor/autoload.php')) {
-    require_once ($basedir.'/vendor/autoload.php');
-    break;
+  if (file_exists($basedir.'/composer.json')) {
+    if (file_exists($basedir.'/vendor/hh_autoload.php')) {
+      require_once $basedir.'/vendor/hh_autoload.php';
+      break;
+    }
+    elseif (file_exists($basedir.'/vendor/autoload.php')) {
+      require_once $basedir.'/vendor/autoload.php';
+      break;
+    }
   }
   $basedir = dirname($basedir);
   if ($basedir === '/') {
