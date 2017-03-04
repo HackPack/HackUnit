@@ -4,6 +4,7 @@ namespace HackPack\HackUnit\Tests\Doubles;
 
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Contract\Test\Suite;
+use HackPack\HackUnit\Event\TestStartListener;
 
 type RunCounts = shape(
   'up' => int,
@@ -19,10 +20,16 @@ class SpySuite implements Suite {
 
   private (function(): void) $runAction;
 
-  public function __construct(
-    ?(function(): void) $runAction = null,
-  ) {
-    $this->runAction = $runAction === null ? () ==> {} : $runAction;
+  public function __construct(?(function(): void) $runAction = null) {
+    $this->runAction =
+      $runAction === null
+        ? () ==> {
+        }
+        : $runAction;
+  }
+
+  public function name(): string {
+    return 'Spy Suite';
   }
 
   public async function up(): Awaitable<void> {
@@ -36,6 +43,7 @@ class SpySuite implements Suite {
   public async function run(
     Assert $assert,
     (function(): void) $testPassed,
+    \ConstVector<TestStartListener> $testStartListeners,
   ): Awaitable<void> {
     $this->asserts->add($assert);
     $this->passCallbacks->add($testPassed);

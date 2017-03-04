@@ -13,7 +13,7 @@ trait AssertionTest {
 
   private function successListeners(): Vector<SuccessListener> {
     return Vector {
-      () ==> {
+      ($e) ==> {
         $this->successCount++;
       },
     };

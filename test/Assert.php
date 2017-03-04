@@ -34,7 +34,7 @@ class AssertTest {
     $skip = $this->skips->at(0);
 
     $this->checkTrace(
-      $skip->callSite(),
+      $skip->skipCallSite(),
       shape(
         'line' => $line,
         'function' => __FUNCTION__,

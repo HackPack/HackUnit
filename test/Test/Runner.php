@@ -118,7 +118,7 @@ class RunnerTest {
     };
     $skip = ($event) ==> {
     };
-    $success = () ==> {
+    $success = ($event) ==> {
     };
 
     $this->runner->onFailure($failure);
@@ -140,7 +140,7 @@ class RunnerTest {
   <<Test>>
   public function testPassListenersAreRun(Assert $assert): void {
     $this->runner->onPass(
-      () ==> {
+      ($e) ==> {
         $this->testsPassed++;
       },
     );

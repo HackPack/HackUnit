@@ -3,17 +3,25 @@
 namespace HackPack\HackUnit\Test;
 
 use HackPack\HackUnit\Contract\Test\Suite;
+use HackPack\HackUnit\Event\BuildFailure;
+use HackPack\HackUnit\Event\BuildFailureListener;
 use SplFileInfo;
 use FilesystemIterator;
 
 final class Loader implements \HackPack\HackUnit\Contract\Test\Loader {
   private int $testCount = 0;
+  private Vector<BuildFailureListener> $buildFailureListeners = Vector {};
 
   public function __construct(
     private (function(string): Traversable<Suite>) $suiteBuilder,
     private Set<string> $includes = Set {},
     private Set<string> $excludes = Set {},
   ) {}
+
+  public function onBuildFailure(BuildFailureListener $l): this {
+    $this->buildFailureListeners->add($l);
+    return $this;
+  }
 
   public function including(string $path): this {
     $this->includes->add($path);
@@ -33,7 +41,13 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader {
     $builder = $this->suiteBuilder;
 
     foreach ($this->pathsToScan() as $path) {
-      $suite = $builder($path);
+      try {
+        $suite = $builder($path);
+      } catch (\Exception $e) {
+        $this->emitBuildFailure($path, $e);
+        $suite = null;
+      }
+
       if ($suite !== null) {
         $suites->addAll($suite);
       }
@@ -91,5 +105,12 @@ final class Loader implements \HackPack\HackUnit\Contract\Test\Loader {
       }
     }
     return true;
+  }
+
+  private function emitBuildFailure(string $path, \Exception $e): void {
+    $event = new BuildFailure($path, $e);
+    foreach ($this->buildFailureListeners as $l) {
+      $l($event);
+    }
   }
 }

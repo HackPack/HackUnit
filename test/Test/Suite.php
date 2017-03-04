@@ -5,6 +5,8 @@ namespace HackPack\HackUnit\Tests\Test;
 use HackPack\HackUnit\Contract\Assert;
 use HackPack\HackUnit\Event\Interruption;
 use HackPack\HackUnit\Event\Skip;
+use HackPack\HackUnit\Event\TestStartListener;
+use HackPack\HackUnit\Event\TestStart;
 use HackPack\HackUnit\Test\Suite;
 use HackPack\HackUnit\Test\Test as TestShape;
 use HackPack\HackUnit\Test\InvokerWithParams;
@@ -21,6 +23,7 @@ class SuiteTest {
   private int $testRuns = 0;
   private int $passedEvents = 0;
   private Vector<Skip> $skipEvents = Vector {};
+  private Vector<TestStart> $testStartEvents = Vector {};
 
   private (function(): Awaitable<mixed>) $factory;
   private TraceItem $traceItem;
@@ -43,6 +46,8 @@ class SuiteTest {
       $assert->mixed($args[1])->identicalTo($this->testRuns);
     };
     $test = shape(
+      'name' => '',
+      'suite name' => '',
       'factory' => $this->factory,
       'method' => $testMethod,
       'trace item' => $this->traceItem,
@@ -52,8 +57,14 @@ class SuiteTest {
         yield [2];
       },
     );
-    $suite =
-      new Suite(Vector {$test}, Vector {}, Vector {}, Vector {}, Vector {});
+    $suite = new Suite(
+      '',
+      Vector {$test},
+      Vector {},
+      Vector {},
+      Vector {},
+      Vector {},
+    );
 
     $assert->whenCalled(() ==> $this->runSuite($suite))->willNotThrow();
     $assert->int($this->passedEvents)->eq(2);
@@ -68,6 +79,7 @@ class SuiteTest {
       $this->makePassingTest($assert),
     };
     $suite = new Suite(
+      '',
       $tests,
       Vector {},
       Vector {},
@@ -101,6 +113,7 @@ class SuiteTest {
 
     foreach (range(0, 2) as $upDownCount) {
       $suite = new Suite(
+        '',
         $tests,
         $this->repeat($upDownCount, $this->makeSuiteUp($assert)),
         $this->repeat($upDownCount, $this->makeSuiteDown($assert)),
@@ -109,6 +122,9 @@ class SuiteTest {
       );
 
       $assert->whenCalled(() ==> $this->runSuite($suite))->willNotThrow();
+
+      // Test start events triggered
+      $assert->int($this->testStartEvents->count())->eq($tests->count());
 
       // Skipped tests shouldn't run the factory
       $assert->int($this->factoryRuns)->eq(2 * $thirdTestCount);
@@ -125,7 +141,7 @@ class SuiteTest {
       // Make sure the test trace item is passed to the skip event
       if ($thirdTestCount > 0) {
         $event = $this->skipEvents->at(0);
-        $assert->mixed($event->callSite())->identicalTo($this->traceItem);
+        $assert->mixed($event->skipCallSite())->identicalTo($this->traceItem);
       }
 
       // Test up/down should not run skipped tests, should run for interrupted tests
@@ -160,6 +176,7 @@ class SuiteTest {
     $this->testRuns = 0;
     $this->passedEvents = 0;
     $this->skipEvents->clear();
+    $this->testStartEvents->clear();
   }
 
   private function repeat<T>(int $count, T $item): Vector<T> {
@@ -179,6 +196,8 @@ class SuiteTest {
 
   private function makePassingTest(Assert $assert): TestShape {
     return shape(
+      'name' => 'passing',
+      'suite name' => '',
       'factory' => $this->factory,
       'method' => $this->makeTestMethod($assert),
       'trace item' => $this->traceItem,
@@ -191,6 +210,8 @@ class SuiteTest {
 
   private function makeSkippedTest(Assert $assert): TestShape {
     return shape(
+      'name' => 'skipped',
+      'suite name' => '',
       'factory' => $this->factory,
       'method' => $this->makeTestMethod($assert),
       'trace item' => $this->traceItem,
@@ -203,6 +224,8 @@ class SuiteTest {
 
   private function makeUnexpectedExceptionTest(): TestShape {
     return shape(
+      'name' => 'unexpected exception',
+      'suite name' => '',
       'factory' => $this->factory,
       'method' => async ($instance, $args) ==> {
         $this->testRuns++;
@@ -218,6 +241,8 @@ class SuiteTest {
 
   private function makeInterruptedTest(): TestShape {
     return shape(
+      'name' => 'interrupted',
+      'suite name' => '',
       'factory' => $this->factory,
       'method' => async ($instance, $args) ==> {
         $this->testRuns++;
@@ -271,6 +296,11 @@ class SuiteTest {
         $this->makeAssert(),
         () ==> {
           $this->passedEvents++;
+        },
+        Vector {
+          (TestStart $e) ==> {
+            $this->testStartEvents->add($e);
+          },
         },
       ),
     );

@@ -1,26 +1,20 @@
 <?hh // strict
 
 namespace HackPack\HackUnit\Event;
-
 use HackPack\HackUnit\Util\Trace;
 use HackPack\HackUnit\Util\TraceItem;
 
-final class Failure {
-  public static function fromCallStack(string $message): this {
-    return new static(
-      $message,
-      Trace::findAssertionCall(),
-      Trace::findTestMethod(),
-    );
+final class Success {
+  public static function fromCallStack(): this {
+    return new static(Trace::findAssertionCall(), Trace::findTestMethod());
   }
 
   public function __construct(
-    private string $message,
     private TraceItem $assertionCallSite,
     private TraceItem $testCallSite,
   ) {}
 
-  public function assertionTraceItem(): TraceItem {
+  public function assertionCallSite(): TraceItem {
     return $this->assertionCallSite;
   }
 
@@ -28,7 +22,4 @@ final class Failure {
     return $this->testCallSite;
   }
 
-  public function getMessage(): string {
-    return $this->message;
-  }
 }

@@ -11,4 +11,4 @@ dependencies:
 
 test:
   override:
-    - docker run -v "$(pwd)":"$(pwd)" --workdir="$(pwd)" --rm hhvm/hhvm:3.15-lts-latest hhvm -c test.ini test.php
+    - docker run -v "$(pwd)":"$(pwd)" --workdir="$(pwd)" -e "CIRCLE_TEST_REPORTS=$CIRCLE_TEST_REPORTS" hhvm/hhvm:3.15-lts-latest hhvm -c test/self-test.ini test/self-test.php
